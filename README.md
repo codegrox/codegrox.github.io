@@ -1,2 +1,2 @@
 # codegrox.github.io
-Sample Portfolio
+CS180 project pages — UC Berkeley, Fall 2026
