@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS180 · Project 0 — Becoming Friends with Your Camera</title>
+<meta name="description" content="CS180 Project 0: perspective, focal length and the centre of projection — a selfie pair, a facade pair and a four-frame dolly zoom.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16181a; --bg2:#1b1e20; --panel:#212528; --edge:#2f353a; --edge2:#3d454b;
+  --fg:#eceae4; --dim:#7f8a90;
+  --green:#a6e22e; --pink:#f92672; --cyan:#66d9ef; --orange:#fd971f; --yellow:#e6db74; --violet:#ae81ff;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --w:1000px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{
+  margin:0; color:var(--fg); font:400 15px/1.72 var(--mono); letter-spacing:-.1px;
+  padding:0 clamp(14px,4vw,40px) 96px;
+  background:
+    radial-gradient(1100px 620px at 78% -8%, rgba(166,226,46,.07), transparent 62%),
+    radial-gradient(900px 560px at 4% 4%, rgba(102,217,239,.06), transparent 60%),
+    repeating-linear-gradient(rgba(255,255,255,.012) 0 1px, transparent 1px 3px),
+    var(--bg);
+}
+.wrap{max-width:var(--w); margin:0 auto}
+::selection{background:var(--green); color:#14160f}
+a{color:var(--cyan); text-underline-offset:3px}
+strong{color:#fff; font-weight:700}
+em{color:var(--yellow); font-style:normal}
+
+/* ---------- window chrome ---------- */
+.chrome{
+  display:flex; align-items:center; gap:9px; margin:0 calc(-1 * clamp(14px,4vw,40px));
+  padding:9px clamp(14px,4vw,40px); background:linear-gradient(#25292c,#1d2124);
+  border-bottom:1px solid #000; font-size:12.5px; color:var(--dim); position:relative; z-index:5;
+}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.35)}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+.chrome .path{margin-left:8px;color:#b9c2c6}
+.chrome .path b{color:var(--green);font-weight:400}
+.chrome .right{margin-left:auto}
+
+/* ---------- masthead ---------- */
+header.top{padding:clamp(28px,5vw,52px) 0 22px}
+.banner{
+  color:var(--green); font-size:clamp(7px,1.5vw,14px); line-height:1.1; white-space:pre;
+  margin:0 0 20px; text-shadow:0 0 22px rgba(166,226,46,.32); overflow:hidden;
+}
+h1{font-size:clamp(20px,3.2vw,29px); font-weight:700; margin:0; letter-spacing:-.5px}
+h1 .c{color:var(--cyan)}
+.sub{color:var(--dim); margin:.5em 0 0; font-size:14px}
+.abstract{max-width:76ch; margin:1.45em 0 0}
+.kv{margin:1.7em 0 0; border-top:1px solid var(--edge); padding-top:14px; font-size:13.5px; color:var(--dim)}
+.kv div{display:flex; gap:14px; flex-wrap:wrap}
+.kv b{color:var(--violet); font-weight:400; min-width:11ch; display:inline-block}
+nav{margin-top:20px; font-size:13.5px; display:flex; flex-wrap:wrap; gap:8px}
+nav a{
+  color:var(--cyan); text-decoration:none; border:1px solid var(--edge);
+  background:var(--bg2); padding:3px 11px; transition:.14s;
+}
+nav a:hover{border-color:var(--cyan); background:#1d2529; box-shadow:0 0 14px rgba(102,217,239,.14)}
+nav a .n{color:var(--dim)}
+
+/* ---------- sections ---------- */
+section{padding-top:clamp(36px,5vw,58px)}
+.hgroup{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.chip{
+  font-size:11.5px; letter-spacing:.9px; color:var(--bg); background:var(--green);
+  padding:2px 9px; font-weight:700; white-space:nowrap;
+}
+.chip.c2{background:var(--cyan)} .chip.c3{background:var(--orange)} .chip.c4{background:var(--violet)} .chip.c5{background:var(--pink)}
+h2{font-size:clamp(17px,2.3vw,21px); font-weight:700; margin:0; letter-spacing:-.3px}
+h2 .p{color:var(--green)} h2 .f{color:var(--orange); font-weight:400}
+h3{font-size:15.5px; font-weight:700; color:var(--yellow); margin:2.3em 0 .5em}
+h3::before{content:"## "; color:var(--edge2); font-weight:400}
+.cmt{color:var(--dim); margin:.5em 0 1.5em}
+.cmt::before{content:"# "; color:var(--edge2)}
+p{max-width:78ch; margin:1.05em 0}
+.rule{border:0; border-top:1px dashed var(--edge); margin:2.4em 0}
+
+/* ---------- code / math boxes ---------- */
+.box{border:1px solid var(--edge); background:linear-gradient(#1f2326,#1a1e20); margin:1.8em 0; break-inside:avoid}
+.box-t{
+  display:flex; gap:10px; align-items:center; border-bottom:1px solid var(--edge);
+  padding:6px 12px; font-size:12.5px; color:var(--pink); background:#1a1d1f; letter-spacing:.5px;
+}
+.box-t::before{content:"◆"; color:var(--orange); font-size:10px}
+.box-b{padding:13px 15px; overflow-x:auto}
+.box pre{margin:0; font:400 13.6px/1.9 var(--mono); color:#dcdad4; white-space:pre}
+.ln{color:#4c565c; user-select:none}
+.v{color:var(--cyan)} .k{color:var(--pink)} .d{color:var(--dim)} .g{color:var(--green)} .o{color:var(--orange)} .u{color:var(--violet)}
+.note{
+  border-left:3px solid var(--orange); background:rgba(253,151,31,.05);
+  padding:10px 14px; color:#c3bfb6; margin:1.7em 0; break-inside:avoid;
+}
+.note b{color:var(--orange); font-weight:500}
+
+/* ---------- figures ---------- */
+figure{margin:1.9em 0; break-inside:avoid}
+.plate{
+  background:#0e1011; border:1px solid var(--edge); padding:10px; display:flex; justify-content:center;
+  transition:.16s;
+}
+figure:hover .plate{border-color:var(--edge2)}
+.plate img{display:block; max-width:100%; height:auto}
+.plate.hero{padding:14px; border-color:#3a444a; box-shadow:0 0 42px rgba(0,0,0,.5)}
+figcaption{margin-top:9px; font-size:13px; color:var(--dim); max-width:84ch}
+figcaption::before{content:"// "; color:var(--edge2)}
+figcaption b{color:var(--yellow); font-weight:500}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.four{display:grid; grid-template-columns:repeat(4,1fr); gap:11px}
+.two figcaption,.four figcaption{margin-top:7px}
+.tag{color:var(--green)}
+
+/* ---------- tables ---------- */
+table{border-collapse:collapse; width:100%; margin:1.7em 0; font-size:13.5px; break-inside:avoid}
+caption{caption-side:top; text-align:left; color:var(--dim); font-size:13px; padding-bottom:9px}
+caption::before{content:"// "; color:var(--edge2)}
+th,td{border:1px solid var(--edge); padding:7px 11px; text-align:right}
+th:first-child,td:first-child{text-align:left; color:var(--violet)}
+thead th{background:#1c2023; color:var(--cyan); font-weight:500; text-align:right}
+thead th:first-child{color:var(--cyan)}
+tbody tr:nth-child(even){background:rgba(255,255,255,.018)}
+td.hi{color:var(--green); font-weight:500}
+td.ctl{color:var(--dim)}
+
+/* ---------- wipe + scrubber ---------- */
+.wipe{position:relative; border:1px solid var(--edge); background:#0e1011; overflow:hidden; line-height:0}
+.wipe img{width:100%; display:block}
+.wipe .b{position:absolute; inset:0; clip-path:inset(0 50% 0 0)}
+.wipe .bar{position:absolute; top:0; bottom:0; left:50%; width:2px; background:var(--pink); box-shadow:0 0 12px rgba(249,38,114,.6); pointer-events:none}
+.ctl{display:flex; align-items:center; gap:14px; margin-top:11px; font-size:13px; color:var(--dim); flex-wrap:wrap}
+input[type=range]{-webkit-appearance:none; appearance:none; flex:1; min-width:140px; height:2px; background:var(--edge2); outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:12px; height:22px; background:var(--green); cursor:ew-resize; box-shadow:0 0 12px rgba(166,226,46,.45)}
+input[type=range]::-moz-range-thumb{width:12px; height:22px; border:0; background:var(--green); cursor:ew-resize}
+.readout{color:var(--green)}
+.readout b{color:var(--cyan); font-weight:400}
+
+/* ---------- status bar ---------- */
+.status{
+  position:fixed; left:0; right:0; bottom:0; z-index:9; display:flex; gap:18px; align-items:center;
+  background:#101314; border-top:1px solid var(--edge); padding:5px clamp(14px,4vw,40px);
+  font-size:12.5px; color:var(--dim);
+}
+.status .mode{background:var(--green); color:#14160f; padding:1px 9px; font-weight:700}
+.status .right{margin-left:auto}
+.status .f{color:var(--cyan)}
+
+footer{margin-top:56px; border-top:1px solid var(--edge); padding-top:16px; font-size:13px; color:var(--dim)}
+.print-only{display:none}
+@media (max-width:720px){ .four{grid-template-columns:1fr 1fr} body{font-size:14px} }
+
+/* ---------- print: white paper, colour kept, clean pagination ---------- */
+@media print{
+  @page{margin:16mm 14mm}
+  html,body{background:#fff !important; padding:0}
+  body{font-size:9.6pt; line-height:1.5; color:#15181a}
+  .wrap{max-width:none}
+  .chrome,nav,.status,.no-print{display:none !important}
+  .print-only{display:block}
+  header.top{padding:0 0 8px}
+  .banner{font-size:6pt; line-height:1.1; color:#2f7d1f; text-shadow:none; margin-bottom:10px}
+  h1{font-size:17pt} h1 .c{color:#0b6b86}
+  h2{font-size:12.5pt} h2 .p{color:#2f7d1f} h2 .f{color:#a35a00}
+  h3{font-size:10.5pt; color:#8a7400} h3::before{color:#999}
+  .chip{background:#2f7d1f; color:#fff; font-size:8pt}
+  .chip.c2{background:#0b6b86}.chip.c3{background:#a35a00}.chip.c4{background:#6b3fd4}.chip.c5{background:#a3145a}
+  .cmt,.sub,.kv,figcaption,caption{color:#5a6165 !important}
+  .kv b{color:#6b3fd4} em{color:#8a5a00; font-weight:600} strong{color:#000}
+  a{color:#0b6b86}
+  .box{background:#fbfbfa; border:1px solid #c3c8cb}
+  .box-t{background:#f0f1f1; color:#a3145a; border-bottom:1px solid #c3c8cb}
+  .box pre{color:#15181a; font-size:8.8pt; line-height:1.65}
+  .ln{color:#a8b0b4} .v{color:#0b6b86} .k{color:#a3145a} .d{color:#6b7276} .g{color:#2f7d1f} .o{color:#a35a00} .u{color:#6b3fd4}
+  .note{background:#fff8ee; border-left:3px solid #a35a00; color:#3a3f42} .note b{color:#a35a00}
+  .plate{background:#fff; border:1px solid #ccd1d4; padding:0}
+  .plate img{max-height:112mm; width:auto; object-fit:contain}
+  .two .plate img{max-height:95mm}
+  .four .plate img{max-height:60mm}
+  figcaption b{color:#8a7400}
+  figcaption::before,caption::before{content:""}
+  th,td{border:1px solid #c3c8cb; padding:4px 7px}
+  thead th{background:#f0f1f1; color:#0b6b86}
+  th:first-child,td:first-child{color:#6b3fd4}
+  tbody tr:nth-child(even){background:#fafafa}
+  td.hi{color:#2f7d1f; font-weight:700} td.ctl{color:#6b7276}
+  .tag{color:#2f7d1f}
+  /* pagination */
+  section{break-before:page; padding-top:0}
+  section:first-of-type{break-before:auto}
+  h1,h2,h3,.hgroup{break-after:avoid}
+  figure,table,.box,.note,.two,.four{break-inside:avoid}
+  p{orphans:3; widows:3}
+  footer{break-inside:avoid; border-top:1px solid #c3c8cb}
+}
+</style>
+</head>
+<body>
+
+<div class="chrome no-print">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="path">mo@berkeley:<b>~/cs180/proj0</b>$ ./run --all</span>
+  <span class="right">bash — 100×52</span>
+</div>
+
+<div class="wrap">
+
+<header class="top">
+<pre class="banner">██████╗ ██████╗  ██████╗      ██╗ ██████╗ 
+██╔══██╗██╔══██╗██╔═══██╗     ██║██╔═████╗
+██████╔╝██████╔╝██║   ██║     ██║██║██╔██║
+██╔═══╝ ██╔══██╗██║   ██║██   ██║████╔╝██║
+██║     ██║  ██║╚██████╔╝╚█████╔╝╚██████╔╝
+╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚════╝  ╚═════╝ </pre>
+  <h1>Project 0 · <span class="c">Becoming Friends with Your Camera</span></h1>
+  <p class="sub">CS180 — Intro to Computer Vision and Computational Photography · Fall 2026</p>
+  <p class="abstract">
+    Three exercises with one idea underneath them: a photograph's <em>size</em> is set by the lens,
+    but its <em>shape</em> is set by where you stand. Zoom multiplies every point by the same number,
+    so it can enlarge a picture and never rearrange it. Walking changes the distance to each part of
+    the scene by a different fraction, and that is the only thing that can bend a face, flatten a
+    facade, or make a corridor breathe. All photographs are mine, shot handheld on a Google Pixel 10;
+    the ratios are measured off the pixels and rounded honestly.
+  </p>
+  <div class="kv">
+    <div><b>author</b><span>Mo Antablyan</span></div>
+    <div><b>camera</b><span>Google Pixel 10 · handheld · EXIF stripped in transit, so no focal lengths are quoted</span></div>
+    <div><b>contents</b><span>selfie distortion · perspective compression · dolly zoom</span></div>
+  </div>
+  <nav class="no-print">
+    <a href="#p0"><span class="n">00</span> setup</a>
+    <a href="#p1"><span class="n">01</span> selfie</a>
+    <a href="#p2"><span class="n">02</span> facade</a>
+    <a href="#p3"><span class="n">03</span> dolly-zoom</a>
+    <a href="#p4"><span class="n">04</span> notes</a>
+  </nav>
+</header>
+
+<!-- ============================= 00 ============================= -->
+<section id="p0">
+  <div class="hgroup"><span class="chip">PART 00</span>
+    <h2><span class="p">$</span> cat <span class="f">the-one-equation.md</span></h2></div>
+  <p class="cmt">everything below falls out of a single line of algebra</p>
+
+  <p>
+    A pinhole camera takes a point sitting at distance <em>Z</em> in front of the lens, offset
+    <em>X</em> sideways, and paints it on the sensor at:
+  </p>
+
+  <div class="box"><div class="box-t">projection</div><div class="box-b"><pre><span class="ln">1 │</span> <span class="k">x</span> = <span class="v">f</span> · X / Z     <span class="d">// f = focal length (zoom)</span>
+<span class="ln">2 │</span> <span class="k">y</span> = <span class="v">f</span> · Y / Z     <span class="d">// Z = distance to that particular point</span></pre></div></div>
+
+  <p>
+    Two knobs. Turning <em>f</em> multiplies every point by the same constant — the picture gets bigger,
+    nothing inside it changes shape. Changing <em>Z</em> is different, because <em>Z</em> is not one
+    number: a face has a nose at one distance, eyes at another, ears at a third. Step back by
+    <span class="tag">Δ</span> and every depth becomes <span class="tag">Z + Δ</span>, so the
+    <em>ratios</em> between them all move:
+  </p>
+
+  <div class="box"><div class="box-t">the whole point</div><div class="box-b"><pre><span class="ln">1 │</span>  size of A     <span class="v">Z_B</span>       <span class="d">step back by Δ</span>       <span class="v">Z_B</span> + Δ
+<span class="ln">2 │</span>  --------- =  -----   <span class="o">─────────────►</span>     -------
+<span class="ln">3 │</span>  size of B     <span class="v">Z_A</span>                       <span class="v">Z_A</span> + Δ
+<span class="ln">4 │</span>
+<span class="ln">5 │</span>  <span class="d">near things shrink relative to far ones; the scene flattens.</span>
+<span class="ln">6 │</span>  <span class="d">as Δ → ∞ the ratio → 1 and depth stops being drawn at all.</span></pre></div></div>
+
+  <p>
+    Part 1 runs that on a face, Part 2 on a building, Part 3 on a corridor — with the zoom cancelling
+    the size change, so only the shape change survives.
+  </p>
+</section>
+
+<!-- ============================= 01 ============================= -->
+<section id="p1">
+  <div class="hgroup"><span class="chip c2">PART 01</span>
+    <h2><span class="p">$</span> ./selfie <span class="f">--wrong-way --right-way</span></h2></div>
+  <p class="cmt">same face, same phone, two standing distances</p>
+
+  <p>
+    An ordinary arm's-length selfie, then a second frame taken from across the room with the zoom
+    pushed in until the head filled the same amount of frame. The faces come out matched in size to
+    about 3%, so whatever still differs between them is perspective and nothing else.
+  </p>
+
+  <figure>
+    <div class="two">
+      <div>
+        <div class="plate"><img src="media/p1-close.jpg" alt="Selfie at arm's length: nose and lips enlarged, ears hidden."></div>
+        <figcaption><b>FIG 1.1a</b> — the wrong way: arm's length, wide.</figcaption>
+      </div>
+      <div>
+        <div class="plate"><img src="media/p1-far.jpg" alt="Portrait from across the room with zoom: proportions normal."></div>
+        <figcaption><b>FIG 1.1b</b> — the right way: stepped back, zoomed in.</figcaption>
+      </div>
+    </div>
+  </figure>
+
+  <p>
+    To make the difference literal, both frames were rotated and scaled so the pupils land on identical
+    pixels. The eyes are now pinned and cannot move; everything that still shifts is depth being drawn
+    differently.
+  </p>
+
+  <figure class="no-print">
+    <div class="wipe" id="wipe">
+      <img src="media/p1-far-aligned.jpg" alt="Far portrait, registered on the eyes.">
+      <img class="b" id="wipeB" src="media/p1-close-aligned.jpg" alt="Close portrait, registered on the eyes.">
+      <div class="bar" id="wipeBar"></div>
+    </div>
+    <div class="ctl"><span>close</span>
+      <input type="range" id="wipeR" min="0" max="100" value="50" aria-label="wipe between the close and far portraits">
+      <span>far</span></div>
+    <figcaption><b>FIG 1.2</b> — drag the bar. Nose and lips swell, the jaw widens, the ears slide away behind the cheeks as the camera comes closer.</figcaption>
+  </figure>
+
+  <h3>Why the close one looks wrong</h3>
+  <p>
+    Put the eye plane at distance <em>Z</em>. The nose tip stands about Δ ≈ 2 cm in front of it, so it is
+    drawn larger than the eyes by <span class="tag">Z / (Z − Δ)</span>:
+  </p>
+
+  <div class="box"><div class="box-t">how much a 2 cm nose inflates</div><div class="box-b"><pre><span class="ln">1 │</span>  Z = 0.35 m  →  0.35 / 0.33 = <span class="k">1.06</span>   <span class="d">6% too big — the selfie look</span>
+<span class="ln">2 │</span>  Z = 1.50 m  →  1.50 / 1.48 = <span class="k">1.013</span>  <span class="d">1.3% — a portrait</span>
+<span class="ln">3 │</span>  Z = 3.00 m  →  3.00 / 2.98 = <span class="k">1.007</span>  <span class="d">0.7% — flat</span></pre></div></div>
+
+  <p>
+    The focal length never appears in that expression. A 2 cm nose is worth 6% of the trip to the lens at
+    arm's length and almost nothing from three metres — that single fraction is the whole effect. Run it
+    the other way for the ears, which sit <em>behind</em> the eye plane: up close they are drawn smaller
+    and disappear behind the cheeks.
+  </p>
+
+  <p>
+    Measured on my two frames, with every length divided by the pupil-to-pupil distance so image scale
+    cancels out:
+  </p>
+
+  <table>
+    <caption>Handheld phone frames — read these as ±1%.</caption>
+    <thead><tr><th>length ÷ interocular</th><th>close</th><th>far</th><th>change</th></tr></thead>
+    <tbody>
+      <tr><td>nose base width</td><td>0.48</td><td>0.46</td><td class="hi">≈ +4%</td></tr>
+      <tr><td>mouth width</td><td>0.84</td><td>0.81</td><td class="hi">≈ +4%</td></tr>
+      <tr><td>eye width <span class="d">(control)</span></td><td>0.386</td><td>0.385</td><td class="ctl">+0.3%</td></tr>
+      <tr><td>brow-to-brow span <span class="d">(control)</span></td><td>1.869</td><td>1.868</td><td class="ctl">+0.0%</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    The bottom two rows are the control: they lie in the same plane as the ruler they are divided by, so
+    no amount of walking can touch them — and they don't move. The nose and lips stand a couple of
+    centimetres in front of that plane and grow by about 4%, which is the predicted 6%-ish as closely as
+    a handheld phone deserves.
+  </p>
+</section>
+
+<!-- ============================= 02 ============================= -->
+<section id="p2">
+  <div class="hgroup"><span class="chip c3">PART 02</span>
+    <h2><span class="p">$</span> ./facade <span class="f">--compression</span></h2></div>
+  <p class="cmt">the same experiment outdoors, and backwards</p>
+
+  <p>
+    Part 1 walked <em>in</em> and watched a face bulge. Part 2 walks <em>out</em> and watches a building
+    go flat. A facade seen at an angle has a near corner at <em>Z</em> and a far corner at
+    <em>Z + d</em>, so the two ends of one wall are drawn in the ratio:
+  </p>
+
+  <div class="box"><div class="box-t">how much a facade recedes</div><div class="box-b"><pre><span class="ln">1 │</span>  near bay     <span class="v">Z</span> + d          <span class="d">d = depth along the wall</span>
+<span class="ln">2 │</span>  --------  =  -------          <span class="d">Z = your distance to the near corner</span>
+<span class="ln">3 │</span>   far bay        <span class="v">Z</span>
+<span class="ln">4 │</span>
+<span class="ln">5 │</span>  d = 30 m, Z =  6 m  →  <span class="k">6.0×</span>  <span class="d">the wall dives away from you</span>
+<span class="ln">6 │</span>  d = 30 m, Z = 60 m  →  <span class="k">1.5×</span>  <span class="d">bays nearly equal — flat</span></pre></div></div>
+
+  <p>
+    Note what is missing on the right-hand side: the focal length. Zooming from 60 m cannot undo the
+    flattening, because the flattening was never about framing — it is the ratio 1 + d/Z, and only your
+    feet can change that. Long lenses do not compress anything; standing far away does, and a long lens
+    is simply what you reach for once you are far away.
+  </p>
+
+  <div class="note no-print">
+    <b>pending —</b> the facade frames are not shot yet. Save them as
+    <span class="tag">media/p2-far-zoom.jpg</span> and <span class="tag">media/p2-near-wide.jpg</span>
+    and this section fills itself. Shoot it like this: stand well back from a facade seen obliquely,
+    zoom until it fills the frame; then walk toward it and shoot wide, stopping when the building is
+    about the same size in the viewfinder. Keep the same corner in both.
+  </div>
+
+  <figure>
+    <div class="two">
+      <div>
+        <div class="plate"><img src="media/p2-far-zoom.jpg" alt="Facade from far away with the zoom: perspective compressed."></div>
+        <figcaption><b>FIG 2.1a</b> — far away, zoomed in. Bays nearly equal, diagonals nearly parallel, the wall reads as flat pattern.</figcaption>
+      </div>
+      <div>
+        <div class="plate"><img src="media/p2-near-wide.jpg" alt="The same facade from close up without zoom: perspective opens out."></div>
+        <figcaption><b>FIG 2.1b</b> — close up, no zoom, same size on the sensor. The near corner towers and the wall opens out.</figcaption>
+      </div>
+    </div>
+  </figure>
+
+  <p>
+    Same building, same size in frame, opposite feeling — and the only thing that changed between the
+    two exposures was how many metres of pavement were behind me. It is why a portrait is shot from
+    across the room and an estate agent shoots a bedroom from the doorway with a wide lens: the
+    photographer picks <em>Z</em> first, then picks a focal length to get the framing back.
+  </p>
+</section>
+
+<!-- ============================= 03 ============================= -->
+<section id="p3">
+  <div class="hgroup"><span class="chip c4">PART 03</span>
+    <h2><span class="p">$</span> ./dolly-zoom <span class="f">--vertigo --loop</span></h2></div>
+  <p class="cmt">walk back, zoom in, keep the subject nailed down — the room does the rest</p>
+
+  <p>
+    An office chair in a dead-end corridor, photographed four times: step back, zoom in, keep the chair
+    the same size. Hold the subject fixed and the room behind it has no choice but to move.
+  </p>
+
+  <figure>
+    <div class="plate hero"><img src="media/dolly-aligned.gif" alt="Dolly zoom loop: the chair stays exactly the same size while the corridor swells and shrinks around it."></div>
+    <figcaption><b>FIG 3.1</b> — the dolly zoom. Four exposures, registered on the chair and looped out and back. The chair is nailed to the pixel; the corridor breathes.</figcaption>
+  </figure>
+
+  <figure>
+    <div class="four">
+      <div><div class="plate"><img src="media/p3-aligned-1.jpg" alt="Frame 1, camera nearest."></div><figcaption><b>1</b> — nearest</figcaption></div>
+      <div><div class="plate"><img src="media/p3-aligned-2.jpg" alt="Frame 2."></div><figcaption><b>2</b></figcaption></div>
+      <div><div class="plate"><img src="media/p3-aligned-3.jpg" alt="Frame 3."></div><figcaption><b>3</b></figcaption></div>
+      <div><div class="plate"><img src="media/p3-aligned-4.jpg" alt="Frame 4, camera furthest."></div><figcaption><b>4</b> — furthest</figcaption></div>
+    </div>
+    <figcaption><b>FIG 3.2</b> — the same four frames laid out in order. Follow the door frame on the left and the skirting board behind the seat: both march outward while the chair holds still.</figcaption>
+  </figure>
+
+  <figure class="no-print">
+    <div class="plate"><img id="frame" src="media/p3-aligned-1.jpg" alt="Registered dolly zoom frame."></div>
+    <div class="ctl"><span>near</span>
+      <input type="range" id="dial" min="1" max="4" value="1" step="1" aria-label="step through the four registered frames">
+      <span>far</span>
+      <span class="readout">frame <b id="r-frame">1</b>/4 · background <b id="r-bg">1.0</b>× · crop kept <b id="r-keep">76</b>%</span></div>
+    <figcaption><b>FIG 3.3</b> — step through them in place: the chair never moves a pixel, and the numbers on the right are what the corridor is doing.</figcaption>
+  </figure>
+
+  <h3>Why the room swells</h3>
+  <p>
+    Holding the subject means holding <span class="tag">f / Z</span> constant, so the focal length has to
+    track the distance: <em>f ∝ Z</em>. A wall a further <em>b</em> behind the subject is then drawn at:
+  </p>
+
+  <div class="box"><div class="box-t">background vs subject</div><div class="box-b"><pre><span class="ln">1 │</span>                   <span class="v">f</span>            <span class="v">Z</span>
+<span class="ln">2 │</span>  background  ∝   -----   ∝   -----     <span class="d">since f ∝ Z when the subject is held</span>
+<span class="ln">3 │</span>                 <span class="v">Z</span> + b        <span class="v">Z</span> + b
+<span class="ln">4 │</span>
+<span class="ln">5 │</span>  Z =  1·b  →  1/2   = <span class="k">0.50</span>  <span class="d">standing close: the wall is drawn small</span>
+<span class="ln">6 │</span>  Z =  3·b  →  3/4   = <span class="k">0.75</span>
+<span class="ln">7 │</span>  Z = 10·b  →  10/11 = <span class="k">0.91</span>  <span class="d">standing far: it catches up with the subject</span>
+<span class="ln">8 │</span>  Z →   ∞   →          <span class="k">1.00</span>  <span class="d">no depth left; wall and chair scale together</span></pre></div></div>
+
+  <p>
+    That climbs as <em>Z</em> grows. Walk backwards and the wall comes with you; walk in and it flees.
+    Nothing in the room moved and the chair never changed size, which is exactly why the shot is
+    unsettling — the picture reports two incompatible things about where you are standing. Hitchcock's
+    crew shot it down a stairwell in <em>Vertigo</em>; I shot it down a corridor at a chair.
+  </p>
+
+  <h3>What the frames measure</h3>
+  <p>
+    Zooming by eye between shots is imprecise, so the chair drifted about 30% larger by the last frame.
+    Cropping fixes it — a crop can only ever enlarge a subject, so the frame with the biggest chair is
+    left untouched and the others are cropped up to meet it. Background magnification is then read off
+    the skirting board on the back wall, a fixed object lying in the wall plane.
+  </p>
+
+  <table>
+    <caption>Per frame, after registration. Handheld and zoomed by eye — the ratios are good to a few percent, not more.</caption>
+    <thead><tr><th>frame</th><th>chair, as shot</th><th>zoom applied in post</th><th>frame kept</th><th>background</th></tr></thead>
+    <tbody>
+      <tr><td>1 — nearest</td><td>1.00×</td><td>1.32×</td><td>76%</td><td>1.0×</td></tr>
+      <tr><td>2</td><td>1.20×</td><td>1.10×</td><td>91%</td><td class="hi">≈ 1.3×</td></tr>
+      <tr><td>3</td><td>1.15×</td><td>1.15×</td><td>87%</td><td class="hi">≈ 1.55×</td></tr>
+      <tr><td>4 — furthest</td><td>1.32×</td><td>1.00×</td><td>100%</td><td class="hi">≈ 1.7×</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <div class="plate"><img src="media/p3-baseboard.jpg" alt="The same skirting board measured in the nearest and furthest frames: about 99 pixels tall in one, about 167 in the other."></div>
+    <figcaption><b>FIG 3.4</b> — the same piece of skirting board in the two extreme frames. The chair between them is identical to the pixel; the board goes from ≈99 px to ≈167 px, and that ratio <em>is</em> the dolly zoom.</figcaption>
+  </figure>
+
+  <figure>
+    <div class="two">
+      <div>
+        <div class="plate"><img src="media/dolly-raw.gif" alt="The four frames looped straight out of the camera; the chair pulses in size."></div>
+        <figcaption><b>FIG 3.5a</b> — straight out of the camera. The chair breathes, which reads as a mistake rather than an effect.</figcaption>
+      </div>
+      <div>
+        <div class="plate"><img src="media/dolly-aligned.gif" alt="The same four frames after registration; the chair is locked."></div>
+        <figcaption><b>FIG 3.5b</b> — after registration. Same four exposures, same pixel dimensions, chair locked.</figcaption>
+      </div>
+    </div>
+  </figure>
+
+  <div class="note no-print">
+    <b>note —</b> printed to PDF, the two loops freeze on their first frame; they run on the live page.
+    FIG 3.2 carries the same information without animation.
+  </div>
+</section>
+
+<!-- ============================= 04 ============================= -->
+<section id="p4">
+  <div class="hgroup"><span class="chip c5">PART 04</span>
+    <h2><span class="p">$</span> tail <span class="f">notes.md</span></h2></div>
+  <p class="cmt">how it was made, briefly</p>
+
+  <div class="box"><div class="box-t">pipeline</div><div class="box-b"><pre><span class="ln">1 │</span> <span class="g">chair</span>       correlate a headrest+backrest patch across a sweep of scales,
+<span class="ln">2 │</span>            crop each frame to the window that implies, resample back to
+<span class="ln">3 │</span>            1928×2560 <span class="d">(Lanczos)</span> — re-running the match returns 1.000
+<span class="ln">4 │</span> <span class="g">background</span>  skirting-board height, read twice per frame: one column band
+<span class="ln">5 │</span>            left of the chair, one right. They agree to about 1%
+<span class="ln">6 │</span> <span class="g">faces</span>       68-point landmark fit, similarity transform pinning the pupils,
+<span class="ln">7 │</span>            all lengths divided by the interocular distance
+<span class="ln">8 │</span> <span class="g">colour</span>      animations only: each frame matched to a common mean/σ over the
+<span class="ln">9 │</span>            chair. Stills are cropped, never retouched</pre></div></div>
+
+  <h3>What I would do differently</h3>
+  <p>
+    Zoom in smaller, deliberate steps and check the subject's size on screen between shots instead of by
+    eye — the 30% drift cost 24% of the first frame to cropping. And shoot eight frames rather than four:
+    with four the loop steps where it should glide.
+  </p>
+</section>
+
+<footer>
+  <p>CS180 · Project 0 · Fall 2026 — photographs, measurements and page by Mo Antablyan.</p>
+</footer>
+
+</div>
+
+<div class="status no-print">
+  <span class="mode">NORMAL</span>
+  <span class="f">proj0.html</span>
+  <span>utf-8</span>
+  <span>4 parts · 12 figures</span>
+  <span class="right">Pixel 10 · handheld</span>
+</div>
+
+<script>
+(function(){
+  var r=document.getElementById('wipeR'), b=document.getElementById('wipeB'), bar=document.getElementById('wipeBar');
+  if(r&&b&&bar){
+    var set=function(v){ b.style.clipPath='inset(0 '+(100-v)+'% 0 0)'; bar.style.left=v+'%'; };
+    r.addEventListener('input',function(){ set(+r.value); }); set(+r.value);
+  }
+  var data={1:{bg:'1.0',keep:'76'},2:{bg:'1.3',keep:'91'},3:{bg:'1.55',keep:'87'},4:{bg:'1.7',keep:'100'}};
+  var dial=document.getElementById('dial'), frame=document.getElementById('frame');
+  if(dial&&frame){
+    dial.addEventListener('input',function(){
+      var n=dial.value,d=data[n];
+      frame.src='media/p3-aligned-'+n+'.jpg';
+      document.getElementById('r-frame').textContent=n;
+      document.getElementById('r-bg').textContent=d.bg;
+      document.getElementById('r-keep').textContent=d.keep;
+    });
+  }
+})();
+</script>
+</body>
+</html>
