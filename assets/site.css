@@ -356,3 +356,99 @@ input[type="range"] { accent-color: var(--accent); }
   .math { font-size:11pt; }
   a { color:#111 !important; text-decoration:none; }
 }
+
+/* Project pages: visible editorial sheet on screen -------------------------
+   The print @page rule only affects PDF/printing. These rules make the
+   left/right page margins visible in the normal browser too. */
+:root { --canvas: #14120f; }
+html[data-theme="light"] { --canvas: #d9d0c1; }
+
+.project-page {
+  background: var(--canvas);
+}
+
+.project-page .site-header {
+  background: color-mix(in srgb, var(--canvas) 94%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--rule) 80%, transparent);
+}
+
+.project-page .header-inner {
+  max-width: 76rem;
+}
+
+.project-page .project-layout {
+  width: min(calc(100% - 4rem), 76rem);
+  margin: 2.25rem auto 4rem;
+  padding: 0 4rem 7rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: 0 28px 76px rgba(0, 0, 0, .28);
+}
+
+.project-page .project-hero {
+  padding-top: 3.6rem;
+}
+
+/* Make the summary read like a newspaper standfirst, not a web card. */
+.project-page .project-summary {
+  border: 0;
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 1rem 0 1.1rem;
+}
+.project-page .project-summary::before,
+.project-page .project-summary::after {
+  display: none;
+}
+
+/* Slightly flatter editorial treatment for report elements. */
+.project-page .figure-frame,
+.project-page pre,
+.project-page .panel,
+.project-page .box {
+  border-radius: 0;
+}
+
+/* The section rail now lives inside the left page gutter instead of
+   hanging outside the visual page. */
+@media (min-width: 1260px) {
+  .project-page .project-toc {
+    width: 8.75rem;
+    margin-left: calc(-8.75rem - 1.75rem);
+  }
+}
+
+@media (max-width: 900px) {
+  .project-page .project-layout {
+    width: min(calc(100% - 1.5rem), 76rem);
+    margin: .75rem auto 2rem;
+    padding: 0 1.35rem 4rem;
+  }
+
+  .project-page .project-hero {
+    padding-top: 2.5rem;
+  }
+}
+
+/* Generous physical page margins for Ctrl+P / Save as PDF. */
+@page {
+  margin: .72in .72in .78in;
+}
+
+@media print {
+  .project-page {
+    background: #fff !important;
+  }
+
+  .project-page .project-layout {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+}
