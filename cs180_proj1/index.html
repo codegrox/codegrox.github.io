@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CS180 Project 1: colorizing Prokudin-Gorskii glass plate images.">
+  <title>Project 1 — Images of the Russian Empire · Codegrox</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('codegrox-theme')||'dark'}catch(e){}</script>
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body class="project-page">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../">CODEGRO<span class="mark">X</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="../#projects">Projects</a>
+      <a class="optional" href="https://github.com/codegrox">GitHub</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </nav>
+  </div>
+</header>
+
+<main id="content" class="shell project-layout">
+  <header class="project-hero reading">
+    <div class="eyebrow">CS 180 · Project 01 · Fall 2026</div>
+    <h1 class="project-title">Images of the Russian Empire</h1>
+    <p class="project-subtitle">Colorizing the Prokudin-Gorskii glass plate collection by aligning the three recorded color channels.</p>
+  </header>
+
+  <nav class="project-toc reading" aria-label="Project sections">
+    <a href="#overview">Overview</a>
+    <a href="#single">Single-scale</a>
+    <a href="#pyramid">Pyramid</a>
+    <a href="#extras">Extra images</a>
+    <a href="#emir">Emir</a>
+  </nav>
+
+  <section id="overview" class="project-section">
+    <h2>Overview</h2>
+    <p>The input images contain three grayscale exposures stacked vertically in B, G, R order. I split the plate into thirds, used blue as the reference channel, and searched for the displacement of green and red that gave the best match.</p>
+    <p>For the small JPG files I used a direct search over shifts from -15 to 15 pixels. For the larger TIFF files I used an image pyramid so the search starts on a small version of the image and is refined at higher resolutions.</p>
+
+    <h3>Scoring</h3>
+    <p>I tried both L2 distance and normalized cross-correlation (NCC). I ignored about 10% around the image border while scoring because the plate borders can otherwise dominate the match.</p>
+    <div class="math">L2 = √Σ(I₁ − I₂)²</div>
+    <div class="math">NCC = ((I₁ − μ₁) · (I₂ − μ₂)) / (||I₁ − μ₁|| ||I₂ − μ₂||)</div>
+  </section>
+
+  <section id="single" class="project-section">
+    <h2>Single-scale alignment</h2>
+    <p>On the three small JPG images, NCC and L2 found the same offsets.</p>
+
+    <div class="breakout">
+      <div class="media-grid three">
+        <figure><div class="figure-frame"><img src="media/single_ncc/cathedral.jpg" alt="Aligned cathedral image"></div><figcaption><strong>Cathedral.</strong> G (2, 5), R (3, 12)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/single_ncc/monastery.jpg" alt="Aligned monastery image"></div><figcaption><strong>Monastery.</strong> G (2, -3), R (2, 3)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/single_ncc/tobolsk.jpg" alt="Aligned Tobolsk image"></div><figcaption><strong>Tobolsk.</strong> G (3, 3), R (3, 6)</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Image</th><th>NCC G</th><th>NCC R</th><th>L2 G</th><th>L2 R</th></tr></thead>
+        <tbody>
+          <tr><td>cathedral</td><td>(2, 5)</td><td>(3, 12)</td><td>(2, 5)</td><td>(3, 12)</td></tr>
+          <tr><td>monastery</td><td>(2, -3)</td><td>(2, 3)</td><td>(2, -3)</td><td>(2, 3)</td></tr>
+          <tr><td>tobolsk</td><td>(3, 3)</td><td>(3, 6)</td><td>(3, 3)</td><td>(3, 6)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="pyramid" class="project-section">
+    <h2>Image pyramid</h2>
+    <p>A full search over a large displacement range is too expensive for the TIFF files. I repeatedly blur and downsample by a factor of two until the image is small. I search ±15 pixels at the coarsest level, double that offset when moving to the next level, and then search ±2 pixels around the estimate.</p>
+    <p>NCC worked well on all of the provided images except Emir. The average alignment time for the large provided images in my run was about 2.4 seconds.</p>
+
+    <div class="breakout">
+      <div class="media-grid three">
+        <figure><div class="figure-frame"><img src="media/ncc/cathedral.jpg" alt="Cathedral colorized"></div><figcaption>cathedral — G (2, 5), R (3, 12)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/church.jpg" alt="Church colorized"></div><figcaption>church — G (4, 25), R (-4, 58)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/emir.jpg" alt="Emir with failed raw-pixel alignment"></div><figcaption>emir — G (24, 49), R (-205, 141), failed</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/harvesters.jpg" alt="Harvesters colorized"></div><figcaption>harvesters — G (17, 60), R (13, 124)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/icon.jpg" alt="Icon colorized"></div><figcaption>icon — G (17, 41), R (23, 89)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/ilemselga.jpg" alt="Ilemselga colorized"></div><figcaption>ilemselga — G (7, 40), R (11, 130)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/melons.jpg" alt="Melons colorized"></div><figcaption>melons — G (11, 82), R (13, 178)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/monastery.jpg" alt="Monastery colorized"></div><figcaption>monastery — G (2, -3), R (2, 3)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/religous_painting.jpg" alt="Religious painting colorized"></div><figcaption>religous_painting — G (3, 28), R (7, 68)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/self_portrait.jpg" alt="Self portrait colorized"></div><figcaption>self_portrait — G (29, 79), R (37, 176)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/siren.jpg" alt="Siren colorized"></div><figcaption>siren — G (-6, 49), R (-25, 96)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/three_generations.jpg" alt="Three generations colorized"></div><figcaption>three_generations — G (14, 53), R (11, 112)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/tobolsk.jpg" alt="Tobolsk colorized"></div><figcaption>tobolsk — G (3, 3), R (3, 6)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/wharf.jpg" alt="Wharf colorized"></div><figcaption>wharf — G (-7, 15), R (-16, 83)</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Image</th><th>Green offset</th><th>Red offset</th></tr></thead>
+        <tbody>
+          <tr><td>cathedral</td><td>(2, 5)</td><td>(3, 12)</td></tr>
+          <tr><td>church</td><td>(4, 25)</td><td>(-4, 58)</td></tr>
+          <tr><td>emir</td><td>(24, 49)</td><td>(-205, 141)</td></tr>
+          <tr><td>harvesters</td><td>(17, 60)</td><td>(13, 124)</td></tr>
+          <tr><td>icon</td><td>(17, 41)</td><td>(23, 89)</td></tr>
+          <tr><td>ilemselga</td><td>(7, 40)</td><td>(11, 130)</td></tr>
+          <tr><td>melons</td><td>(11, 82)</td><td>(13, 178)</td></tr>
+          <tr><td>monastery</td><td>(2, -3)</td><td>(2, 3)</td></tr>
+          <tr><td>religous_painting</td><td>(3, 28)</td><td>(7, 68)</td></tr>
+          <tr><td>self_portrait</td><td>(29, 79)</td><td>(37, 176)</td></tr>
+          <tr><td>siren</td><td>(-6, 49)</td><td>(-25, 96)</td></tr>
+          <tr><td>three_generations</td><td>(14, 53)</td><td>(11, 112)</td></tr>
+          <tr><td>tobolsk</td><td>(3, 3)</td><td>(3, 6)</td></tr>
+          <tr><td>wharf</td><td>(-7, 15)</td><td>(-16, 83)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="extras" class="project-section">
+    <h2>Additional images</h2>
+    <p>I downloaded four more glass plate negatives from the Prokudin-Gorskii collection. These are three of the results I used for the project.</p>
+
+    <div class="breakout">
+      <div class="media-grid three">
+        <figure><div class="figure-frame"><img src="media/extra/extra_ikona.jpg" alt="Additional icon image colorized"></div><figcaption><strong>Ikona.</strong> G (50, 61), R (72, 142)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/extra/extra_matrosi.jpg" alt="Additional sailors image colorized"></div><figcaption><strong>Matrosi.</strong> G (18, 21), R (30, 56)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/extra/extra_stained.jpg" alt="Additional stained glass image colorized"></div><figcaption><strong>Stained glass.</strong> G (16, 20), R (18, 59)</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="emir" class="project-section">
+    <h2>Emir failure and gradient feature</h2>
+    <p>Emir was the main failure with raw-pixel NCC. The different color channels have very different brightness values on the robe, so matching the raw intensities gives the wrong red-channel shift.</p>
+    <p>I also tried aligning gradient magnitude instead of the raw pixel values. This focuses more on edges and gives a much better result for Emir: G (24, 49), R (40, 107).</p>
+
+    <div class="breakout">
+      <div class="media-grid two">
+        <figure><div class="figure-frame"><img src="media/ncc/emir.jpg" alt="Emir raw NCC failure"></div><figcaption><strong>Raw NCC.</strong> Red channel is badly misaligned.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/bells_grad/emir.jpg" alt="Emir aligned with gradient features"></div><figcaption><strong>Gradient NCC.</strong> G (24, 49), R (40, 107).</figcaption></figure>
+      </div>
+    </div>
+
+    <p>There are also a few small color fringes in some images that cannot be removed perfectly with only an x/y translation. Moving people can also create local artifacts because the three exposures were taken at different times.</p>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="footer-inner shell"><span>Codegrox · CS180 Project 1</span><a href="../">All projects</a></div></footer>
+<button class="back-top" type="button" aria-label="Back to top">Top</button>
+<script src="../assets/site.js"></script>
+</body>
+</html>

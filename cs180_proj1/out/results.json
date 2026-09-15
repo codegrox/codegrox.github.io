@@ -1,0 +1,7316 @@
+{
+ "single_ncc/cathedral": {
+  "method": "single",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   390
+  ],
+  "levels": 0,
+  "score_g": 0.960214,
+  "score_r": 0.90565,
+  "g": [
+   2,
+   5
+  ],
+  "r": [
+   3,
+   12
+  ],
+  "image": "cathedral",
+  "file": "cathedral.jpg",
+  "load_s": 0.017,
+  "align_s": 0.15,
+  "save_s": 0.01
+ },
+ "single_ncc/monastery": {
+  "method": "single",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   391
+  ],
+  "levels": 0,
+  "score_g": 0.939614,
+  "score_r": 0.794061,
+  "g": [
+   2,
+   -3
+  ],
+  "r": [
+   2,
+   3
+  ],
+  "image": "monastery",
+  "file": "monastery.jpg",
+  "load_s": 0.004,
+  "align_s": 0.133,
+  "save_s": 0.008
+ },
+ "single_ncc/tobolsk": {
+  "method": "single",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   396
+  ],
+  "levels": 0,
+  "score_g": 0.921347,
+  "score_r": 0.857647,
+  "g": [
+   3,
+   3
+  ],
+  "r": [
+   3,
+   6
+  ],
+  "image": "tobolsk",
+  "file": "tobolsk.jpg",
+  "load_s": 0.004,
+  "align_s": 0.159,
+  "save_s": 0.009
+ },
+ "single_l2/cathedral": {
+  "method": "single",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   390
+  ],
+  "levels": 0,
+  "score_g": 41.804864,
+  "score_r": 61.281792,
+  "g": [
+   2,
+   5
+  ],
+  "r": [
+   3,
+   12
+  ],
+  "image": "cathedral",
+  "file": "cathedral.jpg",
+  "load_s": 0.004,
+  "align_s": 0.088,
+  "save_s": 0.004
+ },
+ "single_l2/monastery": {
+  "method": "single",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   391
+  ],
+  "levels": 0,
+  "score_g": 29.883968,
+  "score_r": 57.56102,
+  "g": [
+   2,
+   -3
+  ],
+  "r": [
+   2,
+   3
+  ],
+  "image": "monastery",
+  "file": "monastery.jpg",
+  "load_s": 0.004,
+  "align_s": 0.092,
+  "save_s": 0.004
+ },
+ "single_l2/tobolsk": {
+  "method": "single",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   396
+  ],
+  "levels": 0,
+  "score_g": 32.209047,
+  "score_r": 57.172629,
+  "g": [
+   3,
+   3
+  ],
+  "r": [
+   3,
+   6
+  ],
+  "image": "tobolsk",
+  "file": "tobolsk.jpg",
+  "load_s": 0.004,
+  "align_s": 0.093,
+  "save_s": 0.005
+ },
+ "ncc/cathedral": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   390
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      390
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 5,
+     "score": 0.960214
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      390
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 12,
+     "score": 0.90565
+    }
+   ]
+  },
+  "score_g": 0.960214,
+  "score_r": 0.90565,
+  "g": [
+   2,
+   5
+  ],
+  "r": [
+   3,
+   12
+  ],
+  "image": "cathedral",
+  "file": "cathedral.jpg",
+  "load_s": 0.004,
+  "align_s": 0.16,
+  "save_s": 0.011
+ },
+ "ncc/monastery": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   391
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      391
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": -3,
+     "score": 0.939614
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      391
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 0.794061
+    }
+   ]
+  },
+  "score_g": 0.939614,
+  "score_r": 0.794061,
+  "g": [
+   2,
+   -3
+  ],
+  "r": [
+   2,
+   3
+  ],
+  "image": "monastery",
+  "file": "monastery.jpg",
+  "load_s": 0.004,
+  "align_s": 0.154,
+  "save_s": 0.01
+ },
+ "ncc/tobolsk": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   396
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      396
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 3,
+     "score": 0.921347
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      396
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 6,
+     "score": 0.857647
+    }
+   ]
+  },
+  "score_g": 0.921347,
+  "score_r": 0.857647,
+  "g": [
+   3,
+   3
+  ],
+  "r": [
+   3,
+   6
+  ],
+  "image": "tobolsk",
+  "file": "tobolsk.jpg",
+  "load_s": 0.004,
+  "align_s": 0.141,
+  "save_s": 0.01
+ },
+ "ncc/church": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3202,
+   3634
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      228
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 1,
+     "score": 0.924352
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      455
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 3,
+     "score": 0.923967
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      909
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 6,
+     "score": 0.920789
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1817
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 12,
+     "score": 0.914227
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3634
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 25,
+     "score": 0.907617
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      228
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 4,
+     "score": 0.755302
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      455
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 7,
+     "score": 0.758665
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      909
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 15,
+     "score": 0.756286
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1817
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 29,
+     "score": 0.753362
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3634
+     ],
+     "radius": 2,
+     "x": -4,
+     "y": 58,
+     "score": 0.747325
+    }
+   ]
+  },
+  "score_g": 0.907617,
+  "score_r": 0.747325,
+  "g": [
+   4,
+   25
+  ],
+  "r": [
+   -4,
+   58
+  ],
+  "image": "church",
+  "file": "church.tif",
+  "load_s": 0.098,
+  "align_s": 2.327,
+  "save_s": 0.748
+ },
+ "ncc/emir": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3209,
+   3702
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 0.761934
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      463
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 6,
+     "score": 0.746492
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      926
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 12,
+     "score": 0.72798
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1851
+     ],
+     "radius": 2,
+     "x": 12,
+     "y": 25,
+     "score": 0.714066
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3702
+     ],
+     "radius": 2,
+     "x": 24,
+     "y": 49,
+     "score": 0.707251
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": -13,
+     "y": 9,
+     "score": 0.337959
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      463
+     ],
+     "radius": 2,
+     "x": -26,
+     "y": 18,
+     "score": 0.314717
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      926
+     ],
+     "radius": 2,
+     "x": -52,
+     "y": 36,
+     "score": 0.297977
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1851
+     ],
+     "radius": 2,
+     "x": -103,
+     "y": 71,
+     "score": 0.288042
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3702
+     ],
+     "radius": 2,
+     "x": -205,
+     "y": 141,
+     "score": 0.283336
+    }
+   ]
+  },
+  "score_g": 0.707251,
+  "score_r": 0.283336,
+  "g": [
+   24,
+   49
+  ],
+  "r": [
+   -205,
+   141
+  ],
+  "image": "emir",
+  "file": "emir.tif",
+  "load_s": 0.101,
+  "align_s": 2.309,
+  "save_s": 1.683
+ },
+ "ncc/harvesters": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3218,
+   3683
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      231
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 4,
+     "score": 0.838439
+    },
+    {
+     "level": 3,
+     "hw": [
+      403,
+      461
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 0.822671
+    },
+    {
+     "level": 2,
+     "hw": [
+      805,
+      921
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 15,
+     "score": 0.807923
+    },
+    {
+     "level": 1,
+     "hw": [
+      1609,
+      1842
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 30,
+     "score": 0.794095
+    },
+    {
+     "level": 0,
+     "hw": [
+      3218,
+      3683
+     ],
+     "radius": 2,
+     "x": 17,
+     "y": 60,
+     "score": 0.787571
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      231
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 8,
+     "score": 0.844035
+    },
+    {
+     "level": 3,
+     "hw": [
+      403,
+      461
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 16,
+     "score": 0.828334
+    },
+    {
+     "level": 2,
+     "hw": [
+      805,
+      921
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 31,
+     "score": 0.814456
+    },
+    {
+     "level": 1,
+     "hw": [
+      1609,
+      1842
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 62,
+     "score": 0.803594
+    },
+    {
+     "level": 0,
+     "hw": [
+      3218,
+      3683
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 124,
+     "score": 0.797662
+    }
+   ]
+  },
+  "score_g": 0.787571,
+  "score_r": 0.797662,
+  "g": [
+   17,
+   60
+  ],
+  "r": [
+   13,
+   124
+  ],
+  "image": "harvesters",
+  "file": "harvesters.tif",
+  "load_s": 0.111,
+  "align_s": 2.324,
+  "save_s": 0.791
+ },
+ "ncc/icon": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3244,
+   3741
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 3,
+     "score": 0.864865
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      468
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 5,
+     "score": 0.865133
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      936
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 10,
+     "score": 0.843633
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1871
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 20,
+     "score": 0.816939
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3741
+     ],
+     "radius": 2,
+     "x": 17,
+     "y": 41,
+     "score": 0.802236
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 6,
+     "score": 0.653846
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      468
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 11,
+     "score": 0.669698
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      936
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 22,
+     "score": 0.662692
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1871
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 45,
+     "score": 0.656879
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3741
+     ],
+     "radius": 2,
+     "x": 23,
+     "y": 89,
+     "score": 0.648086
+    }
+   ]
+  },
+  "score_g": 0.802236,
+  "score_r": 0.648086,
+  "g": [
+   17,
+   41
+  ],
+  "r": [
+   23,
+   89
+  ],
+  "image": "icon",
+  "file": "icon.tif",
+  "load_s": 0.115,
+  "align_s": 2.419,
+  "save_s": 0.826
+ },
+ "ncc/ilemselga": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3270,
+   3800
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      205,
+      238
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 2,
+     "score": 0.723627
+    },
+    {
+     "level": 3,
+     "hw": [
+      409,
+      475
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 5,
+     "score": 0.743799
+    },
+    {
+     "level": 2,
+     "hw": [
+      818,
+      950
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 10,
+     "score": 0.746028
+    },
+    {
+     "level": 1,
+     "hw": [
+      1635,
+      1900
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 20,
+     "score": 0.745264
+    },
+    {
+     "level": 0,
+     "hw": [
+      3270,
+      3800
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 40,
+     "score": 0.743279
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      205,
+      238
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 8,
+     "score": 0.563738
+    },
+    {
+     "level": 3,
+     "hw": [
+      409,
+      475
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 16,
+     "score": 0.578629
+    },
+    {
+     "level": 2,
+     "hw": [
+      818,
+      950
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 32,
+     "score": 0.584321
+    },
+    {
+     "level": 1,
+     "hw": [
+      1635,
+      1900
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 65,
+     "score": 0.586374
+    },
+    {
+     "level": 0,
+     "hw": [
+      3270,
+      3800
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 130,
+     "score": 0.584766
+    }
+   ]
+  },
+  "score_g": 0.743279,
+  "score_r": 0.584766,
+  "g": [
+   7,
+   40
+  ],
+  "r": [
+   11,
+   130
+  ],
+  "image": "ilemselga",
+  "file": "ilemselga.tif",
+  "load_s": 0.128,
+  "align_s": 2.579,
+  "save_s": 0.804
+ },
+ "ncc/melons": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3241,
+   3770
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 5,
+     "score": 0.962051
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      472
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 10,
+     "score": 0.958414
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      943
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 21,
+     "score": 0.951775
+    },
+    {
+     "level": 1,
+     "hw": [
+      1621,
+      1885
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 41,
+     "score": 0.944564
+    },
+    {
+     "level": 0,
+     "hw": [
+      3241,
+      3770
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 82,
+     "score": 0.938897
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 11,
+     "score": 0.935844
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      472
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 22,
+     "score": 0.928548
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      943
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 45,
+     "score": 0.923796
+    },
+    {
+     "level": 1,
+     "hw": [
+      1621,
+      1885
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 89,
+     "score": 0.917483
+    },
+    {
+     "level": 0,
+     "hw": [
+      3241,
+      3770
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 178,
+     "score": 0.913066
+    }
+   ]
+  },
+  "score_g": 0.938897,
+  "score_r": 0.913066,
+  "g": [
+   11,
+   82
+  ],
+  "r": [
+   13,
+   178
+  ],
+  "image": "melons",
+  "file": "melons.tif",
+  "load_s": 0.131,
+  "align_s": 2.433,
+  "save_s": 0.797
+ },
+ "ncc/religous_painting": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3193,
+   3742
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      200,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 2,
+     "score": 0.861121
+    },
+    {
+     "level": 3,
+     "hw": [
+      400,
+      468
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 3,
+     "score": 0.866095
+    },
+    {
+     "level": 2,
+     "hw": [
+      799,
+      936
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 7,
+     "score": 0.856887
+    },
+    {
+     "level": 1,
+     "hw": [
+      1597,
+      1871
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 13,
+     "score": 0.843953
+    },
+    {
+     "level": 0,
+     "hw": [
+      3193,
+      3742
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 28,
+     "score": 0.833142
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      200,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 4,
+     "score": 0.801013
+    },
+    {
+     "level": 3,
+     "hw": [
+      400,
+      468
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 8,
+     "score": 0.800021
+    },
+    {
+     "level": 2,
+     "hw": [
+      799,
+      936
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 17,
+     "score": 0.795163
+    },
+    {
+     "level": 1,
+     "hw": [
+      1597,
+      1871
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 34,
+     "score": 0.786492
+    },
+    {
+     "level": 0,
+     "hw": [
+      3193,
+      3742
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 68,
+     "score": 0.779349
+    }
+   ]
+  },
+  "score_g": 0.833142,
+  "score_r": 0.779349,
+  "g": [
+   3,
+   28
+  ],
+  "r": [
+   7,
+   68
+  ],
+  "image": "religous_painting",
+  "file": "religous_painting.tif",
+  "load_s": 0.107,
+  "align_s": 2.388,
+  "save_s": 0.776
+ },
+ "ncc/self_portrait": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3251,
+   3810
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 5,
+     "score": 0.858604
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      477
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 10,
+     "score": 0.843888
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      953
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 20,
+     "score": 0.824752
+    },
+    {
+     "level": 1,
+     "hw": [
+      1626,
+      1905
+     ],
+     "radius": 2,
+     "x": 14,
+     "y": 39,
+     "score": 0.800762
+    },
+    {
+     "level": 0,
+     "hw": [
+      3251,
+      3810
+     ],
+     "radius": 2,
+     "x": 29,
+     "y": 79,
+     "score": 0.78754
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 11,
+     "score": 0.8131
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      477
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 22,
+     "score": 0.800208
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      953
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 44,
+     "score": 0.784267
+    },
+    {
+     "level": 1,
+     "hw": [
+      1626,
+      1905
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 88,
+     "score": 0.760346
+    },
+    {
+     "level": 0,
+     "hw": [
+      3251,
+      3810
+     ],
+     "radius": 2,
+     "x": 37,
+     "y": 176,
+     "score": 0.746788
+    }
+   ]
+  },
+  "score_g": 0.78754,
+  "score_r": 0.746788,
+  "g": [
+   29,
+   79
+  ],
+  "r": [
+   37,
+   176
+  ],
+  "image": "self_portrait",
+  "file": "self_portrait.tif",
+  "load_s": 0.171,
+  "align_s": 2.431,
+  "save_s": 0.818
+ },
+ "ncc/siren": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3250,
+   3817
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 0.865737
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      478
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 6,
+     "score": 0.865737
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      955
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 12,
+     "score": 0.857176
+    },
+    {
+     "level": 1,
+     "hw": [
+      1625,
+      1909
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 25,
+     "score": 0.851506
+    },
+    {
+     "level": 0,
+     "hw": [
+      3250,
+      3817
+     ],
+     "radius": 2,
+     "x": -6,
+     "y": 49,
+     "score": 0.845009
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": -2,
+     "y": 6,
+     "score": 0.900207
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      478
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 12,
+     "score": 0.904452
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      955
+     ],
+     "radius": 2,
+     "x": -6,
+     "y": 24,
+     "score": 0.89938
+    },
+    {
+     "level": 1,
+     "hw": [
+      1625,
+      1909
+     ],
+     "radius": 2,
+     "x": -12,
+     "y": 48,
+     "score": 0.892545
+    },
+    {
+     "level": 0,
+     "hw": [
+      3250,
+      3817
+     ],
+     "radius": 2,
+     "x": -25,
+     "y": 96,
+     "score": 0.887176
+    }
+   ]
+  },
+  "score_g": 0.845009,
+  "score_r": 0.887176,
+  "g": [
+   -6,
+   49
+  ],
+  "r": [
+   -25,
+   96
+  ],
+  "image": "siren",
+  "file": "siren.tif",
+  "load_s": 0.128,
+  "align_s": 2.587,
+  "save_s": 0.84
+ },
+ "ncc/three_generations": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3209,
+   3714
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      233
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 3,
+     "score": 0.964692
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      465
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 0.953841
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      929
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 13,
+     "score": 0.944747
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1857
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 27,
+     "score": 0.935735
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3714
+     ],
+     "radius": 2,
+     "x": 14,
+     "y": 53,
+     "score": 0.930455
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      233
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 7,
+     "score": 0.923373
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      465
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 14,
+     "score": 0.914702
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      929
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 28,
+     "score": 0.90929
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1857
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 56,
+     "score": 0.901146
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3714
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 112,
+     "score": 0.896449
+    }
+   ]
+  },
+  "score_g": 0.930455,
+  "score_r": 0.896449,
+  "g": [
+   14,
+   53
+  ],
+  "r": [
+   11,
+   112
+  ],
+  "image": "three_generations",
+  "file": "three_generations.tif",
+  "load_s": 0.124,
+  "align_s": 2.428,
+  "save_s": 0.81
+ },
+ "ncc/wharf": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3244,
+   3761
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 1,
+     "score": 0.909285
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      471
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 2,
+     "score": 0.913834
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      941
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 4,
+     "score": 0.90918
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1881
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 8,
+     "score": 0.902138
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3761
+     ],
+     "radius": 2,
+     "x": -7,
+     "y": 15,
+     "score": 0.898891
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": -1,
+     "y": 5,
+     "score": 0.780297
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      471
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 10,
+     "score": 0.783134
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      941
+     ],
+     "radius": 2,
+     "x": -4,
+     "y": 21,
+     "score": 0.785748
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1881
+     ],
+     "radius": 2,
+     "x": -8,
+     "y": 41,
+     "score": 0.778434
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3761
+     ],
+     "radius": 2,
+     "x": -16,
+     "y": 83,
+     "score": 0.769919
+    }
+   ]
+  },
+  "score_g": 0.898891,
+  "score_r": 0.769919,
+  "g": [
+   -7,
+   15
+  ],
+  "r": [
+   -16,
+   83
+  ],
+  "image": "wharf",
+  "file": "wharf.tif",
+  "load_s": 0.117,
+  "align_s": 2.456,
+  "save_s": 0.814
+ },
+ "extra/extra_forest": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3235,
+   3731
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 0.800867
+    },
+    {
+     "level": 3,
+     "hw": [
+      405,
+      467
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 6,
+     "score": 0.802126
+    },
+    {
+     "level": 2,
+     "hw": [
+      809,
+      933
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 11,
+     "score": 0.781514
+    },
+    {
+     "level": 1,
+     "hw": [
+      1618,
+      1866
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 22,
+     "score": 0.744886
+    },
+    {
+     "level": 0,
+     "hw": [
+      3235,
+      3731
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 44,
+     "score": 0.718515
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 6,
+     "score": 0.865983
+    },
+    {
+     "level": 3,
+     "hw": [
+      405,
+      467
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 13,
+     "score": 0.868856
+    },
+    {
+     "level": 2,
+     "hw": [
+      809,
+      933
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 26,
+     "score": 0.844066
+    },
+    {
+     "level": 1,
+     "hw": [
+      1618,
+      1866
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 51,
+     "score": 0.809773
+    },
+    {
+     "level": 0,
+     "hw": [
+      3235,
+      3731
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 103,
+     "score": 0.784947
+    }
+   ]
+  },
+  "score_g": 0.718515,
+  "score_r": 0.784947,
+  "g": [
+   7,
+   44
+  ],
+  "r": [
+   -3,
+   103
+  ],
+  "image": "extra_forest",
+  "file": "extra_forest.tif",
+  "load_s": 0.108,
+  "align_s": 2.686,
+  "save_s": 0.869
+ },
+ "extra/extra_ikona": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3231,
+   3723
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      233
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 4,
+     "score": 0.890896
+    },
+    {
+     "level": 3,
+     "hw": [
+      404,
+      466
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 7,
+     "score": 0.876077
+    },
+    {
+     "level": 2,
+     "hw": [
+      808,
+      931
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 15,
+     "score": 0.876787
+    },
+    {
+     "level": 1,
+     "hw": [
+      1616,
+      1862
+     ],
+     "radius": 2,
+     "x": 25,
+     "y": 30,
+     "score": 0.868752
+    },
+    {
+     "level": 0,
+     "hw": [
+      3231,
+      3723
+     ],
+     "radius": 2,
+     "x": 50,
+     "y": 61,
+     "score": 0.8603
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      233
+     ],
+     "radius": 15,
+     "x": 5,
+     "y": 9,
+     "score": 0.698057
+    },
+    {
+     "level": 3,
+     "hw": [
+      404,
+      466
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 18,
+     "score": 0.724456
+    },
+    {
+     "level": 2,
+     "hw": [
+      808,
+      931
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 35,
+     "score": 0.728774
+    },
+    {
+     "level": 1,
+     "hw": [
+      1616,
+      1862
+     ],
+     "radius": 2,
+     "x": 36,
+     "y": 71,
+     "score": 0.73451
+    },
+    {
+     "level": 0,
+     "hw": [
+      3231,
+      3723
+     ],
+     "radius": 2,
+     "x": 72,
+     "y": 142,
+     "score": 0.729731
+    }
+   ]
+  },
+  "score_g": 0.8603,
+  "score_r": 0.729731,
+  "g": [
+   50,
+   61
+  ],
+  "r": [
+   72,
+   142
+  ],
+  "image": "extra_ikona",
+  "file": "extra_ikona.tif",
+  "load_s": 0.113,
+  "align_s": 3.763,
+  "save_s": 1.277
+ },
+ "extra/extra_matrosi": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3202,
+   3663
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      229
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 1,
+     "score": 0.971083
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      458
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 3,
+     "score": 0.96598
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      916
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 5,
+     "score": 0.958638
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1832
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 10,
+     "score": 0.950051
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3663
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 21,
+     "score": 0.943909
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      229
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 4,
+     "score": 0.821962
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      458
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 7,
+     "score": 0.823183
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      916
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 14,
+     "score": 0.81534
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1832
+     ],
+     "radius": 2,
+     "x": 15,
+     "y": 28,
+     "score": 0.809135
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3663
+     ],
+     "radius": 2,
+     "x": 30,
+     "y": 56,
+     "score": 0.803757
+    }
+   ]
+  },
+  "score_g": 0.943909,
+  "score_r": 0.803757,
+  "g": [
+   18,
+   21
+  ],
+  "r": [
+   30,
+   56
+  ],
+  "image": "extra_matrosi",
+  "file": "extra_matrosi.tif",
+  "load_s": 0.177,
+  "align_s": 4.64,
+  "save_s": 1.202
+ },
+ "extra/extra_stained": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "raw",
+  "plate_hw": [
+   3205,
+   3702
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 1,
+     "score": 0.478776
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      463
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 2,
+     "score": 0.474546
+    },
+    {
+     "level": 2,
+     "hw": [
+      802,
+      926
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 5,
+     "score": 0.472429
+    },
+    {
+     "level": 1,
+     "hw": [
+      1603,
+      1851
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 10,
+     "score": 0.468446
+    },
+    {
+     "level": 0,
+     "hw": [
+      3205,
+      3702
+     ],
+     "radius": 2,
+     "x": 16,
+     "y": 20,
+     "score": 0.464407
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 4,
+     "score": 0.399717
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      463
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 0.391378
+    },
+    {
+     "level": 2,
+     "hw": [
+      802,
+      926
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 15,
+     "score": 0.385338
+    },
+    {
+     "level": 1,
+     "hw": [
+      1603,
+      1851
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 29,
+     "score": 0.382249
+    },
+    {
+     "level": 0,
+     "hw": [
+      3205,
+      3702
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 59,
+     "score": 0.379164
+    }
+   ]
+  },
+  "score_g": 0.464407,
+  "score_r": 0.379164,
+  "g": [
+   16,
+   20
+  ],
+  "r": [
+   18,
+   59
+  ],
+  "image": "extra_stained",
+  "file": "extra_stained.tif",
+  "load_s": 0.183,
+  "align_s": 3.364,
+  "save_s": 1.07
+ },
+ "bells/cathedral": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   341,
+   390
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      390
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 5,
+     "score": 0.738814
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      390
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 12,
+     "score": 0.630017
+    }
+   ]
+  },
+  "score_g": 0.738814,
+  "score_r": 0.630017,
+  "g": [
+   2,
+   5
+  ],
+  "r": [
+   3,
+   12
+  ],
+  "image": "cathedral",
+  "file": "cathedral.jpg",
+  "align_s": 0.285,
+  "post_s": 0.014,
+  "crop_box_tblr": [
+   12,
+   333,
+   16,
+   371
+  ],
+  "kept_frac": [
+   0.9413,
+   0.9103
+  ],
+  "wb_gains_rgb": [
+   0.9924,
+   0.9967,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0824,
+   0.9184
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/monastery": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   341,
+   391
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      391
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": -3,
+     "score": 0.883404
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      391
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 0.807244
+    }
+   ]
+  },
+  "score_g": 0.883404,
+  "score_r": 0.807244,
+  "g": [
+   2,
+   -3
+  ],
+  "r": [
+   2,
+   3
+  ],
+  "image": "monastery",
+  "file": "monastery.jpg",
+  "align_s": 0.315,
+  "post_s": 0.015,
+  "crop_box_tblr": [
+   3,
+   330,
+   15,
+   376
+  ],
+  "kept_frac": [
+   0.9589,
+   0.9233
+  ],
+  "wb_gains_rgb": [
+   1.0,
+   0.9754,
+   0.9457
+  ],
+  "contrast_black_white": [
+   0.0421,
+   0.9457
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/tobolsk": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   341,
+   396
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      396
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 0.824536
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      396
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 6,
+     "score": 0.77879
+    }
+   ]
+  },
+  "score_g": 0.824536,
+  "score_r": 0.77879,
+  "g": [
+   2,
+   3
+  ],
+  "r": [
+   3,
+   6
+  ],
+  "image": "tobolsk",
+  "file": "tobolsk.jpg",
+  "align_s": 0.311,
+  "post_s": 0.016,
+  "crop_box_tblr": [
+   10,
+   329,
+   21,
+   380
+  ],
+  "kept_frac": [
+   0.9355,
+   0.9066
+  ],
+  "wb_gains_rgb": [
+   1.0,
+   0.945,
+   0.9399
+  ],
+  "contrast_black_white": [
+   0.0296,
+   0.9363
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/church": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3202,
+   3634
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      228
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 2,
+     "score": 0.829399
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      455
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 3,
+     "score": 0.829298
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      909
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 6,
+     "score": 0.792925
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1817
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 12,
+     "score": 0.680326
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3634
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 25,
+     "score": 0.527558
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      228
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 4,
+     "score": 0.786757
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      455
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 7,
+     "score": 0.765144
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      909
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 15,
+     "score": 0.734342
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1817
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 29,
+     "score": 0.658422
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3634
+     ],
+     "radius": 2,
+     "x": -4,
+     "y": 58,
+     "score": 0.507771
+    }
+   ]
+  },
+  "score_g": 0.527558,
+  "score_r": 0.507771,
+  "g": [
+   4,
+   25
+  ],
+  "r": [
+   -4,
+   58
+  ],
+  "image": "church",
+  "file": "church.tif",
+  "align_s": 4.189,
+  "post_s": 0.497,
+  "crop_box_tblr": [
+   58,
+   3068,
+   84,
+   3414
+  ],
+  "kept_frac": [
+   0.94,
+   0.9163
+  ],
+  "wb_gains_rgb": [
+   0.9681,
+   1.0,
+   0.8257
+  ],
+  "contrast_black_white": [
+   0.1373,
+   0.7863
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/emir": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3209,
+   3702
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 0.618973
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      463
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 6,
+     "score": 0.599267
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      926
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 12,
+     "score": 0.554502
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1851
+     ],
+     "radius": 2,
+     "x": 12,
+     "y": 25,
+     "score": 0.520559
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3702
+     ],
+     "radius": 2,
+     "x": 24,
+     "y": 49,
+     "score": 0.458996
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 7,
+     "score": 0.52964
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      463
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 13,
+     "score": 0.552944
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      926
+     ],
+     "radius": 2,
+     "x": 10,
+     "y": 27,
+     "score": 0.559753
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1851
+     ],
+     "radius": 2,
+     "x": 20,
+     "y": 53,
+     "score": 0.547454
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3702
+     ],
+     "radius": 2,
+     "x": 40,
+     "y": 107,
+     "score": 0.492865
+    }
+   ]
+  },
+  "score_g": 0.458996,
+  "score_r": 0.492865,
+  "g": [
+   24,
+   49
+  ],
+  "r": [
+   40,
+   107
+  ],
+  "image": "emir",
+  "file": "emir.tif",
+  "align_s": 2.874,
+  "post_s": 0.616,
+  "crop_box_tblr": [
+   137,
+   3152,
+   230,
+   3560
+  ],
+  "kept_frac": [
+   0.9395,
+   0.8995
+  ],
+  "wb_gains_rgb": [
+   0.9281,
+   1.0,
+   0.9804
+  ],
+  "contrast_black_white": [
+   0.074,
+   0.877
+  ],
+  "note": "differs from raw ncc by up to 245 px"
+ },
+ "bells/harvesters": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3218,
+   3683
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      231
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 4,
+     "score": 0.628356
+    },
+    {
+     "level": 3,
+     "hw": [
+      403,
+      461
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 0.563153
+    },
+    {
+     "level": 2,
+     "hw": [
+      805,
+      921
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 15,
+     "score": 0.495023
+    },
+    {
+     "level": 1,
+     "hw": [
+      1609,
+      1842
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 30,
+     "score": 0.420146
+    },
+    {
+     "level": 0,
+     "hw": [
+      3218,
+      3683
+     ],
+     "radius": 2,
+     "x": 17,
+     "y": 60,
+     "score": 0.342788
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      231
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 8,
+     "score": 0.609034
+    },
+    {
+     "level": 3,
+     "hw": [
+      403,
+      461
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 16,
+     "score": 0.531866
+    },
+    {
+     "level": 2,
+     "hw": [
+      805,
+      921
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 31,
+     "score": 0.453493
+    },
+    {
+     "level": 1,
+     "hw": [
+      1609,
+      1842
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 62,
+     "score": 0.379949
+    },
+    {
+     "level": 0,
+     "hw": [
+      3218,
+      3683
+     ],
+     "radius": 2,
+     "x": 14,
+     "y": 124,
+     "score": 0.299272
+    }
+   ]
+  },
+  "score_g": 0.342788,
+  "score_r": 0.299272,
+  "g": [
+   17,
+   60
+  ],
+  "r": [
+   14,
+   124
+  ],
+  "image": "harvesters",
+  "file": "harvesters.tif",
+  "align_s": 2.952,
+  "post_s": 0.545,
+  "crop_box_tblr": [
+   159,
+   3174,
+   172,
+   3477
+  ],
+  "kept_frac": [
+   0.9369,
+   0.8974
+  ],
+  "wb_gains_rgb": [
+   0.9828,
+   0.9813,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0784,
+   0.9514
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/icon": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3244,
+   3741
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 3,
+     "score": 0.769781
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      468
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 5,
+     "score": 0.742913
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      936
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 10,
+     "score": 0.60346
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1871
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 21,
+     "score": 0.470077
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3741
+     ],
+     "radius": 2,
+     "x": 17,
+     "y": 42,
+     "score": 0.372846
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 6,
+     "score": 0.566082
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      468
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 11,
+     "score": 0.588638
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      936
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 23,
+     "score": 0.495845
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1871
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 45,
+     "score": 0.424891
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3741
+     ],
+     "radius": 2,
+     "x": 23,
+     "y": 90,
+     "score": 0.335482
+    }
+   ]
+  },
+  "score_g": 0.372846,
+  "score_r": 0.335482,
+  "g": [
+   17,
+   42
+  ],
+  "r": [
+   23,
+   90
+  ],
+  "image": "icon",
+  "file": "icon.tif",
+  "align_s": 3.205,
+  "post_s": 0.71,
+  "crop_box_tblr": [
+   190,
+   3205,
+   238,
+   3598
+  ],
+  "kept_frac": [
+   0.9294,
+   0.8982
+  ],
+  "wb_gains_rgb": [
+   0.9606,
+   0.9241,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0834,
+   0.8951
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/ilemselga": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3270,
+   3800
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      205,
+      238
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 0.858537
+    },
+    {
+     "level": 3,
+     "hw": [
+      409,
+      475
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 5,
+     "score": 0.902771
+    },
+    {
+     "level": 2,
+     "hw": [
+      818,
+      950
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 10,
+     "score": 0.850965
+    },
+    {
+     "level": 1,
+     "hw": [
+      1635,
+      1900
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 20,
+     "score": 0.765199
+    },
+    {
+     "level": 0,
+     "hw": [
+      3270,
+      3800
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 40,
+     "score": 0.634517
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      205,
+      238
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 8,
+     "score": 0.889432
+    },
+    {
+     "level": 3,
+     "hw": [
+      409,
+      475
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 16,
+     "score": 0.837992
+    },
+    {
+     "level": 2,
+     "hw": [
+      818,
+      950
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 33,
+     "score": 0.777818
+    },
+    {
+     "level": 1,
+     "hw": [
+      1635,
+      1900
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 65,
+     "score": 0.690059
+    },
+    {
+     "level": 0,
+     "hw": [
+      3270,
+      3800
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 131,
+     "score": 0.528167
+    }
+   ]
+  },
+  "score_g": 0.634517,
+  "score_r": 0.528167,
+  "g": [
+   7,
+   40
+  ],
+  "r": [
+   11,
+   131
+  ],
+  "image": "ilemselga",
+  "file": "ilemselga.tif",
+  "align_s": 3.066,
+  "post_s": 0.592,
+  "crop_box_tblr": [
+   201,
+   3151,
+   11,
+   3571
+  ],
+  "kept_frac": [
+   0.9021,
+   0.9368
+  ],
+  "wb_gains_rgb": [
+   1.0,
+   0.9573,
+   0.9022
+  ],
+  "contrast_black_white": [
+   0.045,
+   0.9946
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/melons": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3241,
+   3770
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 5,
+     "score": 0.875851
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      472
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 10,
+     "score": 0.81911
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      943
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 20,
+     "score": 0.676855
+    },
+    {
+     "level": 1,
+     "hw": [
+      1621,
+      1885
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 40,
+     "score": 0.546735
+    },
+    {
+     "level": 0,
+     "hw": [
+      3241,
+      3770
+     ],
+     "radius": 2,
+     "x": 10,
+     "y": 80,
+     "score": 0.43035
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 11,
+     "score": 0.779091
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      472
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 22,
+     "score": 0.68117
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      943
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 45,
+     "score": 0.586513
+    },
+    {
+     "level": 1,
+     "hw": [
+      1621,
+      1885
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 88,
+     "score": 0.460288
+    },
+    {
+     "level": 0,
+     "hw": [
+      3241,
+      3770
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 177,
+     "score": 0.348212
+    }
+   ]
+  },
+  "score_g": 0.43035,
+  "score_r": 0.348212,
+  "g": [
+   10,
+   80
+  ],
+  "r": [
+   13,
+   177
+  ],
+  "image": "melons",
+  "file": "melons.tif",
+  "align_s": 3.194,
+  "post_s": 0.6,
+  "crop_box_tblr": [
+   197,
+   3237,
+   13,
+   3533
+  ],
+  "kept_frac": [
+   0.938,
+   0.9337
+  ],
+  "wb_gains_rgb": [
+   0.9303,
+   0.9752,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0038,
+   1.0
+  ],
+  "note": "differs from raw ncc by up to 2 px"
+ },
+ "bells/religous_painting": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3193,
+   3742
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      200,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 2,
+     "score": 0.742704
+    },
+    {
+     "level": 3,
+     "hw": [
+      400,
+      468
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 3,
+     "score": 0.73151
+    },
+    {
+     "level": 2,
+     "hw": [
+      799,
+      936
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 7,
+     "score": 0.632259
+    },
+    {
+     "level": 1,
+     "hw": [
+      1597,
+      1871
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 15,
+     "score": 0.508407
+    },
+    {
+     "level": 0,
+     "hw": [
+      3193,
+      3742
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 30,
+     "score": 0.429054
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      200,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 4,
+     "score": 0.679665
+    },
+    {
+     "level": 3,
+     "hw": [
+      400,
+      468
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 8,
+     "score": 0.700814
+    },
+    {
+     "level": 2,
+     "hw": [
+      799,
+      936
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 17,
+     "score": 0.656935
+    },
+    {
+     "level": 1,
+     "hw": [
+      1597,
+      1871
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 34,
+     "score": 0.528771
+    },
+    {
+     "level": 0,
+     "hw": [
+      3193,
+      3742
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 70,
+     "score": 0.437447
+    }
+   ]
+  },
+  "score_g": 0.429054,
+  "score_r": 0.437447,
+  "g": [
+   4,
+   30
+  ],
+  "r": [
+   6,
+   70
+  ],
+  "image": "religous_painting",
+  "file": "religous_painting.tif",
+  "align_s": 3.281,
+  "post_s": 0.576,
+  "crop_box_tblr": [
+   115,
+   3100,
+   131,
+   3741
+  ],
+  "kept_frac": [
+   0.9349,
+   0.9647
+  ],
+  "wb_gains_rgb": [
+   0.9702,
+   0.9769,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0038,
+   1.0
+  ],
+  "note": "differs from raw ncc by up to 2 px"
+ },
+ "bells/self_portrait": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3251,
+   3810
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 5,
+     "score": 0.792581
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      477
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 10,
+     "score": 0.697249
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      953
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 20,
+     "score": 0.583833
+    },
+    {
+     "level": 1,
+     "hw": [
+      1626,
+      1905
+     ],
+     "radius": 2,
+     "x": 14,
+     "y": 39,
+     "score": 0.493518
+    },
+    {
+     "level": 0,
+     "hw": [
+      3251,
+      3810
+     ],
+     "radius": 2,
+     "x": 29,
+     "y": 78,
+     "score": 0.410453
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 11,
+     "score": 0.776715
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      477
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 22,
+     "score": 0.676179
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      953
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 44,
+     "score": 0.576222
+    },
+    {
+     "level": 1,
+     "hw": [
+      1626,
+      1905
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 88,
+     "score": 0.478237
+    },
+    {
+     "level": 0,
+     "hw": [
+      3251,
+      3810
+     ],
+     "radius": 2,
+     "x": 37,
+     "y": 175,
+     "score": 0.39259
+    }
+   ]
+  },
+  "score_g": 0.410453,
+  "score_r": 0.39259,
+  "g": [
+   29,
+   78
+  ],
+  "r": [
+   37,
+   175
+  ],
+  "image": "self_portrait",
+  "file": "self_portrait.tif",
+  "align_s": 3.168,
+  "post_s": 0.588,
+  "crop_box_tblr": [
+   175,
+   3180,
+   37,
+   3647
+  ],
+  "kept_frac": [
+   0.9243,
+   0.9475
+  ],
+  "wb_gains_rgb": [
+   1.0,
+   0.976,
+   0.9916
+  ],
+  "contrast_black_white": [
+   0.0038,
+   1.0
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/siren": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3250,
+   3817
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 0.772681
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      478
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 6,
+     "score": 0.763884
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      955
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 12,
+     "score": 0.662019
+    },
+    {
+     "level": 1,
+     "hw": [
+      1625,
+      1909
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 24,
+     "score": 0.555673
+    },
+    {
+     "level": 0,
+     "hw": [
+      3250,
+      3817
+     ],
+     "radius": 2,
+     "x": -6,
+     "y": 49,
+     "score": 0.401637
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": -2,
+     "y": 6,
+     "score": 0.85476
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      478
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 12,
+     "score": 0.848999
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      955
+     ],
+     "radius": 2,
+     "x": -6,
+     "y": 24,
+     "score": 0.735041
+    },
+    {
+     "level": 1,
+     "hw": [
+      1625,
+      1909
+     ],
+     "radius": 2,
+     "x": -12,
+     "y": 48,
+     "score": 0.594035
+    },
+    {
+     "level": 0,
+     "hw": [
+      3250,
+      3817
+     ],
+     "radius": 2,
+     "x": -24,
+     "y": 96,
+     "score": 0.41271
+    }
+   ]
+  },
+  "score_g": 0.401637,
+  "score_r": 0.41271,
+  "g": [
+   -6,
+   49
+  ],
+  "r": [
+   -24,
+   96
+  ],
+  "image": "siren",
+  "file": "siren.tif",
+  "align_s": 3.33,
+  "post_s": 0.622,
+  "crop_box_tblr": [
+   176,
+   3131,
+   300,
+   3595
+  ],
+  "kept_frac": [
+   0.9092,
+   0.8632
+  ],
+  "wb_gains_rgb": [
+   1.0,
+   0.9357,
+   0.8553
+  ],
+  "contrast_black_white": [
+   0.0277,
+   0.877
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/three_generations": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3209,
+   3714
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      233
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 3,
+     "score": 0.864339
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      465
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 6,
+     "score": 0.742357
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      929
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 13,
+     "score": 0.653247
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1857
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 27,
+     "score": 0.543105
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3714
+     ],
+     "radius": 2,
+     "x": 12,
+     "y": 54,
+     "score": 0.443906
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      233
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 7,
+     "score": 0.812745
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      465
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 14,
+     "score": 0.741009
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      929
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 28,
+     "score": 0.662685
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1857
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 56,
+     "score": 0.556089
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3714
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 111,
+     "score": 0.451479
+    }
+   ]
+  },
+  "score_g": 0.443906,
+  "score_r": 0.451479,
+  "g": [
+   12,
+   54
+  ],
+  "r": [
+   9,
+   111
+  ],
+  "image": "three_generations",
+  "file": "three_generations.tif",
+  "align_s": 3.197,
+  "post_s": 0.627,
+  "crop_box_tblr": [
+   146,
+   3206,
+   12,
+   3487
+  ],
+  "kept_frac": [
+   0.9536,
+   0.9356
+  ],
+  "wb_gains_rgb": [
+   0.9934,
+   1.0,
+   0.9799
+  ],
+  "contrast_black_white": [
+   0.0593,
+   0.9639
+  ],
+  "note": "differs from raw ncc by up to 2 px"
+ },
+ "bells/wharf": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3244,
+   3761
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 1,
+     "score": 0.851502
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      471
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 2,
+     "score": 0.913469
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      941
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 4,
+     "score": 0.85704
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1881
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 8,
+     "score": 0.762066
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3761
+     ],
+     "radius": 2,
+     "x": -7,
+     "y": 15,
+     "score": 0.660518
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": -1,
+     "y": 5,
+     "score": 0.872624
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      471
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 10,
+     "score": 0.827562
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      941
+     ],
+     "radius": 2,
+     "x": -4,
+     "y": 21,
+     "score": 0.776968
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1881
+     ],
+     "radius": 2,
+     "x": -8,
+     "y": 41,
+     "score": 0.649279
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3761
+     ],
+     "radius": 2,
+     "x": -16,
+     "y": 83,
+     "score": 0.504123
+    }
+   ]
+  },
+  "score_g": 0.660518,
+  "score_r": 0.504123,
+  "g": [
+   -7,
+   15
+  ],
+  "r": [
+   -16,
+   83
+  ],
+  "image": "wharf",
+  "file": "wharf.tif",
+  "align_s": 3.126,
+  "post_s": 0.602,
+  "crop_box_tblr": [
+   138,
+   3128,
+   130,
+   3745
+  ],
+  "kept_frac": [
+   0.9217,
+   0.9612
+  ],
+  "wb_gains_rgb": [
+   0.9755,
+   1.0,
+   0.9873
+  ],
+  "contrast_black_white": [
+   0.0039,
+   1.0
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/extra_forest": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3235,
+   3731
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 0.762637
+    },
+    {
+     "level": 3,
+     "hw": [
+      405,
+      467
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 6,
+     "score": 0.751296
+    },
+    {
+     "level": 2,
+     "hw": [
+      809,
+      933
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 11,
+     "score": 0.672603
+    },
+    {
+     "level": 1,
+     "hw": [
+      1618,
+      1866
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 22,
+     "score": 0.552242
+    },
+    {
+     "level": 0,
+     "hw": [
+      3235,
+      3731
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 45,
+     "score": 0.438253
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 6,
+     "score": 0.83088
+    },
+    {
+     "level": 3,
+     "hw": [
+      405,
+      467
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 13,
+     "score": 0.810038
+    },
+    {
+     "level": 2,
+     "hw": [
+      809,
+      933
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 26,
+     "score": 0.700034
+    },
+    {
+     "level": 1,
+     "hw": [
+      1618,
+      1866
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 51,
+     "score": 0.583531
+    },
+    {
+     "level": 0,
+     "hw": [
+      3235,
+      3731
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 103,
+     "score": 0.456984
+    }
+   ]
+  },
+  "score_g": 0.438253,
+  "score_r": 0.456984,
+  "g": [
+   8,
+   45
+  ],
+  "r": [
+   -3,
+   103
+  ],
+  "image": "extra_forest",
+  "file": "extra_forest.tif",
+  "align_s": 3.37,
+  "post_s": 0.676,
+  "crop_box_tblr": [
+   103,
+   3158,
+   98,
+   3523
+  ],
+  "kept_frac": [
+   0.9444,
+   0.918
+  ],
+  "wb_gains_rgb": [
+   0.9979,
+   0.9791,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0745,
+   0.9686
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/extra_ikona": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3231,
+   3723
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      233
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 4,
+     "score": 0.780093
+    },
+    {
+     "level": 3,
+     "hw": [
+      404,
+      466
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 7,
+     "score": 0.714382
+    },
+    {
+     "level": 2,
+     "hw": [
+      808,
+      931
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 15,
+     "score": 0.705447
+    },
+    {
+     "level": 1,
+     "hw": [
+      1616,
+      1862
+     ],
+     "radius": 2,
+     "x": 25,
+     "y": 30,
+     "score": 0.633659
+    },
+    {
+     "level": 0,
+     "hw": [
+      3231,
+      3723
+     ],
+     "radius": 2,
+     "x": 50,
+     "y": 61,
+     "score": 0.552636
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      233
+     ],
+     "radius": 15,
+     "x": 5,
+     "y": 9,
+     "score": 0.67974
+    },
+    {
+     "level": 3,
+     "hw": [
+      404,
+      466
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 18,
+     "score": 0.742063
+    },
+    {
+     "level": 2,
+     "hw": [
+      808,
+      931
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 35,
+     "score": 0.702756
+    },
+    {
+     "level": 1,
+     "hw": [
+      1616,
+      1862
+     ],
+     "radius": 2,
+     "x": 36,
+     "y": 71,
+     "score": 0.673116
+    },
+    {
+     "level": 0,
+     "hw": [
+      3231,
+      3723
+     ],
+     "radius": 2,
+     "x": 72,
+     "y": 143,
+     "score": 0.578645
+    }
+   ]
+  },
+  "score_g": 0.552636,
+  "score_r": 0.578645,
+  "g": [
+   50,
+   61
+  ],
+  "r": [
+   72,
+   143
+  ],
+  "image": "extra_ikona",
+  "file": "extra_ikona.tif",
+  "align_s": 7.496,
+  "post_s": 1.686,
+  "crop_box_tblr": [
+   143,
+   3228,
+   222,
+   3582
+  ],
+  "kept_frac": [
+   0.9548,
+   0.9025
+  ],
+  "wb_gains_rgb": [
+   1.0,
+   0.9474,
+   0.9908
+  ],
+  "contrast_black_white": [
+   0.0688,
+   0.9262
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/extra_matrosi": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3202,
+   3663
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      229
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 1,
+     "score": 0.894521
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      458
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 3,
+     "score": 0.838326
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      916
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 5,
+     "score": 0.734315
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1832
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 10,
+     "score": 0.615714
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3663
+     ],
+     "radius": 2,
+     "x": 19,
+     "y": 21,
+     "score": 0.501346
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      229
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 0.798152
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      458
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 7,
+     "score": 0.777992
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      916
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 14,
+     "score": 0.680192
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1832
+     ],
+     "radius": 2,
+     "x": 15,
+     "y": 28,
+     "score": 0.576932
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3663
+     ],
+     "radius": 2,
+     "x": 30,
+     "y": 57,
+     "score": 0.468263
+    }
+   ]
+  },
+  "score_g": 0.501346,
+  "score_r": 0.468263,
+  "g": [
+   19,
+   21
+  ],
+  "r": [
+   30,
+   57
+  ],
+  "image": "extra_matrosi",
+  "file": "extra_matrosi.tif",
+  "align_s": 9.276,
+  "post_s": 1.701,
+  "crop_box_tblr": [
+   187,
+   3172,
+   110,
+   3505
+  ],
+  "kept_frac": [
+   0.9322,
+   0.9268
+  ],
+  "wb_gains_rgb": [
+   0.9876,
+   1.0,
+   0.9677
+  ],
+  "contrast_black_white": [
+   0.0634,
+   0.9382
+  ],
+  "note": "same as raw ncc"
+ },
+ "bells/extra_stained": {
+  "method": "pyramid",
+  "metric": "ncc",
+  "feature": "grad",
+  "plate_hw": [
+   3205,
+   3702
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 1,
+     "score": 0.503052
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      463
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 2,
+     "score": 0.470204
+    },
+    {
+     "level": 2,
+     "hw": [
+      802,
+      926
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 5,
+     "score": 0.435451
+    },
+    {
+     "level": 1,
+     "hw": [
+      1603,
+      1851
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 10,
+     "score": 0.352577
+    },
+    {
+     "level": 0,
+     "hw": [
+      3205,
+      3702
+     ],
+     "radius": 2,
+     "x": 16,
+     "y": 20,
+     "score": 0.231812
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 4,
+     "score": 0.394988
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      463
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 0.380023
+    },
+    {
+     "level": 2,
+     "hw": [
+      802,
+      926
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 15,
+     "score": 0.336235
+    },
+    {
+     "level": 1,
+     "hw": [
+      1603,
+      1851
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 30,
+     "score": 0.268292
+    },
+    {
+     "level": 0,
+     "hw": [
+      3205,
+      3702
+     ],
+     "radius": 2,
+     "x": 17,
+     "y": 60,
+     "score": 0.165122
+    }
+   ]
+  },
+  "score_g": 0.231812,
+  "score_r": 0.165122,
+  "g": [
+   16,
+   20
+  ],
+  "r": [
+   17,
+   60
+  ],
+  "image": "extra_stained",
+  "file": "extra_stained.tif",
+  "align_s": 4.946,
+  "post_s": 1.325,
+  "crop_box_tblr": [
+   150,
+   3130,
+   17,
+   3522
+  ],
+  "kept_frac": [
+   0.9298,
+   0.9468
+  ],
+  "wb_gains_rgb": [
+   0.9212,
+   0.9907,
+   1.0
+  ],
+  "contrast_black_white": [
+   0.0039,
+   0.9747
+  ],
+  "note": "same as raw ncc"
+ },
+ "l2/cathedral": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   390
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      390
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 5,
+     "score": 41.804864
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      390
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 12,
+     "score": 61.281792
+    }
+   ]
+  },
+  "score_g": 41.804864,
+  "score_r": 61.281792,
+  "g": [
+   2,
+   5
+  ],
+  "r": [
+   3,
+   12
+  ],
+  "image": "cathedral",
+  "file": "cathedral.jpg",
+  "load_s": 0.008,
+  "align_s": 0.222,
+  "save_s": 0.012
+ },
+ "l2/monastery": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   391
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      391
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": -3,
+     "score": 29.883968
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      391
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 57.56102
+    }
+   ]
+  },
+  "score_g": 29.883968,
+  "score_r": 57.56102,
+  "g": [
+   2,
+   -3
+  ],
+  "r": [
+   2,
+   3
+  ],
+  "image": "monastery",
+  "file": "monastery.jpg",
+  "load_s": 0.008,
+  "align_s": 0.201,
+  "save_s": 0.006
+ },
+ "l2/tobolsk": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   341,
+   396
+  ],
+  "levels": 0,
+  "trace": {
+   "g": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      396
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 3,
+     "score": 32.209047
+    }
+   ],
+   "r": [
+    {
+     "level": 0,
+     "hw": [
+      341,
+      396
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 6,
+     "score": 57.172629
+    }
+   ]
+  },
+  "score_g": 32.209047,
+  "score_r": 57.172629,
+  "g": [
+   3,
+   3
+  ],
+  "r": [
+   3,
+   6
+  ],
+  "image": "tobolsk",
+  "file": "tobolsk.jpg",
+  "load_s": 0.005,
+  "align_s": 0.178,
+  "save_s": 0.008
+ },
+ "l2/church": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3202,
+   3634
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      228
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 2,
+     "score": 38.328827
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      455
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 3,
+     "score": 76.616408
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      909
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 6,
+     "score": 153.466401
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1817
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 13,
+     "score": 307.36629
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3634
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 25,
+     "score": 617.009553
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      228
+     ],
+     "radius": 15,
+     "x": 15,
+     "y": 5,
+     "score": 41.275004
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      455
+     ],
+     "radius": 2,
+     "x": 32,
+     "y": 9,
+     "score": 82.852621
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      909
+     ],
+     "radius": 2,
+     "x": 66,
+     "y": 17,
+     "score": 166.822132
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1817
+     ],
+     "radius": 2,
+     "x": 134,
+     "y": 32,
+     "score": 335.046197
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3634
+     ],
+     "radius": 2,
+     "x": 267,
+     "y": 64,
+     "score": 673.168841
+    }
+   ]
+  },
+  "score_g": 617.009553,
+  "score_r": 673.168841,
+  "g": [
+   4,
+   25
+  ],
+  "r": [
+   267,
+   64
+  ],
+  "image": "church",
+  "file": "church.tif",
+  "load_s": 0.264,
+  "align_s": 3.971,
+  "save_s": 0.551
+ },
+ "l2/emir": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3209,
+   3702
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 3,
+     "score": 22.504696
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      463
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 6,
+     "score": 47.712088
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      926
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 12,
+     "score": 100.882207
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1851
+     ],
+     "radius": 2,
+     "x": 12,
+     "y": 25,
+     "score": 209.60453
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3702
+     ],
+     "radius": 2,
+     "x": 24,
+     "y": 49,
+     "score": 426.949402
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 4,
+     "y": 6,
+     "score": 39.496027
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      463
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 12,
+     "score": 82.672425
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      926
+     ],
+     "radius": 2,
+     "x": 15,
+     "y": 25,
+     "score": 170.879903
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1851
+     ],
+     "radius": 2,
+     "x": 29,
+     "y": 51,
+     "score": 349.123869
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3702
+     ],
+     "radius": 2,
+     "x": 57,
+     "y": 103,
+     "score": 705.154054
+    }
+   ]
+  },
+  "score_g": 426.949402,
+  "score_r": 705.154054,
+  "g": [
+   24,
+   49
+  ],
+  "r": [
+   57,
+   103
+  ],
+  "image": "emir",
+  "file": "emir.tif",
+  "load_s": 0.175,
+  "align_s": 3.471,
+  "save_s": 2.484
+ },
+ "l2/harvesters": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3218,
+   3683
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      231
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 4,
+     "score": 35.387222
+    },
+    {
+     "level": 3,
+     "hw": [
+      403,
+      461
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 72.725628
+    },
+    {
+     "level": 2,
+     "hw": [
+      805,
+      921
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 15,
+     "score": 150.043038
+    },
+    {
+     "level": 1,
+     "hw": [
+      1609,
+      1842
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 30,
+     "score": 307.287656
+    },
+    {
+     "level": 0,
+     "hw": [
+      3218,
+      3683
+     ],
+     "radius": 2,
+     "x": 16,
+     "y": 59,
+     "score": 621.638609
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      231
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 8,
+     "score": 39.662897
+    },
+    {
+     "level": 3,
+     "hw": [
+      403,
+      461
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 16,
+     "score": 81.016564
+    },
+    {
+     "level": 2,
+     "hw": [
+      805,
+      921
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 31,
+     "score": 164.775416
+    },
+    {
+     "level": 1,
+     "hw": [
+      1609,
+      1842
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 62,
+     "score": 334.407441
+    },
+    {
+     "level": 0,
+     "hw": [
+      3218,
+      3683
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 124,
+     "score": 673.869009
+    }
+   ]
+  },
+  "score_g": 621.638609,
+  "score_r": 673.869009,
+  "g": [
+   16,
+   59
+  ],
+  "r": [
+   13,
+   124
+  ],
+  "image": "harvesters",
+  "file": "harvesters.tif",
+  "load_s": 0.153,
+  "align_s": 3.468,
+  "save_s": 0.863
+ },
+ "l2/icon": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3244,
+   3741
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 3,
+     "score": 32.236566
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      468
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 5,
+     "score": 66.073117
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      936
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 10,
+     "score": 138.534645
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1871
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 21,
+     "score": 290.724681
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3741
+     ],
+     "radius": 2,
+     "x": 17,
+     "y": 41,
+     "score": 596.874837
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 6,
+     "score": 43.662116
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      468
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 11,
+     "score": 88.771669
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      936
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 22,
+     "score": 182.092699
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1871
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 45,
+     "score": 370.420296
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3741
+     ],
+     "radius": 2,
+     "x": 23,
+     "y": 90,
+     "score": 750.822823
+    }
+   ]
+  },
+  "score_g": 596.874837,
+  "score_r": 750.822823,
+  "g": [
+   17,
+   41
+  ],
+  "r": [
+   23,
+   90
+  ],
+  "image": "icon",
+  "file": "icon.tif",
+  "load_s": 0.359,
+  "align_s": 3.399,
+  "save_s": 0.622
+ },
+ "l2/ilemselga": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3270,
+   3800
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      205,
+      238
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 2,
+     "score": 39.508108
+    },
+    {
+     "level": 3,
+     "hw": [
+      409,
+      475
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 5,
+     "score": 78.142083
+    },
+    {
+     "level": 2,
+     "hw": [
+      818,
+      950
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 10,
+     "score": 156.961526
+    },
+    {
+     "level": 1,
+     "hw": [
+      1635,
+      1900
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 20,
+     "score": 314.960771
+    },
+    {
+     "level": 0,
+     "hw": [
+      3270,
+      3800
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 39,
+     "score": 632.021118
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      205,
+      238
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 7,
+     "score": 49.308506
+    },
+    {
+     "level": 3,
+     "hw": [
+      409,
+      475
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 16,
+     "score": 97.970639
+    },
+    {
+     "level": 2,
+     "hw": [
+      818,
+      950
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 32,
+     "score": 196.584004
+    },
+    {
+     "level": 1,
+     "hw": [
+      1635,
+      1900
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 65,
+     "score": 394.023001
+    },
+    {
+     "level": 0,
+     "hw": [
+      3270,
+      3800
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 130,
+     "score": 790.177338
+    }
+   ]
+  },
+  "score_g": 632.021118,
+  "score_r": 790.177338,
+  "g": [
+   7,
+   39
+  ],
+  "r": [
+   11,
+   130
+  ],
+  "image": "ilemselga",
+  "file": "ilemselga.tif",
+  "load_s": 0.186,
+  "align_s": 4.618,
+  "save_s": 0.864
+ },
+ "l2/melons": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3241,
+   3770
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 5,
+     "score": 17.110684
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      472
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 10,
+     "score": 35.428363
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      943
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 21,
+     "score": 74.430849
+    },
+    {
+     "level": 1,
+     "hw": [
+      1621,
+      1885
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 41,
+     "score": 156.149046
+    },
+    {
+     "level": 0,
+     "hw": [
+      3241,
+      3770
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 82,
+     "score": 323.065417
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 11,
+     "score": 29.368053
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      472
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 22,
+     "score": 60.164563
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      943
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 45,
+     "score": 122.405703
+    },
+    {
+     "level": 1,
+     "hw": [
+      1621,
+      1885
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 89,
+     "score": 248.936707
+    },
+    {
+     "level": 0,
+     "hw": [
+      3241,
+      3770
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 178,
+     "score": 503.721704
+    }
+   ]
+  },
+  "score_g": 323.065417,
+  "score_r": 503.721704,
+  "g": [
+   11,
+   82
+  ],
+  "r": [
+   13,
+   178
+  ],
+  "image": "melons",
+  "file": "melons.tif",
+  "load_s": 0.192,
+  "align_s": 3.08,
+  "save_s": 0.574
+ },
+ "l2/religous_painting": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3193,
+   3742
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      200,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 2,
+     "score": 21.975918
+    },
+    {
+     "level": 3,
+     "hw": [
+      400,
+      468
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 3,
+     "score": 44.656166
+    },
+    {
+     "level": 2,
+     "hw": [
+      799,
+      936
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 7,
+     "score": 93.649774
+    },
+    {
+     "level": 1,
+     "hw": [
+      1597,
+      1871
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 13,
+     "score": 196.754033
+    },
+    {
+     "level": 0,
+     "hw": [
+      3193,
+      3742
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 28,
+     "score": 407.499836
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      200,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 4,
+     "score": 27.2918
+    },
+    {
+     "level": 3,
+     "hw": [
+      400,
+      468
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 8,
+     "score": 56.070423
+    },
+    {
+     "level": 2,
+     "hw": [
+      799,
+      936
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 17,
+     "score": 115.105722
+    },
+    {
+     "level": 1,
+     "hw": [
+      1597,
+      1871
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 34,
+     "score": 236.612888
+    },
+    {
+     "level": 0,
+     "hw": [
+      3193,
+      3742
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 68,
+     "score": 482.281167
+    }
+   ]
+  },
+  "score_g": 407.499836,
+  "score_r": 482.281167,
+  "g": [
+   3,
+   28
+  ],
+  "r": [
+   7,
+   68
+  ],
+  "image": "religous_painting",
+  "file": "religous_painting.tif",
+  "load_s": 0.248,
+  "align_s": 3.748,
+  "save_s": 0.585
+ },
+ "l2/self_portrait": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3251,
+   3810
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 5,
+     "score": 20.84633
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      477
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 10,
+     "score": 43.605838
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      953
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 20,
+     "score": 92.835189
+    },
+    {
+     "level": 1,
+     "hw": [
+      1626,
+      1905
+     ],
+     "radius": 2,
+     "x": 14,
+     "y": 39,
+     "score": 196.463021
+    },
+    {
+     "level": 0,
+     "hw": [
+      3251,
+      3810
+     ],
+     "radius": 2,
+     "x": 29,
+     "y": 79,
+     "score": 405.818364
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 11,
+     "score": 20.89565
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      477
+     ],
+     "radius": 2,
+     "x": 5,
+     "y": 22,
+     "score": 43.675782
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      953
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 44,
+     "score": 92.718749
+    },
+    {
+     "level": 1,
+     "hw": [
+      1626,
+      1905
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 88,
+     "score": 196.547562
+    },
+    {
+     "level": 0,
+     "hw": [
+      3251,
+      3810
+     ],
+     "radius": 2,
+     "x": 37,
+     "y": 176,
+     "score": 405.963396
+    }
+   ]
+  },
+  "score_g": 405.818364,
+  "score_r": 405.963396,
+  "g": [
+   29,
+   79
+  ],
+  "r": [
+   37,
+   176
+  ],
+  "image": "self_portrait",
+  "file": "self_portrait.tif",
+  "load_s": 0.201,
+  "align_s": 4.064,
+  "save_s": 0.766
+ },
+ "l2/siren": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3250,
+   3817
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 38.21991
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      478
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 6,
+     "score": 76.776721
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      955
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 12,
+     "score": 155.952284
+    },
+    {
+     "level": 1,
+     "hw": [
+      1625,
+      1909
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 25,
+     "score": 315.164154
+    },
+    {
+     "level": 0,
+     "hw": [
+      3250,
+      3817
+     ],
+     "radius": 2,
+     "x": -6,
+     "y": 49,
+     "score": 636.314356
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      204,
+      239
+     ],
+     "radius": 15,
+     "x": -2,
+     "y": 6,
+     "score": 41.941595
+    },
+    {
+     "level": 3,
+     "hw": [
+      407,
+      478
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 12,
+     "score": 83.788344
+    },
+    {
+     "level": 2,
+     "hw": [
+      813,
+      955
+     ],
+     "radius": 2,
+     "x": -6,
+     "y": 24,
+     "score": 168.669244
+    },
+    {
+     "level": 1,
+     "hw": [
+      1625,
+      1909
+     ],
+     "radius": 2,
+     "x": -12,
+     "y": 48,
+     "score": 340.110404
+    },
+    {
+     "level": 0,
+     "hw": [
+      3250,
+      3817
+     ],
+     "radius": 2,
+     "x": -25,
+     "y": 96,
+     "score": 683.530483
+    }
+   ]
+  },
+  "score_g": 636.314356,
+  "score_r": 683.530483,
+  "g": [
+   -6,
+   49
+  ],
+  "r": [
+   -25,
+   96
+  ],
+  "image": "siren",
+  "file": "siren.tif",
+  "load_s": 0.284,
+  "align_s": 3.218,
+  "save_s": 1.126
+ },
+ "l2/three_generations": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3209,
+   3714
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      233
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 3,
+     "score": 19.159313
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      465
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 7,
+     "score": 40.369846
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      929
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 13,
+     "score": 84.330447
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1857
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 27,
+     "score": 174.986146
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3714
+     ],
+     "radius": 2,
+     "x": 14,
+     "y": 53,
+     "score": 357.352972
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      233
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 7,
+     "score": 18.334588
+    },
+    {
+     "level": 3,
+     "hw": [
+      402,
+      465
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 14,
+     "score": 38.430727
+    },
+    {
+     "level": 2,
+     "hw": [
+      803,
+      929
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 28,
+     "score": 79.027994
+    },
+    {
+     "level": 1,
+     "hw": [
+      1605,
+      1857
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 56,
+     "score": 163.719201
+    },
+    {
+     "level": 0,
+     "hw": [
+      3209,
+      3714
+     ],
+     "radius": 2,
+     "x": 11,
+     "y": 112,
+     "score": 333.913494
+    }
+   ]
+  },
+  "score_g": 357.352972,
+  "score_r": 333.913494,
+  "g": [
+   14,
+   53
+  ],
+  "r": [
+   11,
+   112
+  ],
+  "image": "three_generations",
+  "file": "three_generations.tif",
+  "load_s": 0.237,
+  "align_s": 3.951,
+  "save_s": 0.575
+ },
+ "l2/wharf": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3244,
+   3761
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 1,
+     "score": 19.326515
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      471
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 2,
+     "score": 38.895535
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      941
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 4,
+     "score": 79.938033
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1881
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 8,
+     "score": 164.525868
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3761
+     ],
+     "radius": 2,
+     "x": -7,
+     "y": 15,
+     "score": 334.189646
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      236
+     ],
+     "radius": 15,
+     "x": -1,
+     "y": 5,
+     "score": 23.468575
+    },
+    {
+     "level": 3,
+     "hw": [
+      406,
+      471
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 10,
+     "score": 47.939908
+    },
+    {
+     "level": 2,
+     "hw": [
+      811,
+      941
+     ],
+     "radius": 2,
+     "x": -4,
+     "y": 21,
+     "score": 97.513416
+    },
+    {
+     "level": 1,
+     "hw": [
+      1622,
+      1881
+     ],
+     "radius": 2,
+     "x": -8,
+     "y": 41,
+     "score": 200.468281
+    },
+    {
+     "level": 0,
+     "hw": [
+      3244,
+      3761
+     ],
+     "radius": 2,
+     "x": -16,
+     "y": 83,
+     "score": 410.304242
+    }
+   ]
+  },
+  "score_g": 334.189646,
+  "score_r": 410.304242,
+  "g": [
+   -7,
+   15
+  ],
+  "r": [
+   -16,
+   83
+  ],
+  "image": "wharf",
+  "file": "wharf.tif",
+  "load_s": 0.232,
+  "align_s": 3.747,
+  "save_s": 1.02
+ },
+ "l2/extra_forest": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3235,
+   3731
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 3,
+     "score": 24.58722
+    },
+    {
+     "level": 3,
+     "hw": [
+      405,
+      467
+     ],
+     "radius": 2,
+     "x": 1,
+     "y": 6,
+     "score": 50.885219
+    },
+    {
+     "level": 2,
+     "hw": [
+      809,
+      933
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 11,
+     "score": 109.169272
+    },
+    {
+     "level": 1,
+     "hw": [
+      1618,
+      1866
+     ],
+     "radius": 2,
+     "x": 3,
+     "y": 22,
+     "score": 237.966837
+    },
+    {
+     "level": 0,
+     "hw": [
+      3235,
+      3731
+     ],
+     "radius": 2,
+     "x": 7,
+     "y": 44,
+     "score": 503.586824
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      203,
+      234
+     ],
+     "radius": 15,
+     "x": 0,
+     "y": 7,
+     "score": 18.392481
+    },
+    {
+     "level": 3,
+     "hw": [
+      405,
+      467
+     ],
+     "radius": 2,
+     "x": 0,
+     "y": 13,
+     "score": 37.907934
+    },
+    {
+     "level": 2,
+     "hw": [
+      809,
+      933
+     ],
+     "radius": 2,
+     "x": -1,
+     "y": 26,
+     "score": 83.768076
+    },
+    {
+     "level": 1,
+     "hw": [
+      1618,
+      1866
+     ],
+     "radius": 2,
+     "x": -2,
+     "y": 51,
+     "score": 187.317947
+    },
+    {
+     "level": 0,
+     "hw": [
+      3235,
+      3731
+     ],
+     "radius": 2,
+     "x": -3,
+     "y": 103,
+     "score": 401.580777
+    }
+   ]
+  },
+  "score_g": 503.586824,
+  "score_r": 401.580777,
+  "g": [
+   7,
+   44
+  ],
+  "r": [
+   -3,
+   103
+  ],
+  "image": "extra_forest",
+  "file": "extra_forest.tif",
+  "load_s": 0.162,
+  "align_s": 3.171,
+  "save_s": 0.987
+ },
+ "l2/extra_ikona": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3231,
+   3723
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      233
+     ],
+     "radius": 15,
+     "x": 3,
+     "y": 4,
+     "score": 17.033696
+    },
+    {
+     "level": 3,
+     "hw": [
+      404,
+      466
+     ],
+     "radius": 2,
+     "x": 6,
+     "y": 7,
+     "score": 38.323679
+    },
+    {
+     "level": 2,
+     "hw": [
+      808,
+      931
+     ],
+     "radius": 2,
+     "x": 13,
+     "y": 15,
+     "score": 80.520663
+    },
+    {
+     "level": 1,
+     "hw": [
+      1616,
+      1862
+     ],
+     "radius": 2,
+     "x": 25,
+     "y": 30,
+     "score": 169.816698
+    },
+    {
+     "level": 0,
+     "hw": [
+      3231,
+      3723
+     ],
+     "radius": 2,
+     "x": 50,
+     "y": 61,
+     "score": 352.564242
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      202,
+      233
+     ],
+     "radius": 15,
+     "x": 5,
+     "y": 9,
+     "score": 22.64242
+    },
+    {
+     "level": 3,
+     "hw": [
+      404,
+      466
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 18,
+     "score": 46.671838
+    },
+    {
+     "level": 2,
+     "hw": [
+      808,
+      931
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 35,
+     "score": 97.875605
+    },
+    {
+     "level": 1,
+     "hw": [
+      1616,
+      1862
+     ],
+     "radius": 2,
+     "x": 36,
+     "y": 71,
+     "score": 200.168602
+    },
+    {
+     "level": 0,
+     "hw": [
+      3231,
+      3723
+     ],
+     "radius": 2,
+     "x": 72,
+     "y": 142,
+     "score": 409.94323
+    }
+   ]
+  },
+  "score_g": 352.564242,
+  "score_r": 409.94323,
+  "g": [
+   50,
+   61
+  ],
+  "r": [
+   72,
+   142
+  ],
+  "image": "extra_ikona",
+  "file": "extra_ikona.tif",
+  "load_s": 0.233,
+  "align_s": 3.631,
+  "save_s": 0.554
+ },
+ "l2/extra_matrosi": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3202,
+   3663
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      229
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 1,
+     "score": 14.765191
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      458
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 3,
+     "score": 30.996502
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      916
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 5,
+     "score": 66.653816
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1832
+     ],
+     "radius": 2,
+     "x": 9,
+     "y": 10,
+     "score": 142.845324
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3663
+     ],
+     "radius": 2,
+     "x": 18,
+     "y": 21,
+     "score": 298.535075
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      229
+     ],
+     "radius": 15,
+     "x": 2,
+     "y": 4,
+     "score": 26.033326
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      458
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 7,
+     "score": 52.809244
+    },
+    {
+     "level": 2,
+     "hw": [
+      801,
+      916
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 14,
+     "score": 109.194665
+    },
+    {
+     "level": 1,
+     "hw": [
+      1601,
+      1832
+     ],
+     "radius": 2,
+     "x": 15,
+     "y": 28,
+     "score": 223.73508
+    },
+    {
+     "level": 0,
+     "hw": [
+      3202,
+      3663
+     ],
+     "radius": 2,
+     "x": 30,
+     "y": 56,
+     "score": 455.380761
+    }
+   ]
+  },
+  "score_g": 298.535075,
+  "score_r": 455.380761,
+  "g": [
+   18,
+   21
+  ],
+  "r": [
+   30,
+   56
+  ],
+  "image": "extra_matrosi",
+  "file": "extra_matrosi.tif",
+  "load_s": 0.178,
+  "align_s": 4.701,
+  "save_s": 0.626
+ },
+ "l2/extra_stained": {
+  "method": "pyramid",
+  "metric": "l2",
+  "feature": "raw",
+  "plate_hw": [
+   3205,
+   3702
+  ],
+  "levels": 4,
+  "trace": {
+   "g": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 1,
+     "y": 1,
+     "score": 36.666279
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      463
+     ],
+     "radius": 2,
+     "x": 2,
+     "y": 2,
+     "score": 75.725136
+    },
+    {
+     "level": 2,
+     "hw": [
+      802,
+      926
+     ],
+     "radius": 2,
+     "x": 4,
+     "y": 5,
+     "score": 154.670932
+    },
+    {
+     "level": 1,
+     "hw": [
+      1603,
+      1851
+     ],
+     "radius": 2,
+     "x": 8,
+     "y": 10,
+     "score": 313.498087
+    },
+    {
+     "level": 0,
+     "hw": [
+      3205,
+      3702
+     ],
+     "radius": 2,
+     "x": 16,
+     "y": 19,
+     "score": 631.881958
+    }
+   ],
+   "r": [
+    {
+     "level": 4,
+     "hw": [
+      201,
+      232
+     ],
+     "radius": 15,
+     "x": 15,
+     "y": -15,
+     "score": 46.434675
+    },
+    {
+     "level": 3,
+     "hw": [
+      401,
+      463
+     ],
+     "radius": 2,
+     "x": 32,
+     "y": -32,
+     "score": 94.687955
+    },
+    {
+     "level": 2,
+     "hw": [
+      802,
+      926
+     ],
+     "radius": 2,
+     "x": 66,
+     "y": -64,
+     "score": 192.753192
+    },
+    {
+     "level": 1,
+     "hw": [
+      1603,
+      1851
+     ],
+     "radius": 2,
+     "x": 134,
+     "y": -128,
+     "score": 389.008493
+    },
+    {
+     "level": 0,
+     "hw": [
+      3205,
+      3702
+     ],
+     "radius": 2,
+     "x": 270,
+     "y": -255,
+     "score": 781.728332
+    }
+   ]
+  },
+  "score_g": 631.881958,
+  "score_r": 781.728332,
+  "g": [
+   16,
+   19
+  ],
+  "r": [
+   270,
+   -255
+  ],
+  "image": "extra_stained",
+  "file": "extra_stained.tif",
+  "load_s": 0.181,
+  "align_s": 3.057,
+  "save_s": 0.999
+ }
+}

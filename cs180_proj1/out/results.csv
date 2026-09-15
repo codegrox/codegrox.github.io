@@ -1,0 +1,61 @@
+key,image,method,metric,feature,g_x,g_y,r_x,r_y,levels,score_g,score_r,align_s,plate_h,plate_w,note
+single_ncc/cathedral,cathedral,single,ncc,raw,2,5,3,12,0,0.960214,0.90565,0.15,341,390,
+single_ncc/monastery,monastery,single,ncc,raw,2,-3,2,3,0,0.939614,0.794061,0.133,341,391,
+single_ncc/tobolsk,tobolsk,single,ncc,raw,3,3,3,6,0,0.921347,0.857647,0.159,341,396,
+single_l2/cathedral,cathedral,single,l2,raw,2,5,3,12,0,41.804864,61.281792,0.088,341,390,
+single_l2/monastery,monastery,single,l2,raw,2,-3,2,3,0,29.883968,57.56102,0.092,341,391,
+single_l2/tobolsk,tobolsk,single,l2,raw,3,3,3,6,0,32.209047,57.172629,0.093,341,396,
+ncc/cathedral,cathedral,pyramid,ncc,raw,2,5,3,12,0,0.960214,0.90565,0.16,341,390,
+ncc/church,church,pyramid,ncc,raw,4,25,-4,58,4,0.907617,0.747325,2.327,3202,3634,
+ncc/emir,emir,pyramid,ncc,raw,24,49,-205,141,4,0.707251,0.283336,2.309,3209,3702,
+ncc/harvesters,harvesters,pyramid,ncc,raw,17,60,13,124,4,0.787571,0.797662,2.324,3218,3683,
+ncc/icon,icon,pyramid,ncc,raw,17,41,23,89,4,0.802236,0.648086,2.419,3244,3741,
+ncc/ilemselga,ilemselga,pyramid,ncc,raw,7,40,11,130,4,0.743279,0.584766,2.579,3270,3800,
+ncc/melons,melons,pyramid,ncc,raw,11,82,13,178,4,0.938897,0.913066,2.433,3241,3770,
+ncc/monastery,monastery,pyramid,ncc,raw,2,-3,2,3,0,0.939614,0.794061,0.154,341,391,
+ncc/religous_painting,religous_painting,pyramid,ncc,raw,3,28,7,68,4,0.833142,0.779349,2.388,3193,3742,
+ncc/self_portrait,self_portrait,pyramid,ncc,raw,29,79,37,176,4,0.78754,0.746788,2.431,3251,3810,
+ncc/siren,siren,pyramid,ncc,raw,-6,49,-25,96,4,0.845009,0.887176,2.587,3250,3817,
+ncc/three_generations,three_generations,pyramid,ncc,raw,14,53,11,112,4,0.930455,0.896449,2.428,3209,3714,
+ncc/tobolsk,tobolsk,pyramid,ncc,raw,3,3,3,6,0,0.921347,0.857647,0.141,341,396,
+ncc/wharf,wharf,pyramid,ncc,raw,-7,15,-16,83,4,0.898891,0.769919,2.456,3244,3761,
+extra/extra_forest,extra_forest,pyramid,ncc,raw,7,44,-3,103,4,0.718515,0.784947,2.686,3235,3731,
+extra/extra_ikona,extra_ikona,pyramid,ncc,raw,50,61,72,142,4,0.8603,0.729731,3.763,3231,3723,
+extra/extra_matrosi,extra_matrosi,pyramid,ncc,raw,18,21,30,56,4,0.943909,0.803757,4.64,3202,3663,
+extra/extra_stained,extra_stained,pyramid,ncc,raw,16,20,18,59,4,0.464407,0.379164,3.364,3205,3702,
+bells/cathedral,cathedral,pyramid,ncc,grad,2,5,3,12,0,0.738814,0.630017,0.285,341,390,same as raw ncc
+bells/church,church,pyramid,ncc,grad,4,25,-4,58,4,0.527558,0.507771,4.189,3202,3634,same as raw ncc
+bells/emir,emir,pyramid,ncc,grad,24,49,40,107,4,0.458996,0.492865,2.874,3209,3702,differs from raw ncc by up to 245 px
+bells/extra_forest,extra_forest,pyramid,ncc,grad,8,45,-3,103,4,0.438253,0.456984,3.37,3235,3731,same as raw ncc
+bells/extra_ikona,extra_ikona,pyramid,ncc,grad,50,61,72,143,4,0.552636,0.578645,7.496,3231,3723,same as raw ncc
+bells/extra_matrosi,extra_matrosi,pyramid,ncc,grad,19,21,30,57,4,0.501346,0.468263,9.276,3202,3663,same as raw ncc
+bells/extra_stained,extra_stained,pyramid,ncc,grad,16,20,17,60,4,0.231812,0.165122,4.946,3205,3702,same as raw ncc
+bells/harvesters,harvesters,pyramid,ncc,grad,17,60,14,124,4,0.342788,0.299272,2.952,3218,3683,same as raw ncc
+bells/icon,icon,pyramid,ncc,grad,17,42,23,90,4,0.372846,0.335482,3.205,3244,3741,same as raw ncc
+bells/ilemselga,ilemselga,pyramid,ncc,grad,7,40,11,131,4,0.634517,0.528167,3.066,3270,3800,same as raw ncc
+bells/melons,melons,pyramid,ncc,grad,10,80,13,177,4,0.43035,0.348212,3.194,3241,3770,differs from raw ncc by up to 2 px
+bells/monastery,monastery,pyramid,ncc,grad,2,-3,2,3,0,0.883404,0.807244,0.315,341,391,same as raw ncc
+bells/religous_painting,religous_painting,pyramid,ncc,grad,4,30,6,70,4,0.429054,0.437447,3.281,3193,3742,differs from raw ncc by up to 2 px
+bells/self_portrait,self_portrait,pyramid,ncc,grad,29,78,37,175,4,0.410453,0.39259,3.168,3251,3810,same as raw ncc
+bells/siren,siren,pyramid,ncc,grad,-6,49,-24,96,4,0.401637,0.41271,3.33,3250,3817,same as raw ncc
+bells/three_generations,three_generations,pyramid,ncc,grad,12,54,9,111,4,0.443906,0.451479,3.197,3209,3714,differs from raw ncc by up to 2 px
+bells/tobolsk,tobolsk,pyramid,ncc,grad,2,3,3,6,0,0.824536,0.77879,0.311,341,396,same as raw ncc
+bells/wharf,wharf,pyramid,ncc,grad,-7,15,-16,83,4,0.660518,0.504123,3.126,3244,3761,same as raw ncc
+l2/cathedral,cathedral,pyramid,l2,raw,2,5,3,12,0,41.804864,61.281792,0.222,341,390,
+l2/church,church,pyramid,l2,raw,4,25,267,64,4,617.009553,673.168841,3.971,3202,3634,
+l2/emir,emir,pyramid,l2,raw,24,49,57,103,4,426.949402,705.154054,3.471,3209,3702,
+l2/extra_forest,extra_forest,pyramid,l2,raw,7,44,-3,103,4,503.586824,401.580777,3.171,3235,3731,
+l2/extra_ikona,extra_ikona,pyramid,l2,raw,50,61,72,142,4,352.564242,409.94323,3.631,3231,3723,
+l2/extra_matrosi,extra_matrosi,pyramid,l2,raw,18,21,30,56,4,298.535075,455.380761,4.701,3202,3663,
+l2/extra_stained,extra_stained,pyramid,l2,raw,16,19,270,-255,4,631.881958,781.728332,3.057,3205,3702,
+l2/harvesters,harvesters,pyramid,l2,raw,16,59,13,124,4,621.638609,673.869009,3.468,3218,3683,
+l2/icon,icon,pyramid,l2,raw,17,41,23,90,4,596.874837,750.822823,3.399,3244,3741,
+l2/ilemselga,ilemselga,pyramid,l2,raw,7,39,11,130,4,632.021118,790.177338,4.618,3270,3800,
+l2/melons,melons,pyramid,l2,raw,11,82,13,178,4,323.065417,503.721704,3.08,3241,3770,
+l2/monastery,monastery,pyramid,l2,raw,2,-3,2,3,0,29.883968,57.56102,0.201,341,391,
+l2/religous_painting,religous_painting,pyramid,l2,raw,3,28,7,68,4,407.499836,482.281167,3.748,3193,3742,
+l2/self_portrait,self_portrait,pyramid,l2,raw,29,79,37,176,4,405.818364,405.963396,4.064,3251,3810,
+l2/siren,siren,pyramid,l2,raw,-6,49,-25,96,4,636.314356,683.530483,3.218,3250,3817,
+l2/three_generations,three_generations,pyramid,l2,raw,14,53,11,112,4,357.352972,333.913494,3.951,3209,3714,
+l2/tobolsk,tobolsk,pyramid,l2,raw,3,3,3,6,0,32.209047,57.172629,0.178,341,396,
+l2/wharf,wharf,pyramid,l2,raw,-7,15,-16,83,4,334.189646,410.304242,3.747,3244,3761,
