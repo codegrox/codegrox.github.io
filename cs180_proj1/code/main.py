@@ -51,6 +51,45 @@ def run_one(path, stage, out_dir, method='pyramid', metric='ncc', feature='raw')
     }
 
 
+def save_pyramid_levels(path, out_dir):
+    """Save the blue-channel pyramid used to illustrate coarse-to-fine alignment."""
+    plate = align.to_float(skio.imread(path))
+    blue, _, _ = align.split_bgr(plate)
+    for level, im in enumerate(align.make_pyramid(blue)):
+        rgb = np.dstack([im, im, im])
+        save_result(rgb, out_dir, 'figs', f'pyramid_{Path(path).stem}_L{level}')
+
+
+def run_bells(path, out_dir):
+    """Gradient alignment followed by crop, white balance, and contrast."""
+    plate = align.to_float(skio.imread(path))
+    start = time.perf_counter()
+    rgb, g_off, r_off = align.colorize(plate, 'pyramid', 'ncc', 'grad')
+    elapsed = time.perf_counter() - start
+
+    # auto_crop expects the internal (y, x) convention
+    dg = (g_off[1], g_off[0])
+    dr = (r_off[1], r_off[0])
+    cropped = align.auto_crop(rgb, dg, dr)
+    balanced = align.white_balance(cropped)
+    final = align.auto_contrast(balanced)
+
+    name = Path(path).stem
+    save_result(rgb, out_dir, 'bells_grad', name)
+    save_result(cropped, out_dir, 'bells_crop', name)
+    save_result(np.clip(balanced, 0, 1), out_dir, 'bells_wb', name)
+    save_result(final, out_dir, 'bells_final', name)
+
+    print(f'{Path(path).name:28s}  G {g_off!s:12s}  R {r_off!s:12s}  {elapsed:.2f}s  + post')
+    return {
+        'stage': 'bells_grad',
+        'image': name,
+        'g': g_off,
+        'r': r_off,
+        'time': elapsed,
+    }
+
+
 def write_results(rows, out_dir):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -90,12 +129,19 @@ def main():
     parser.add_argument('--data', required=True, help='folder containing the provided plates')
     parser.add_argument('--extra', help='folder containing my extra Prokudin-Gorskii plates')
     parser.add_argument('--out', default='out')
+    parser.add_argument('--only', help='optional comma-separated image names, for example emir,church')
     parser.add_argument('--no-l2', action='store_true', help='skip full pyramid L2 comparison')
-    parser.add_argument('--no-gradient', action='store_true', help='skip gradient-feature comparison')
+    parser.add_argument('--no-gradient', action='store_true', help='skip gradient/crop/color comparison')
     args = parser.parse_args()
 
     course = image_files(args.data)
     extra = image_files(args.extra) if args.extra else []
+
+    if args.only:
+        wanted = {x.strip() for x in args.only.split(',') if x.strip()}
+        course = [p for p in course if p.stem in wanted]
+        extra = [p for p in extra if p.stem in wanted]
+
     small = [p for p in course if p.suffix.lower() in {'.jpg', '.jpeg'}]
 
     print(f'{len(course)} course plates, {len(extra)} extra plates')
@@ -112,6 +158,8 @@ def main():
     print('\nPyramid NCC')
     for p in course:
         rows.append(run_one(p, 'ncc', args.out, metric='ncc'))
+        if p.stem == 'emir':
+            save_pyramid_levels(p, args.out)
 
     if extra:
         print('\nExtra images')
@@ -124,9 +172,9 @@ def main():
             rows.append(run_one(p, 'l2', args.out, metric='l2'))
 
     if not args.no_gradient:
-        print('\nGradient NCC')
+        print('\nBells and whistles')
         for p in course + extra:
-            rows.append(run_one(p, 'bells_grad', args.out, metric='ncc', feature='grad'))
+            rows.append(run_bells(p, args.out))
 
     write_results(rows, args.out)
     print(f'\nDone. Results are in {args.out}')

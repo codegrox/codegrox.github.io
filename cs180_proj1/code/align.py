@@ -61,7 +61,7 @@ def search(moving, fixed, center=(0, 0), radius=15, metric='ncc', crop=0.10):
 
 
 def blur(im):
-    # small gaussian-like blur before shrinking
+    # 5-tap binomial filter, used before each downsample
     k = np.array([1, 4, 6, 4, 1], dtype=np.float32) / 16.0
     r = 2
 
@@ -78,6 +78,7 @@ def downsample(im):
 
 
 def make_pyramid(im, max_size=400):
+    # full resolution first, coarsest image last
     pyr = [im]
     while max(pyr[-1].shape) > max_size:
         pyr.append(downsample(pyr[-1]))
@@ -131,5 +132,86 @@ def colorize(plate, method='pyramid', metric='ncc', feature='raw'):
     ar = shift(r, *dr)
     rgb = np.dstack([ar, ag, b])
 
-    # return x,y because that is how the project asks us to report offsets
+    # report x,y even though np.roll uses y,x internally
     return rgb, (dg[1], dg[0]), (dr[1], dr[0])
+
+
+# Bells and whistles ---------------------------------------------------------
+
+def valid_overlap(shape, dg, dr):
+    """Region not contaminated by np.roll wraparound."""
+    h, w = shape[:2]
+    ys = [0, dg[0], dr[0]]
+    xs = [0, dg[1], dr[1]]
+    return max(ys), h + min(ys), max(xs), w + min(xs)
+
+
+def _block_mean(im, k):
+    h = (im.shape[0] // k) * k
+    w = (im.shape[1] // k) * k
+    return im[:h, :w].reshape(h // k, k, w // k, k, 3).mean(axis=(1, 3))
+
+
+def auto_crop(rgb, dg=(0, 0), dr=(0, 0), band=0.12, dark=0.12):
+    """Remove roll wraparound, then trim dark plate borders near the edges."""
+    top, bottom, left, right = valid_overlap(rgb.shape, dg, dr)
+    im = rgb[top:bottom, left:right]
+
+    # Detect borders on a small thumbnail so this stays cheap on TIFFs.
+    k = max(1, int(np.ceil(max(im.shape[:2]) / 800)))
+    thumb = _block_mean(im, k)
+    border = thumb.min(axis=2) < dark
+    h, w = border.shape
+
+    def edge_cut(frac, n):
+        limit = int(band * n)
+        clean_needed = max(2, int(0.025 * n))
+        last_border = 0
+        clean = 0
+        for i in range(limit):
+            if frac[i] > 0.60:
+                last_border = i + 1
+                clean = 0
+            else:
+                clean += 1
+                if clean >= clean_needed:
+                    break
+        return last_border
+
+    rows = border.mean(axis=1)
+    cols = border.mean(axis=0)
+    ct = edge_cut(rows, h)
+    cb = edge_cut(rows[::-1], h)
+    cl = edge_cut(cols, w)
+    cr = edge_cut(cols[::-1], w)
+
+    y0 = top + ct * k
+    y1 = top + (h - cb) * k
+    x0 = left + cl * k
+    x1 = left + (w - cr) * k
+    return rgb[y0:y1, x0:x1]
+
+
+def white_balance(rgb, frac=0.20):
+    """Estimate color cast from the lowest-chroma pixels and scale RGB channels."""
+    pixels = rgb[::4, ::4].reshape(-1, 3).astype(np.float64)
+    brightness = pixels.mean(axis=1)
+    mx = pixels.max(axis=1)
+    mn = pixels.min(axis=1)
+    good = (brightness > 0.10) & (mx < 0.97)
+    if good.sum() < 100:
+        return rgb
+
+    pixels = pixels[good]
+    chroma = (mx[good] - mn[good]) / brightness[good]
+    neutral = pixels[chroma <= np.quantile(chroma, frac)]
+    means = neutral.mean(axis=0)
+    gains = np.clip(means.mean() / np.maximum(means, 1e-6), 0.9, 1.1)
+    gains /= gains.max()
+    return rgb * gains.astype(np.float32)
+
+
+def auto_contrast(rgb, low=0.5, high=99.5):
+    """Shared percentile stretch, so contrast changes without changing color balance."""
+    a, b = np.percentile(rgb[::4, ::4], [low, high])
+    return np.clip((rgb - a) / max(b - a, 1e-6), 0, 1)
