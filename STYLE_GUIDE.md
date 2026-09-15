@@ -1,4 +1,4 @@
-# Codegrox site style guide
+# site style guide
 
 ## Visual language
 
@@ -31,6 +31,6 @@ The shared system uses a restrained manuscript/editorial look: warm paper or dar
 5. Add one project card to the root `index.html`.
 6. Do not copy CSS into each project; all shared appearance belongs in `assets/site.css`.
 
-## Design restraint
+## Design restraint 
 
 Use the copper accent only for navigational state, small labels, rules, and important marks. Avoid terminal chrome, neon colors, oversized cards, heavy drop shadows, or decorative UI that competes with images and analysis.
