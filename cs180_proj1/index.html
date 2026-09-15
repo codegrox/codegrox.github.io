@@ -45,13 +45,15 @@
 
   <section id="overview" class="project-section">
     <h2>Overview</h2>
-    <p>The input images contain three grayscale exposures stacked vertically in B, G, R order. I split the plate into thirds, used blue as the reference channel, and searched for the displacement of green and red that gave the best match.</p>
-    <p>For the small JPG files I used a direct search over shifts from -15 to 15 pixels. For the larger TIFF files I used an image pyramid so the search starts on a small version of the image and is refined at higher resolutions.</p>
+    <p>Each digitized glass plate contains three monochrome exposures of the same scene, recorded through blue, green, and red filters and stacked vertically in B, G, R order. If those three thirds are simply placed into the B, G, and R channels of one image, small camera motions between exposures appear as colored fringes. The alignment problem is therefore to recover two integer translations: one for G relative to B and one for R relative to B.</p>
+    <p>I keep blue fixed as the reference coordinate system and move the other two channels. For the small JPG files I can test every shift in a local window directly. The full-resolution TIFFs can require displacements well beyond that window, so I use the same matcher inside a coarse-to-fine image pyramid: estimate a large motion cheaply at low resolution, scale that estimate upward, and only search a small neighborhood at each finer level.</p>
 
-    <h3>Scoring</h3>
-    <p>I tried both L2 distance and normalized cross-correlation (NCC). I ignored about 10% around the image border while scoring because the plate borders can otherwise dominate the match.</p>
+    <h3>Scoring: what makes two shifts look aligned?</h3>
+    <p>For every candidate displacement I shift the moving channel and compare its interior with the corresponding interior of B. I tested the two metrics requested in the project: L2 distance and normalized cross-correlation (NCC). L2 asks for the smallest pixelwise difference, while NCC asks for the strongest correlation after subtracting each image's mean. In the formulas below, <em>p</em> indexes pixels and \(\mu_1,\mu_2\) are the mean intensities of the two cropped comparison regions.</p>
     <div class="math">\[L_2(I_1,I_2)=\sqrt{\sum_p (I_1(p)-I_2(p))^2}\]</div>
     <div class="math">\[\operatorname{NCC}(I_1,I_2)=\frac{(I_1-\mu_1)\cdot(I_2-\mu_2)}{\lVert I_1-\mu_1\rVert_2\,\lVert I_2-\mu_2\rVert_2}\]</div>
+    <p>The mean subtraction makes NCC insensitive to an additive brightness offset, and the normalization reduces sensitivity to overall contrast. That is useful here because the three exposures were made through different color filters. It still does <em>not</em> make raw-pixel NCC invariant to scene content that changes dramatically between channels, which is exactly what happens on Emir.</p>
+    <p>I exclude about 10% around the border <em>only while scoring</em>. Those margins contain dark/bright plate edges and, after a shift, wrapped pixels from <code>np.roll</code>. If they are included, a visually meaningless border match can overpower the actual scene structure. This scoring crop is separate from the automatic output cropping used later as a bells-and-whistles step.</p>
 
     <h3>Implementation details</h3>
     <ol class="method-steps">
@@ -61,7 +63,16 @@
       <li><strong>Search coarse-to-fine for the TIFFs.</strong> Before each 2× downsample I blur with the separable kernel [1, 4, 6, 4, 1] / 16. I stop when the long side is at most 400 pixels, search ±15 there, then double the estimate and refine within ±2 at each finer level.</li>
       <li><strong>Compose the result.</strong> The chosen shifts are applied to G and R and the aligned channels are stacked into one RGB image.</li>
     </ol>
-    <p class="note">I used one fixed parameter set for every image rather than tuning individual plates. All offsets on this page are <strong>(x, y)</strong> shifts applied to G or R relative to B; +x moves right and +y moves down.</p>
+
+    <h3>Why the pyramid is faster</h3>
+    <p>A single-scale search over [-15, 15] in both axes tests 31 × 31 = <strong>961 candidate shifts per channel</strong>. That is fine for the small JPGs. A full-resolution search wide enough to cover ±200 pixels would need 401 × 401 = 160,801 candidates per channel, and each candidate would score millions of pixels. For a five-level pyramid such as Emir's, my search instead evaluates 961 candidates at the coarsest level and only 25 candidates (±2 in each axis) at each of the four refinements: 1,061 candidate shifts per channel in total.</p>
+    <pre><code>offset = search(coarsest_level, center=(0, 0), radius=15)
+for level from coarse-1 down to full resolution:
+    offset = 2 * offset
+    offset = search(level, center=offset, radius=2)</code></pre>
+    <p>Blurring before each 2× reduction is important: without a low-pass filter, fine high-frequency detail can alias into false structure at the coarser scale. I use the separable binomial kernel [1, 4, 6, 4, 1] / 16, a compact Gaussian-like filter, before taking every other pixel.</p>
+
+    <p class="note">I used one fixed parameter set for every image rather than tuning individual plates. All offsets on this page are <strong>(x, y)</strong> shifts applied to G or R relative to B; +x moves right and +y moves down. Internally NumPy indexes arrays as (y, x), so I convert the order only when reporting results.</p>
 
     <h3>Before alignment</h3>
     <p>Simply stacking the three exposures leaves strong colored fringes because the camera moved slightly between exposures. Aligning G and R to B removes most of that separation.</p>
@@ -89,7 +100,8 @@
 
   <section id="single" class="project-section">
     <h2>Single-scale alignment</h2>
-    <p>On the three small JPG images, NCC and L2 found the same offsets.</p>
+    <p>The low-resolution JPGs are small enough that brute-force search is practical. For each of G and R I test every integer displacement \((x,y)\in[-15,15]^2\), score the overlap against B, and keep the best shift. I perform the G→B and R→B searches independently; there is no need to align R to G once both are expressed in B's coordinate system.</p>
+    <p>On all three provided JPGs, NCC and L2 chose exactly the same offsets. That agreement is a useful sanity check: on these easy examples the scene structure dominates the small photometric differences between channels.</p>
 
     <div class="breakout">
       <div class="media-grid three">
@@ -113,8 +125,9 @@
 
   <section id="pyramid" class="project-section">
     <h2>Image pyramid</h2>
-    <p>A full search over a large displacement range is too expensive for the TIFF files. I repeatedly blur and downsample by a factor of two until the image is small. I search ±15 pixels at the coarsest level, double that offset when moving to the next level, and then search ±2 pixels around the estimate.</p>
-    <p>NCC worked well on all of the provided images except Emir.</p>
+    <p>The TIFFs are much larger and their true displacements can be tens or hundreds of full-resolution pixels, so simply enlarging the brute-force window would multiply both the number of candidate shifts and the cost of each score. I repeatedly blur and downsample by two until the longest image dimension is at most 400 pixels. At that coarsest scale, even a large full-resolution displacement becomes a small one.</p>
+    <p>I search ±15 pixels around zero at the coarsest level. When I move one level toward full resolution, every pixel now represents half as much physical displacement, so I double the current offset estimate and search only ±2 around it. This repeats until L0. The result is still an integer translation at full resolution, but most of the expensive global search happened on a tiny image.</p>
+    <p>Raw-pixel NCC produced visually good alignment on 13 of the 14 provided images. The table also reveals a useful pattern: the high-resolution plates often need much larger vertical than horizontal corrections, so a fixed ±15 full-resolution window would miss many of them even though the final x shift is modest.</p>
 
     <h3>What the pyramid looks like</h3>
     <p>The blue channel of Emir below shows the actual pyramid used by the search. L0 is the full-resolution image. Each next level is blurred and downsampled by two, so L4 is only 1/16 as wide and tall. The alignment starts at L4, where a ±15-pixel search covers a large displacement in the original image, then the offset is doubled and refined by ±2 pixels at each finer level.</p>
@@ -168,11 +181,15 @@
         </tbody>
       </table>
     </div>
+
+    <h3>Reading the offsets</h3>
+    <p>The displacement is not a property of the scene itself; it records how the three exposures landed relative to one another on the digitized plate. For example, <em>melons</em> needs R (13, 178), while <em>church</em> needs R (-4, 58). The pyramid handles both with the same search parameters because the coarse level absorbs the large motion and the fine levels only correct the residual error.</p>
+    <p>Emir's raw NCC red offset, R (-205, 141), is the obvious outlier. It is not merely a large valid shift: the resulting color fringes show that the metric optimized the wrong correspondence. I keep that failure in the baseline results rather than silently replacing it, then address it separately with a feature that is less dependent on raw channel intensity.</p>
   </section>
 
   <section id="extras" class="project-section">
     <h2>Additional images</h2>
-    <p>I downloaded four more glass plate negatives from the Prokudin-Gorskii collection and ran the same pyramid alignment on them.</p>
+    <p>I downloaded four more glass plate negatives from the Prokudin-Gorskii collection and ran them through the same pyramid NCC pipeline with no image-specific parameter changes. This is a useful check that the method is not tuned only to the provided examples.</p>
 
     <div class="breakout">
       <div class="media-grid four">
@@ -182,12 +199,13 @@
         <figure><div class="figure-frame"><img src="media/extra/extra_stained.jpg" alt="stained colorized"></div><figcaption><strong>stained.</strong> G (16, 20), R (18, 59)</figcaption></figure>
       </div>
     </div>
+    <p><em>Ikona</em> is the most demanding of these four in horizontal displacement, reaching G (50, 61) and R (72, 142), while <em>forest</em> has a red shift of (-3, 103). Both still converge with the same coarse-to-fine search. <em>Stained</em> is also a useful metric comparison: NCC gives a stable R (18, 59), whereas the raw-pixel L2 run jumped to R (270, -255). That reinforces why I use NCC as the main baseline shown on the page.</p>
   </section>
 
   <section id="emir" class="project-section">
     <h2>Emir failure and gradient feature</h2>
-    <p>Emir was the main failure with raw-pixel NCC. The different color channels have very different brightness values on the robe, so matching the raw intensities gives the wrong red-channel shift.</p>
-    <p>I also tried aligning gradient magnitude instead of the raw pixel values. This focuses more on edges and gives a much better result for Emir: G (24, 49), R (40, 107).</p>
+    <p>Emir is the main failure of the raw-pixel baseline. His robe has very different responses through the three color filters: regions that are bright in one exposure can be much darker in another. Mean-centering and normalization help with global brightness and contrast, but they cannot make two channels agree when the underlying material itself has a different spectral response. As a result, raw NCC finds R (-205, 141), a numerically high-correlation match that is visibly wrong.</p>
+    <p>To reduce that dependence on absolute intensity, I compute a simple gradient magnitude image for each channel and align those features instead. The exact brightness of a surface may change from B to R, but many object boundaries—robe edges, facial contours, architectural edges—remain in the same location. Gradient NCC therefore compares more of the shared <em>structure</em> of the channels. For Emir it changes the result to G (24, 49), R (40, 107), which is visually aligned.</p>
 
     <div class="breakout">
       <div class="media-grid two">
@@ -196,14 +214,26 @@
       </div>
     </div>
 
-    <p>There are also a few small color fringes in some images that cannot be removed perfectly with only an x/y translation. Moving people can also create local artifacts because the three exposures were taken at different times.</p>
+    <h3>Remaining limitations</h3>
+    <p>The model is intentionally only a global x/y translation. That cannot correct every artifact: people, water, foliage, or fabric can move between the three sequential exposures, and a global shift cannot make two different poses coincide. Small channel-specific optical distortions or scratches can also leave local color fringes even when the dominant scene geometry is aligned. Solving those would require a richer motion model or local/non-rigid registration, which is outside the scope of this project.</p>
   </section>
 
   <section id="bells" class="project-section">
     <h2>Bells and whistles</h2>
-    <p>After the basic alignment worked, I tried a small finishing pipeline. The important alignment change is to compare gradient magnitude instead of raw intensity. Gradient magnitude emphasizes edges and is less sensitive to the large brightness differences between Emir's color channels.</p>
+    <p>After the required raw-pixel alignment, I added a small finishing pipeline. I kept these operations separate so it is clear which stage changes <em>geometry</em> and which stages only change presentation. Gradient NCC changes the alignment feature; cropping, white balance, and contrast operate on the already aligned RGB image.</p>
+
+    <h3>1 · Gradient-domain alignment</h3>
+    <p>I approximate horizontal and vertical derivatives with centered finite differences and combine them into gradient magnitude. Compared with raw intensity, this representation emphasizes transitions and object boundaries, which are more likely to appear in all three filtered exposures.</p>
     <div class="math">\[G(I)=\sqrt{\left(\frac{\partial I}{\partial x}\right)^2+\left(\frac{\partial I}{\partial y}\right)^2}\]</div>
-    <p>After alignment, I also remove the wrapped/non-overlapping border and trim dark plate borders near the edges. For color, I estimate a conservative white balance from the lowest-chroma pixels rather than assuming the whole image should average to gray. Finally I apply one shared percentile contrast stretch to all three channels so the contrast changes without changing their relative color balance.</p>
+
+    <h3>2 · Automatic border crop</h3>
+    <p>Shifting with <code>np.roll</code> wraps pixels from one edge to the opposite edge, so I first compute the region where B, shifted G, and shifted R all contain genuine overlapping pixels. I then inspect a small thumbnail near the outer ~12% of the image and trim edge bands that are dominated by very dark plate-border pixels. The crop is therefore driven by the image and the recovered shifts rather than by a fixed final rectangle.</p>
+
+    <h3>3 · Conservative white balance</h3>
+    <p>A simple gray-world assumption can over-correct a photograph whose scene is naturally dominated by one color. Instead I sample nonsaturated pixels and rank them by chroma, use the lowest-chroma 20% as approximately neutral references, and estimate per-channel gains from those pixels. I limit the gain adjustment to roughly ±10% so this stage corrects obvious casts without aggressively recoloring the historical image.</p>
+
+    <h3>4 · Shared contrast stretch</h3>
+    <p>Finally I map approximately the 0.5th and 99.5th intensity percentiles to the display range. The same low/high values are shared across R, G, and B rather than stretching each channel independently; this improves global contrast while preserving the relative color balance established by the previous stage.</p>
 
     <div class="panel corner-ticks">
       <div class="panel-title">Finishing pipeline</div>
