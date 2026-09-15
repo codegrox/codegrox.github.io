@@ -38,6 +38,11 @@
     <a href="#bells">Bells &amp; whistles</a>
   </nav>
 
+  <div class="reading panel corner-ticks project-summary">
+    <div class="panel-title">Result snapshot</div>
+    <p><strong>Raw-pixel NCC aligned 13 of the 14 provided images.</strong> Emir was the one clear failure; switching the matching feature to gradient magnitude corrected it to G (24, 49), R (40, 107). The same pyramid parameters were also used on four additional Prokudin-Gorskii plates.</p>
+  </div>
+
   <section id="overview" class="project-section">
     <h2>Overview</h2>
     <p>The input images contain three grayscale exposures stacked vertically in B, G, R order. I split the plate into thirds, used blue as the reference channel, and searched for the displacement of green and red that gave the best match.</p>
@@ -47,6 +52,39 @@
     <p>I tried both L2 distance and normalized cross-correlation (NCC). I ignored about 10% around the image border while scoring because the plate borders can otherwise dominate the match.</p>
     <div class="math">\[L_2(I_1,I_2)=\sqrt{\sum_p (I_1(p)-I_2(p))^2}\]</div>
     <div class="math">\[\operatorname{NCC}(I_1,I_2)=\frac{(I_1-\mu_1)\cdot(I_2-\mu_2)}{\lVert I_1-\mu_1\rVert_2\,\lVert I_2-\mu_2\rVert_2}\]</div>
+
+    <h3>Implementation details</h3>
+    <ol class="method-steps">
+      <li><strong>Split the plate.</strong> The top, middle, and bottom thirds are B, G, and R. I keep B fixed and align G and R to it.</li>
+      <li><strong>Score candidate shifts.</strong> I ignore 10% around the image boundary while scoring, maximize mean-centered NCC, or minimize L2.</li>
+      <li><strong>Search directly for the JPGs.</strong> Every displacement in [-15, 15] × [-15, 15] is tested.</li>
+      <li><strong>Search coarse-to-fine for the TIFFs.</strong> Before each 2× downsample I blur with the separable kernel [1, 4, 6, 4, 1] / 16. I stop when the long side is at most 400 pixels, search ±15 there, then double the estimate and refine within ±2 at each finer level.</li>
+      <li><strong>Compose the result.</strong> The chosen shifts are applied to G and R and the aligned channels are stacked into one RGB image.</li>
+    </ol>
+    <p class="note">I used one fixed parameter set for every image rather than tuning individual plates. All offsets on this page are <strong>(x, y)</strong> shifts applied to G or R relative to B; +x moves right and +y moves down.</p>
+
+    <h3>Before alignment</h3>
+    <p>Simply stacking the three exposures leaves strong colored fringes because the camera moved slightly between exposures. Aligning G and R to B removes most of that separation.</p>
+    <div class="breakout">
+      <div class="media-grid two">
+        <figure><div class="figure-frame"><img src="media/unaligned/church.jpg" alt="Church channels stacked without alignment"></div><figcaption><strong>Unaligned composite.</strong> The three exposures are stacked with zero shift.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/ncc/church.jpg" alt="Church after pyramid NCC alignment"></div><figcaption><strong>After pyramid NCC.</strong> G (4, 25), R (-4, 58).</figcaption></figure>
+      </div>
+    </div>
+
+    <h3>Metric sanity check</h3>
+    <p>The two raw-pixel metrics agree on easy images but can behave very differently on harder plates. NCC was the more consistent baseline overall, while Emir is the important exception that motivated the gradient feature.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Image</th><th>Pyramid NCC</th><th>Pyramid L2</th><th>What happened</th></tr></thead>
+        <tbody>
+          <tr><td>cathedral</td><td>G (2, 5), R (3, 12)</td><td>G (2, 5), R (3, 12)</td><td>Both metrics agree.</td></tr>
+          <tr><td>church</td><td>G (4, 25), R (-4, 58)</td><td>G (4, 25), R (267, 64)</td><td>L2 jumps to a bad red-channel displacement.</td></tr>
+          <tr><td>emir</td><td>G (24, 49), R (-205, 141)</td><td>G (24, 49), R (57, 103)</td><td>The raw-pixel metrics disagree sharply because channel brightness differs.</td></tr>
+          <tr><td>stained</td><td>G (16, 20), R (18, 59)</td><td>G (16, 19), R (270, -255)</td><td>L2 fails on the red channel; NCC remains stable.</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section id="single" class="project-section">
