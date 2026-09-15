@@ -60,3 +60,6 @@ python code/main.py --data data/course --extra data/extra --out out_test --only 
 
 Offsets are printed as `(x, y)`. Positive x moves right and positive y moves down.
 Green and red are aligned to the blue channel.
+
+## Project webpage
+https://codegrox.github.io/cs180_proj1/
