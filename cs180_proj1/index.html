@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en" data-theme="dark">
 <head>
@@ -74,7 +75,7 @@
   <section id="pyramid" class="project-section">
     <h2>Image pyramid</h2>
     <p>A full search over a large displacement range is too expensive for the TIFF files. I repeatedly blur and downsample by a factor of two until the image is small. I search ±15 pixels at the coarsest level, double that offset when moving to the next level, and then search ±2 pixels around the estimate.</p>
-    <p>NCC worked well on all of the provided images except Emir. The average alignment time for the large provided images in my run was about 2.4 seconds.</p>
+    <p>NCC worked well on all of the provided images except Emir.</p>
 
     <div class="breakout">
       <div class="media-grid three">
@@ -120,13 +121,14 @@
 
   <section id="extras" class="project-section">
     <h2>Additional images</h2>
-    <p>I downloaded four more glass plate negatives from the Prokudin-Gorskii collection. These are three of the results I used for the project.</p>
+    <p>I downloaded four more glass plate negatives from the Prokudin-Gorskii collection and ran the same pyramid alignment on them.</p>
 
     <div class="breakout">
-      <div class="media-grid three">
-        <figure><div class="figure-frame"><img src="media/extra/extra_ikona.jpg" alt="Additional icon image colorized"></div><figcaption><strong>Ikona.</strong> G (50, 61), R (72, 142)</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/extra/extra_matrosi.jpg" alt="Additional sailors image colorized"></div><figcaption><strong>Matrosi.</strong> G (18, 21), R (30, 56)</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/extra/extra_stained.jpg" alt="Additional stained glass image colorized"></div><figcaption><strong>Stained glass.</strong> G (16, 20), R (18, 59)</figcaption></figure>
+      <div class="media-grid four">
+        <figure><div class="figure-frame"><img src="media/extra/extra_forest.jpg" alt="forest colorized"></div><figcaption><strong>forest.</strong> G (7, 44), R (-3, 103)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/extra/extra_ikona.jpg" alt="ikona colorized"></div><figcaption><strong>ikona.</strong> G (50, 61), R (72, 142)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/extra/extra_matrosi.jpg" alt="matrosi colorized"></div><figcaption><strong>matrosi.</strong> G (18, 21), R (30, 56)</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/extra/extra_stained.jpg" alt="stained colorized"></div><figcaption><strong>stained.</strong> G (16, 20), R (18, 59)</figcaption></figure>
       </div>
     </div>
   </section>
