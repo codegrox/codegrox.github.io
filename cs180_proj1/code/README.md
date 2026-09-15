@@ -1,7 +1,5 @@
 # CS180 Project 1 - Images of the Russian Empire
 
-Hovhannes Antablyan
-
 ## Files
 
 - `align.py` - alignment code: single-scale search, image pyramid, NCC/L2, gradient features, and post-processing helpers
