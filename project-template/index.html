@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Project description.">
+  <title>Project XX — Codegrox</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('codegrox-theme')||'dark'}catch(e){}</script>
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body class="project-page">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../">CODEGRO<span class="mark">X</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="../#projects">Projects</a>
+      <a class="optional" href="https://github.com/codegrox">GitHub</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </nav>
+  </div>
+</header>
+
+<main id="content" class="shell project-layout">
+  <header class="project-hero reading">
+    <div class="eyebrow">Project XX · CS 180</div>
+    <h1 class="project-title">Project title goes here</h1>
+    <p class="project-subtitle">One restrained sentence explaining the problem and the result.</p>
+    <div class="project-meta"><span><strong>Course</strong> CS 180</span><span><strong>Term</strong> Fall 2026</span><span><strong>Author</strong> John</span></div>
+  </header>
+
+  <nav class="project-toc reading" aria-label="Project sections">
+    <a href="#overview">Overview</a><a href="#method">Method</a><a href="#results">Results</a><a href="#discussion">Discussion</a>
+  </nav>
+
+  <section id="overview" class="project-section">
+    <h2>Overview</h2>
+    <p class="lede">Use a short lead paragraph here. The page is designed to read more like a technical folio or field notebook than a terminal window.</p>
+    <p>Body copy stays in the narrow reading column. Large images can break out using the <code>breakout</code> class when needed.</p>
+    <div class="panel corner-ticks">
+      <div class="panel-title">Key idea</div>
+      <p>Use this panel for one result, assumption, or implementation detail that deserves emphasis.</p>
+    </div>
+  </section>
+
+  <section id="method" class="project-section">
+    <h2>Method</h2>
+    <h3>Subsection</h3>
+    <p>Describe the algorithm here.</p>
+    <pre><code>def example(image):
+    return process(image)</code></pre>
+    <div class="math">score = Σ (I₁ − I₂)²</div>
+  </section>
+
+  <section id="results" class="project-section">
+    <h2>Results</h2>
+    <div class="breakout">
+      <div class="media-grid two">
+        <figure><div class="figure-frame"><img src="placeholder-a.jpg" alt="Describe result A"></div><figcaption><strong>Result A.</strong> Replace with your image and caption.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="placeholder-b.jpg" alt="Describe result B"></div><figcaption><strong>Result B.</strong> Replace with your image and caption.</figcaption></figure>
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Image</th><th>Green offset</th><th>Red offset</th></tr></thead><tbody><tr><td>example.tif</td><td>(0, 0)</td><td>(0, 0)</td></tr></tbody></table></div>
+  </section>
+
+  <section id="discussion" class="project-section">
+    <h2>Discussion</h2>
+    <p>Explain failures, trade-offs, and anything surprising. Keep presentation subordinate to the technical content.</p>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="footer-inner shell"><span>Codegrox · Project XX</span><a href="../">All projects</a></div></footer>
+<button class="back-top" type="button" aria-label="Back to top">Top</button>
+<script src="../assets/site.js"></script>
+</body>
+</html>
