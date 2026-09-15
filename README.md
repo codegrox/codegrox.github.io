@@ -10,4 +10,4 @@ Main files:
 - `cs180_proj1/` - CS180 Project 1
 - `project-template/` - basic page to copy for a future project
 
-For a new project I usually copy `project-template`, add the project to the home page, and put the images in that project's `media` folder.
+For a new project, copy `project-template`, add the project to the home page, and put the images in that project's `media` folder.
