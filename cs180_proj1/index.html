@@ -189,14 +189,38 @@ for level from coarse-1 down to full resolution:
 
   <section id="extras" class="project-section">
     <h2>Additional images</h2>
-    <p>I downloaded four more glass plate negatives from the Prokudin-Gorskii collection and ran them through the same pyramid NCC pipeline with no image-specific parameter changes. This is a useful check that the method is not tuned only to the provided examples.</p>
+    <p>I downloaded four more glass plate negatives from the Library of Congress Prokudin-Gorskii collection and ran them through the same pyramid NCC pipeline with no image-specific parameter changes. I kept the archival titles and source links with each result below. This is a useful check that the method is not tuned only to the provided examples.</p>
 
     <div class="breakout">
       <div class="media-grid four">
-        <figure><div class="figure-frame"><img src="media/extra/extra_forest.jpg" alt="forest colorized"></div><figcaption><strong>forest.</strong> G (7, 44), R (-3, 103)</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/extra/extra_ikona.jpg" alt="ikona colorized"></div><figcaption><strong>ikona.</strong> G (50, 61), R (72, 142)</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/extra/extra_matrosi.jpg" alt="matrosi colorized"></div><figcaption><strong>matrosi.</strong> G (18, 21), R (30, 56)</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/extra/extra_stained.jpg" alt="stained colorized"></div><figcaption><strong>stained.</strong> G (16, 20), R (18, 59)</figcaption></figure>
+        <figure>
+          <div class="figure-frame"><img src="media/extra/extra_forest.jpg" alt="forest colorized"></div>
+          <figcaption>
+            <strong>forest.</strong> G (7, 44), R (-3, 103)
+            <span class="archive-source">Library of Congress · <a href="https://www.loc.gov/item/2018681015/" target="_blank" rel="noopener noreferrer">Na dambi︠e︡ vodokhranilishcha na r. Chusovoĭ (u perevala na r. Ri︠e︡shotku)</a></span>
+          </figcaption>
+        </figure>
+        <figure>
+          <div class="figure-frame"><img src="media/extra/extra_ikona.jpg" alt="ikona colorized"></div>
+          <figcaption>
+            <strong>ikona.</strong> G (50, 61), R (72, 142)
+            <span class="archive-source">Library of Congress · <a href="https://www.loc.gov/item/2018681040/" target="_blank" rel="noopener noreferrer">Chudotvornai︠a︡ ikona, prinesennai︠a︡ Pr. Dalmatom. [Dalmatovo]</a></span>
+          </figcaption>
+        </figure>
+        <figure>
+          <div class="figure-frame"><img src="media/extra/extra_matrosi.jpg" alt="matrosi colorized"></div>
+          <figcaption>
+            <strong>matrosi.</strong> G (18, 21), R (30, 56)
+            <span class="archive-source">Library of Congress · <a href="https://www.loc.gov/item/2018678872/" target="_blank" rel="noopener noreferrer">Komanda parokhoda "Sheksna" M.P.S. [Rossiĭskai︠a︡ imperii︠a︡]</a></span>
+          </figcaption>
+        </figure>
+        <figure>
+          <div class="figure-frame"><img src="media/extra/extra_stained.jpg" alt="stained colorized"></div>
+          <figcaption>
+            <strong>stained.</strong> G (16, 20), R (18, 59)
+            <span class="archive-source">Library of Congress · <a href="https://www.loc.gov/item/2018679006/" target="_blank" rel="noopener noreferrer">Zaprestolʹnyĭ obraz v t︠s︡erkvi Īoanna Bogoslova. [Rossiĭskai︠a︡ imperii︠a︡]</a></span>
+          </figcaption>
+        </figure>
       </div>
     </div>
     <p><em>Ikona</em> is the most demanding of these four in horizontal displacement, reaching G (50, 61) and R (72, 142), while <em>forest</em> has a red shift of (-3, 103). Both still converge with the same coarse-to-fine search. <em>Stained</em> is also a useful metric comparison: NCC gives a stable R (18, 59), whereas the raw-pixel L2 run jumped to R (270, -255). That reinforces why I use NCC as the main baseline shown on the page.</p>
@@ -252,7 +276,7 @@ for level from coarse-1 down to full resolution:
   </section>
 </main>
 
-<footer class="site-footer"><div class="footer-inner shell"><span>Codegrox · CS180 Project 1</span><a href="../">All projects</a></div></footer>
+<footer class="site-footer"><div class="footer-inner shell"><span>© CS 180 2026 • Hovhannes Antablyan. All rights reserved.</span><a href="../">All projects</a></div></footer>
 <button class="back-top" type="button" aria-label="Back to top">Top</button>
 <script src="../assets/site.js"></script>
 </body>
