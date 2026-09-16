@@ -211,6 +211,24 @@ def white_balance(rgb, frac=0.20):
     return rgb * gains.astype(np.float32)
 
 
+def better_color_map(rgb):
+    """Conservative 3x3 channel remapping for the historical filter responses.
+
+    The Prokudin-Gorskii filters are not guaranteed to match modern RGB primaries.
+    This fixed matrix mixes the three aligned channels slightly instead of treating
+    each exposure as a perfect modern primary. Every row sums to 1, so neutral gray
+    stays neutral; the small negative off-diagonal terms reduce channel cross-talk.
+    The same mapping is used for every image.
+    """
+    matrix = np.array([
+        [1.10, -0.07, -0.03],
+        [-0.04, 1.08, -0.04],
+        [-0.02, -0.06, 1.08],
+    ], dtype=np.float32)
+    mapped = rgb.astype(np.float32) @ matrix.T
+    return np.clip(mapped, 0, 1)
+
+
 def auto_contrast(rgb, low=0.5, high=99.5):
     """Shared percentile stretch, so contrast changes without changing color balance."""
     a, b = np.percentile(rgb[::4, ::4], [low, high])

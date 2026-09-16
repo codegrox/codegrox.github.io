@@ -61,7 +61,7 @@ def save_pyramid_levels(path, out_dir):
 
 
 def run_bells(path, out_dir):
-    """Gradient alignment followed by crop, white balance, and contrast."""
+    """Gradient alignment followed by crop, white balance, color mapping, and contrast."""
     plate = align.to_float(skio.imread(path))
     start = time.perf_counter()
     rgb, g_off, r_off = align.colorize(plate, 'pyramid', 'ncc', 'grad')
@@ -72,12 +72,14 @@ def run_bells(path, out_dir):
     dr = (r_off[1], r_off[0])
     cropped = align.auto_crop(rgb, dg, dr)
     balanced = align.white_balance(cropped)
-    final = align.auto_contrast(balanced)
+    mapped = align.better_color_map(balanced)
+    final = align.auto_contrast(mapped)
 
     name = Path(path).stem
     save_result(rgb, out_dir, 'bells_grad', name)
     save_result(cropped, out_dir, 'bells_crop', name)
     save_result(np.clip(balanced, 0, 1), out_dir, 'bells_wb', name)
+    save_result(mapped, out_dir, 'bells_map', name)
     save_result(final, out_dir, 'bells_final', name)
 
     print(f'{Path(path).name:28s}  G {g_off!s:12s}  R {r_off!s:12s}  {elapsed:.2f}s  + post')

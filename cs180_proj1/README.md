@@ -41,8 +41,9 @@ The script runs:
 - pyramid NCC on all provided images
 - pyramid NCC on the extra images
 - pyramid L2 for comparison
-- gradient-NCC alignment followed by automatic border cropping, gray-pixel white balance, and a shared contrast stretch
+- gradient-NCC alignment followed by automatic border cropping, gray-pixel white balance, a fixed 3x3 color remapping, and a shared contrast stretch
 - an Emir pyramid visualization under `out/figs/`
+- color-mapped bells-and-whistles outputs under `out/bells_map/`
 
 It prints the G and R offsets and writes `results.csv` and `results.md`.
 Full-size results go under `out/`, with smaller copies under `out/web/`.

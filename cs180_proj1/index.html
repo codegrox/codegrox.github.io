@@ -244,7 +244,7 @@ for level from coarse-1 down to full resolution:
 
   <section id="bells" class="project-section">
     <h2>Bells and whistles</h2>
-    <p>After the required raw-pixel alignment, I added a small finishing pipeline. I kept these operations separate so it is clear which stage changes <em>geometry</em> and which stages only change presentation. Gradient NCC changes the alignment feature; cropping, white balance, and contrast operate on the already aligned RGB image.</p>
+    <p>After the required raw-pixel alignment, I added a small finishing pipeline. I kept these operations separate so it is clear which stage changes <em>geometry</em> and which stages only change presentation. Gradient NCC changes the alignment feature; cropping, white balance, color mapping, and contrast operate on the already aligned RGB image.</p>
 
     <h3>1 · Gradient-domain alignment</h3>
     <p>I approximate horizontal and vertical derivatives with centered finite differences and combine them into gradient magnitude. Compared with raw intensity, this representation emphasizes transitions and object boundaries, which are more likely to appear in all three filtered exposures.</p>
@@ -256,21 +256,43 @@ for level from coarse-1 down to full resolution:
     <h3>3 · Conservative white balance</h3>
     <p>A simple gray-world assumption can over-correct a photograph whose scene is naturally dominated by one color. Instead I sample nonsaturated pixels and rank them by chroma, use the lowest-chroma 20% as approximately neutral references, and estimate per-channel gains from those pixels. I limit the gain adjustment to roughly ±10% so this stage corrects obvious casts without aggressively recoloring the historical image.</p>
 
-    <h3>4 · Shared contrast stretch</h3>
+    <h3>4 · Better color mapping</h3>
+    <p>The original glass plates were exposed through historical red, green, and blue filters, but there is no reason to assume those filter responses are identical to modern RGB primaries. Instead of treating the aligned channels as a perfect identity mapping, I apply one fixed 3×3 color-correction matrix to every image after white balance:</p>
+    <div class="math">\[
+      \begin{bmatrix}R'\\G'\\B'\end{bmatrix}
+      =
+      \begin{bmatrix}
+      1.10 &amp; -0.07 &amp; -0.03\\
+      -0.04 &amp; 1.08 &amp; -0.04\\
+      -0.02 &amp; -0.06 &amp; 1.08
+      \end{bmatrix}
+      \begin{bmatrix}R\\G\\B\end{bmatrix}.
+    \]</div>
+    <p>Each row sums to one, so a neutral gray remains neutral. The small off-diagonal terms mix the historical channels rather than assuming a one-to-one correspondence with display RGB, while the diagonal boost increases separation between colors. This is a deliberately conservative, heuristic mapping rather than a calibrated reconstruction of the original filter spectra, and I use exactly the same matrix for every plate.</p>
+
+    <div class="breakout">
+      <div class="media-grid two color-map-compare">
+        <figure><div class="figure-frame"><img src="media/bells_wb/emir.jpg" alt="Emir after white balance before color remapping"></div><figcaption><strong>Before mapping.</strong> Aligned, cropped, and white-balanced RGB channels.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/bells_map/emir.jpg" alt="Emir after 3 by 3 color remapping"></div><figcaption><strong>After mapping.</strong> Fixed neutral-preserving 3×3 channel mix.</figcaption></figure>
+      </div>
+    </div>
+
+    <h3>5 · Shared contrast stretch</h3>
     <p>Finally I map approximately the 0.5th and 99.5th intensity percentiles to the display range. The same low/high values are shared across R, G, and B rather than stretching each channel independently; this improves global contrast while preserving the relative color balance established by the previous stage.</p>
 
     <div class="panel corner-ticks">
       <div class="panel-title">Finishing pipeline</div>
-      <p class="caption">gradient NCC → border crop → gray-pixel white balance → shared contrast stretch</p>
+      <p class="caption">gradient NCC → border crop → gray-pixel white balance → 3×3 color mapping → shared contrast stretch</p>
     </div>
 
     <p>Emir makes the progression easiest to see. The first image below is already correctly aligned with gradients; the remaining stages only clean the presentation and do not change the alignment offsets.</p>
     <div class="breakout">
-      <div class="media-grid four">
+      <div class="media-grid three">
         <figure><div class="figure-frame"><img src="media/bells_grad/emir.jpg" alt="Emir after gradient-based alignment"></div><figcaption><strong>1 · Gradient NCC.</strong> Correct alignment, G (24, 49), R (40, 107).</figcaption></figure>
         <figure><div class="figure-frame"><img src="media/bells_crop/emir.jpg" alt="Emir after automatic border crop"></div><figcaption><strong>2 · Crop.</strong> Remove wraparound and plate borders.</figcaption></figure>
         <figure><div class="figure-frame"><img src="media/bells_wb/emir.jpg" alt="Emir after gray-pixel white balance"></div><figcaption><strong>3 · White balance.</strong> Estimate the cast from neutral pixels.</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/bells_final/emir.jpg" alt="Final processed Emir image"></div><figcaption><strong>4 · Final.</strong> Shared percentile contrast stretch.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/bells_map/emir.jpg" alt="Emir after better color mapping"></div><figcaption><strong>4 · Color mapping.</strong> Mix historical channels with the fixed 3×3 transform.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/bells_final/emir.jpg" alt="Final processed Emir image"></div><figcaption><strong>5 · Final.</strong> Shared percentile contrast stretch.</figcaption></figure>
       </div>
     </div>
   </section>
