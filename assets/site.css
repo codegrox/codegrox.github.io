@@ -452,3 +452,63 @@ html[data-theme="light"] { --canvas: #d9d0c1; }
     background: #fff !important;
   }
 }
+
+
+/* Project contents rail ----------------------------------------------------
+   Larger and more deliberate on wide screens: a small editorial sidebar,
+   visually separate from the article sheet without competing with it. */
+@media (min-width: 1260px) {
+  .project-page .project-toc {
+    width: 10.75rem;
+    margin-left: calc(-10.75rem - 2.15rem);
+    padding: .7rem 1.15rem .8rem 0;
+    gap: .08rem;
+    border-right: 1px solid color-mix(in srgb, var(--rule-strong) 72%, transparent);
+    color: var(--ink-soft);
+    font-size: .72rem;
+    line-height: 1.35;
+    letter-spacing: .055em;
+    counter-reset: project-toc;
+  }
+
+  .project-page .project-toc::before {
+    content: "Contents";
+    display: block;
+    padding: 0 0 .62rem;
+    margin: 0 0 .38rem;
+    border-bottom: 1px solid var(--rule);
+    color: var(--accent);
+    font: 600 .61rem/1 var(--sans);
+    letter-spacing: .17em;
+    text-transform: uppercase;
+  }
+
+  .project-page .project-toc a {
+    counter-increment: project-toc;
+    display: grid;
+    grid-template-columns: 1.65rem 1fr;
+    align-items: baseline;
+    gap: .18rem;
+    padding: .42rem 0;
+    color: var(--ink-soft);
+    font-weight: 560;
+    letter-spacing: .045em;
+    transition: color .14s ease, transform .14s ease;
+  }
+
+  .project-page .project-toc a::before {
+    content: counter(project-toc, decimal-leading-zero);
+    color: var(--ink-faint);
+    font: 500 .54rem/1 var(--mono);
+    letter-spacing: .04em;
+  }
+
+  .project-page .project-toc a:hover {
+    color: var(--ink);
+    transform: translateX(.18rem);
+  }
+
+  .project-page .project-toc a:hover::before {
+    color: var(--accent);
+  }
+}
