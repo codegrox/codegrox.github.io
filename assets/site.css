@@ -512,3 +512,259 @@ html[data-theme="light"] { --canvas: #d9d0c1; }
     color: var(--accent);
   }
 }
+
+
+/* Larger result imagery ----------------------------------------------------
+   Result comparisons should be inspectable, not thumbnail-like. */
+
+/* Emir is the key failure/fix comparison: give each result a full row. */
+.project-page #emir .breakout {
+  width: min(58rem, calc(100vw - 5rem));
+}
+
+.project-page #emir .media-grid.two {
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.project-page #emir .media-grid.two figure {
+  width: 100%;
+}
+
+.project-page #emir .figure-frame img {
+  width: 100%;
+  max-height: none;
+}
+
+/* Four finishing stages are easier to inspect as a 2 x 2 sequence. */
+.project-page #bells .media-grid.four {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.35rem;
+}
+
+/* Let the key figures breathe a little more than ordinary gallery images. */
+.project-page #emir figcaption,
+.project-page #bells figcaption {
+  margin-top: .55rem;
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .project-page #emir .breakout {
+    width: min(100%, calc(100vw - 2rem));
+  }
+
+  .project-page #bells .media-grid.four {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Preserve the larger comparison treatment in the PDF too. */
+@media print {
+  .project-page #emir .media-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .project-page #bells .media-grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-page #emir figure,
+  .project-page #bells figure {
+    break-inside: avoid;
+  }
+}
+
+
+/* Additional images: make the four self-selected results easier to inspect. */
+.project-page #extras .breakout {
+  width: min(62rem, calc(100vw - 5rem));
+}
+
+.project-page #extras .media-grid.four {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.45rem;
+}
+
+.project-page #extras .figure-frame img {
+  width: 100%;
+  max-height: none;
+}
+
+.project-page #extras figcaption {
+  margin-top: .55rem;
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .project-page #extras .breakout {
+    width: min(100%, calc(100vw - 2rem));
+  }
+
+  .project-page #extras .media-grid.four {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .project-page #extras .media-grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-page #extras figure {
+    break-inside: avoid;
+  }
+}
+
+
+/* Full-size project imagery ------------------------------------------------
+   Treat results as figures to inspect rather than compact gallery thumbnails. */
+.project-page .project-section .breakout {
+  width: min(62rem, calc(100vw - 5rem));
+}
+
+.project-page .project-section .media-grid.two,
+.project-page .project-section .media-grid.three,
+.project-page .project-section .media-grid.four {
+  grid-template-columns: 1fr;
+  gap: 2.25rem;
+}
+
+.project-page .project-section .media-grid figure {
+  width: 100%;
+  margin: 0;
+}
+
+.project-page .project-section .figure-frame {
+  width: 100%;
+}
+
+.project-page .project-section .figure-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+}
+
+.project-page .project-section figcaption {
+  margin-top: .58rem;
+  font-size: .73rem;
+  line-height: 1.45;
+}
+
+/* Pyramid levels are low-resolution by design; keep them large enough to read,
+   but do not stretch the coarsest levels to absurd proportions. */
+.project-page #pyramid .media-grid.three:first-of-type .figure-frame {
+  display: flex;
+  justify-content: center;
+  background: var(--panel);
+}
+
+.project-page #pyramid .media-grid.three:first-of-type .figure-frame img {
+  width: auto;
+  max-width: 100%;
+}
+
+/* Mobile: use nearly the full viewport width. */
+@media (max-width: 760px) {
+  .project-page .project-section .breakout {
+    width: min(100%, calc(100vw - 1.25rem));
+  }
+}
+
+/* PDF: still one large figure per row so details remain legible. */
+@media print {
+  .project-page .project-section .media-grid.two,
+  .project-page .project-section .media-grid.three,
+  .project-page .project-section .media-grid.four {
+    grid-template-columns: 1fr;
+  }
+
+  .project-page .project-section figure {
+    break-inside: avoid;
+  }
+}
+
+
+/* Keep the opening result snapshot aligned with the centered reading column.
+   `.panel` uses a later margin shorthand, so explicitly restore auto side margins. */
+@media screen {
+  .project-page .project-summary {
+    width: min(100%, var(--reading));
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+
+/* Resolution-aware figure sizing -------------------------------------------
+   TIFF-derived results can use the full report width. The three provided JPG
+   plates are only about 390 px wide, so do not enlarge them until they look soft. */
+.project-page img[src$="/cathedral.jpg"],
+.project-page img[src$="/monastery.jpg"],
+.project-page img[src$="/tobolsk.jpg"] {
+  width: min(100%, 32rem) !important;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* Pyramid levels are intentionally smaller at coarser scales. */
+.project-page img[src$="pyramid_emir_L1.jpg"] {
+  width: min(100%, 58rem) !important;
+  margin-inline: auto;
+}
+.project-page img[src$="pyramid_emir_L2.jpg"] {
+  width: min(100%, 48rem) !important;
+  margin-inline: auto;
+}
+.project-page img[src$="pyramid_emir_L3.jpg"] {
+  width: min(100%, 29rem) !important;
+  margin-inline: auto;
+}
+.project-page img[src$="pyramid_emir_L4.jpg"] {
+  width: min(100%, 15rem) !important;
+  margin-inline: auto;
+}
+
+/* Center intentionally constrained images inside the full-width frame. */
+.project-page .figure-frame {
+  text-align: center;
+}
+
+
+/* Archival source captions ------------------------------------------------ */
+.project-page .archive-source {
+  display: block;
+  margin-top: .28rem;
+  color: var(--ink-faint);
+  font-family: var(--sans);
+  font-size: .62rem;
+  font-weight: 450;
+  line-height: 1.45;
+  letter-spacing: .015em;
+  text-transform: none;
+}
+
+.project-page .archive-source a {
+  color: var(--ink-soft);
+  text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  text-underline-offset: .16em;
+}
+
+.project-page .archive-source a:hover {
+  color: var(--accent);
+}
+
+@media print {
+  .project-page .archive-source {
+    font-size: 7.5pt;
+  }
+
+  .project-page .archive-source a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
