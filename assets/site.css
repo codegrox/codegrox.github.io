@@ -793,3 +793,43 @@ html[data-theme="light"] { --canvas: #d9d0c1; }
     gap: .22in;
   }
 }
+
+/* Side-by-side comparisons (Project 2) --------------------------------------
+   Opt-in modifiers. Project pages default to one full-width figure per row;
+   these restore small multiples where images are meant to be compared at a
+   glance (filter outputs, frequency spectra, stack levels). */
+.project-page .project-section .media-grid.compare-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; }
+.project-page .project-section .media-grid.compare-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.project-page .project-section .media-grid.compare-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .85rem; }
+.project-page .project-section .media-grid.compare-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; }
+.project-page .project-section .media-grid[class*="compare-"] figure { align-self: start; }
+.project-page .project-section .figure-frame img.crisp { image-rendering: pixelated; }
+.project-page .project-section .figure-frame.plain { background: transparent; border-color: transparent; padding: 0; }
+.project-page .distance-view { display: flex; align-items: flex-end; justify-content: center; min-height: 12rem; }
+.project-page .distance-view img { width: 100%; height: auto; transition: width .12s linear; }
+.project-page .distance-control { display: flex; align-items: center; gap: .8rem; margin-top: .7rem; }
+.project-page .distance-control input[type="range"] { flex: 1; accent-color: var(--accent); }
+@media (max-width: 760px) {
+  .project-page .project-section .media-grid.compare-3,
+  .project-page .project-section .media-grid.compare-4,
+  .project-page .project-section .media-grid.compare-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media print {
+  .project-page .project-section .media-grid.compare-4,
+  .project-page .project-section .media-grid.compare-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .project-page .distance-control { display: none; }
+}
+.project-page .table-wrap tr.chosen td { color: var(--ink); font-weight: 500; }
+.project-page .table-wrap tr.chosen td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+.project-page .table-wrap td.chosen-cell { color: var(--ink); font-weight: 500; box-shadow: inset 2px 0 0 var(--accent); }
+
+/* Part headings and section highlight in the project rail (Project 2) --------- */
+.project-page .part-heading { margin: clamp(3.5rem, 7vw, 5.5rem) auto 0; padding-top: 1.3rem; border-top: 1px solid var(--rule); }
+.project-page .part-heading h2 { font-size: clamp(2rem, 4.4vw, 3rem); line-height: 1.05; margin: .4rem 0 0; }
+.project-page .part-heading p { color: var(--ink-soft); margin-top: .7rem; }
+.project-page .project-toc a.is-active { color: var(--ink); }
+@media (min-width: 1260px) {
+  .project-page .project-toc a[data-num]::before { content: attr(data-num); }
+  .project-page .project-toc a.is-active { transform: translateX(.18rem); }
+  .project-page .project-toc a.is-active::before { color: var(--accent); }
+}

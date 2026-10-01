@@ -1,0 +1,185 @@
+{
+  "part1": {
+    "selfie": "data/mine/selfie.jpg",
+    "selfie_max_side": 480,
+    "cameraman": "data/course/cameraman.png",
+    "fd_threshold": 0.28,
+    "fd_sweep": [0.15, 0.22, 0.28, 0.35],
+    "gauss_sigma": 1.5,
+    "dog_threshold": 0.1,
+    "dog_sweep": [0.05, 0.08, 0.1, 0.15],
+    "selfie_display_side": 1600
+  },
+  "sharpen": {
+    "sigma": 2.0,
+    "alpha": 1.5,
+    "alpha_sweep": [0.5, 1, 2, 4],
+    "max_side": 1600,
+    "images": [
+      {
+        "name": "taj",
+        "path": "data/course/taj.jpg"
+      },
+      {
+        "name": "mind_cage",
+        "path": "data/mine/mind_cage.jpg"
+      },
+      {
+        "name": "mind_cats",
+        "path": "data/mine/mind_cats.jpg"
+      },
+      {
+        "name": "mind_room",
+        "path": "data/mine/mind_room.jpg"
+      }
+    ],
+    "eval": [
+      {
+        "name": "dog",
+        "path": "data/mine/sharp.jpg",
+        "blur_sigma": 2.0,
+        "alphas": [0, 0.5, 1, 1.5, 2, 3, 4, 6]
+      },
+      {
+        "name": "car",
+        "path": "data/mine/puddle.jpg",
+        "blur_sigma": 2.0,
+        "alphas": [0, 0.5, 1, 1.5, 2, 3, 4, 6]
+      }
+    ]
+  },
+  "hybrid_work_side": 2048,
+  "hybrid_out_side": 1600,
+  "hybrids": [
+    {
+      "name": "derek_nutmeg",
+      "low": "data/course/DerekPicture.jpg",
+      "high": "data/course/nutmeg.jpg",
+      "points": "points/derek_nutmeg.json",
+      "sigma_low": 10,
+      "sigma_high": 6,
+      "color": "both"
+    },
+    {
+      "name": "dafoe_skull",
+      "low": "data/mine/dafoe_calm.jpg",
+      "high": "data/mine/skull_human.jpg",
+      "points": "points/dafoe_skull.json",
+      "cutoff_low": 6,
+      "cutoff_high": 24,
+      "color": "both",
+      "favorite": true,
+      "cutoff_study": [[16, 10], [8, 14], [6, 24]]
+    },
+    {
+      "name": "dafoe_expr",
+      "low": "data/mine/dafoe_calm.jpg",
+      "high": "data/mine/dafoe_manic.jpg",
+      "points": "points/dafoe_expr.json",
+      "cutoff_low": 8,
+      "cutoff_high": 14,
+      "color": "both"
+    },
+    {
+      "name": "dafoe_snl",
+      "low": "data/mine/dafoe_calm.jpg",
+      "high": "data/mine/dafoe_snl.jpg",
+      "points": "points/dafoe_snl.json",
+      "cutoff_low": 8,
+      "cutoff_high": 16,
+      "color": "both"
+    },
+    {
+      "name": "chimp_skull",
+      "low": "data/mine/chimp.jpg",
+      "high": "data/mine/skull_chimp.jpg",
+      "points": "points/chimp_skull.json",
+      "cutoff_low": 16,
+      "cutoff_high": 28,
+      "color": "both",
+      "gain_high": 0.8
+    },
+    {
+      "name": "bear_skull",
+      "low": "data/mine/bear.jpg",
+      "high": "data/mine/skull_bear.jpg",
+      "points": "points/bear_skull.json",
+      "cutoff_low": 16,
+      "cutoff_high": 28,
+      "color": "both",
+      "gain_high": 0.8
+    }
+  ],
+  "blend_max_side": 1600,
+  "stacks": {
+    "blend": "oraple",
+    "show_levels": [0, 2, 4]
+  },
+  "blends": [
+    {
+      "name": "oraple",
+      "a": "data/course/apple.jpeg",
+      "b": "data/course/orange.jpeg",
+      "mask": {"type": "step", "axis": "vertical", "at": 0.5},
+      "levels": 7,
+      "s0": 2.0
+    },
+    {
+      "name": "manhattan_clouds",
+      "a": "data/mine/manhattan.jpg",
+      "b": "data/mine/earth_clouds.jpg",
+      "mask": {"type": "step", "axis": "horizontal", "at": 0.595},
+      "levels": 9,
+      "s0": 2.0
+    },
+    {
+      "name": "rocket_space",
+      "a": "data/mine/milky_way.jpg",
+      "b": "data/mine/rocket.jpg",
+      "mask": {"type": "polygon", "points": "points/rocket_space_mask.json", "invert": true},
+      "levels": 8,
+      "s0": 2.0,
+      "favorite": true
+    },
+    {
+      "name": "dafoe_mouth",
+      "a": "data/mine/dafoe_manic.jpg",
+      "b": "data/mine/dafoe_calm.jpg",
+      "points": "points/dafoe_mouth.json",
+      "mask": {"type": "ellipse", "center": [0.5415, 0.352], "radii": [0.105, 0.052], "space": "b"},
+      "levels": 5,
+      "s0": 1.5,
+      "max_upscale": 1.5
+    },
+    {
+      "name": "newsom_beard",
+      "a": "data/mine/binladen.jpg",
+      "b": "data/mine/newsom.jpg",
+      "points": "points/newsom_beard.json",
+      "mask": {"type": "polygon", "points": "points/newsom_beard_mask.json", "space": "a"},
+      "levels": 4,
+      "s0": 1.5,
+      "pre_blur_a": 1.0,
+      "max_upscale": 1.5
+    },
+    {
+      "name": "doctor_space",
+      "a": "data/mine/hubble_deep_field.jpg",
+      "b": "data/mine/doctor.jpg",
+      "crop_b": [0.24, 0.78, 0.0, 1.0],
+      "mask": {"type": "grabcut", "points": "points/doctor_space_mask.json", "sure_fg": "points/doctor_space_fg.json", "invert": true, "dark_bg": 0.09},
+      "levels": 6,
+      "s0": 1.5,
+      "max_side": 2048
+    },
+    {
+      "name": "train_space",
+      "a": "data/mine/star_trails.jpg",
+      "b": "data/mine/train.jpg",
+      "mask": {"type": "grabcut", "points": "points/train_space_mask.json", "sure_fg": "points/train_space_fg.json", "invert": true},
+      "levels": 6,
+      "s0": 1.5,
+      "max_side": 2048
+    }
+  ]
+}

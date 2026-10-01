@@ -76,3 +76,28 @@
     updateDial();
   }
 })();
+
+// Highlight the section currently in view in the project table of contents.
+(() => {
+  const links = [...document.querySelectorAll('.project-toc a[href^="#"]')];
+  const sections = links.map((a) => document.getElementById(a.getAttribute('href').slice(1)));
+  if (!links.length || sections.some((s) => !s)) return;
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const line = window.innerHeight * 0.3;
+    let current = null;
+    sections.forEach((s) => { if (s.getBoundingClientRect().top <= line) current = s; });
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    if (atBottom) current = sections[sections.length - 1];
+    links.forEach((a, i) => {
+      const on = sections[i] === current;
+      a.classList.toggle('is-active', on);
+      if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+    });
+  };
+  const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+  window.addEventListener('scroll', queue, { passive: true });
+  window.addEventListener('resize', queue);
+  update();
+})();
