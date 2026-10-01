@@ -122,6 +122,7 @@ This writes `out/review_bundle.zip` (reduced copies of all figures, `results.jso
 - Stack level `k` has total blur `s0 * 2^(k-1)` (0 at level 0), so each level halves the bandwidth like a pyramid level would. Blending streams through the levels, so memory stays flat at full resolution.
 - Alignment: 2 point pairs use the starter code (similarity transform); 3 pairs (e.g. eyes + mouth) solve an affine transform. Either way the image being warped is resized first, so the reference image keeps its native resolution.
 - Masks: `step`, `ellipse`, `polygon`, `file`, or `grabcut` (a rough polygon refined to the subject's outline by OpenCV GrabCut). `"space": "a"` / `"b"` draws the mask on that source photo and warps it along with the alignment.
+- Blend options: `"fit": "similarity"` makes a 3-point alignment rotation + scale only; `"mask_hole"` removes a second mask drawn on image b (e.g. keep Newsom's own lips); `"color_match"` shifts image a's color cast and brightness to b's from two skin patches (Lab means) and can desaturate it (`keep_chroma`).
 
 ## Project webpage
 

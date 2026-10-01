@@ -84,8 +84,8 @@
     "2.2": "2026-10-01 00:50:25",
     "2.2.bw": "2026-10-01 00:50:39",
     "2.3": "2026-10-01 00:50:45",
-    "2.4": "2026-10-01 00:51:36",
-    "2.4.bw": "2026-10-01 00:53:11"
+    "2.4": "2026-10-01 02:22:57",
+    "2.4.bw": "2026-10-01 02:24:34"
   },
   "1.2": {
     "image_shape": [
@@ -897,8 +897,8 @@
     },
     "newsom_beard": {
       "shape": [
-        751,
-        751,
+        763,
+        763,
         3
       ],
       "levels": 4,
@@ -914,8 +914,8 @@
         "points": "points/newsom_beard_mask.json",
         "space": "a"
       },
-      "mask_fraction": 0.0849379,
-      "feather_sigma": 15.02
+      "mask_fraction": 0.069748,
+      "feather_sigma": 15.26
     },
     "doctor_space": {
       "shape": [
@@ -1038,11 +1038,11 @@
     "newsom_beard": {
       "depth": {
         "2": {
-          "seam_gradient": 0.0527255,
+          "seam_gradient": 0.0586062,
           "coarsest_sigma": 1.5
         },
         "4": {
-          "seam_gradient": 0.0472953,
+          "seam_gradient": 0.0529944,
           "coarsest_sigma": 6.0
         }
       }

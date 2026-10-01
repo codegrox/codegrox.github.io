@@ -47,20 +47,33 @@ def _affine(P1, P2):
     return AffineTransform(matrix=M)
 
 
+def _similarity(P1, P2):
+    """Least-squares rotation + uniform scale + shift (no shear) taking P1 -> P2.
+    With 3 points it cannot hit all of them exactly, so it cannot slant a face
+    to absorb small clicking errors the way an affine fit does."""
+    A, y = [], []
+    for (x, yy), (u, v) in zip(P1, P2):
+        A += [[x, -yy, 1, 0], [yy, x, 0, 1]]
+        y += [u, v]
+    a, b, tx, ty = np.linalg.lstsq(np.array(A), np.array(y), rcond=None)[0]
+    return AffineTransform(matrix=np.array([[a, -b, tx], [b, a, ty], [0, 0, 1]]))
+
+
 def _resize_pts(im, P, f):
     h, w = im.shape[:2]
     nh, nw = max(1, int(round(h * f))), max(1, int(round(w * f)))
     return resize(im, (nh, nw)), P * np.array([nw / w, nh / h])
 
 
-def align_pair(im1, im2, P1, P2, max_upscale=None):
+def align_pair(im1, im2, P1, P2, max_upscale=None, fit='affine'):
     """Warp im1 onto im2's frame and crop both to the region valid in both.
 
     2 point pairs: the provided starter code (recenter -> rescale -> rotate).
       im1 is resized first so its point distance equals im2's; the starter's own
       rescale always shrinks the larger face, which would throw away resolution.
     3 point pairs: an affine warp (rotation, scale, shear) solved from the three
-      correspondences, which can also match a head turned differently.
+      correspondences, which can also match a head turned differently; or, with
+      fit='similarity', a least-squares rotation + scale only.
 
     im2 keeps its native resolution unless im1 would have to be upsampled by more
     than max_upscale, in which case im2 is reduced so the two stay comparable.
@@ -68,16 +81,17 @@ def align_pair(im1, im2, P1, P2, max_upscale=None):
     P1, P2 = np.asarray(P1, float), np.asarray(P2, float)
     n1, n2 = as_rgb(im1).shape[2], as_rgb(im2).shape[2]
     if len(P1) == 3:
-        t = _affine(P1, P2)
+        solve = _similarity if fit == 'similarity' else _affine
+        t = solve(P1, P2)
         scale = np.sqrt(abs(np.linalg.det(t.params[:2, :2])))
         if max_upscale and scale > max_upscale:
             im2, P2 = _resize_pts(im2, P2, max_upscale / scale)
-            t = _affine(P1, P2)
+            t = solve(P1, P2)
         n = max(n1, n2)
         a1 = warp(_with_validity(im1, n), t.inverse, output_shape=im2.shape[:2], order=3,
                   mode='constant', cval=0, preserve_range=True)
         a2 = _with_validity(im2, n)
-        info = {'method': 'affine (3 points)', 'rotation_deg': float(np.degrees(t.rotation)),
+        info = {'method': f'{fit} (3 points)', 'rotation_deg': float(np.degrees(t.rotation)),
                 'scale': float(np.sqrt(abs(np.linalg.det(t.params[:2, :2])))),
                 'shear_deg': float(np.degrees(t.shear))}
     else:

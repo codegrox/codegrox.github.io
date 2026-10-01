@@ -96,15 +96,31 @@ def feather_blend(im_a, im_b, mask, sigma):
 
 # --------------------------------------------------------------- preprocessing
 
+def color_match(a, b, box_a, box_b, keep_chroma=1.0):
+    """Shift a's color cast and brightness to b's, measured on corresponding
+    patches (e.g. forehead skin) in Lab. Only the means move, so a keeps its own
+    contrast; keep_chroma < 1 then desaturates a (e.g. color noise in an old scan).
+    Boxes are (x0, y0, x1, y1) fractions of each photo."""
+    from skimage.color import rgb2lab, lab2rgb
+    la, lb = rgb2lab(a), rgb2lab(b)
+    def patch(lab, box):
+        x0, y0, x1, y1 = box
+        h, w = lab.shape[:2]
+        return lab[int(y0 * h):int(y1 * h), int(x0 * w):int(x1 * w)].reshape(-1, 3)
+    out = la - patch(la, box_a).mean(0) + patch(lb, box_b).mean(0)
+    out[..., 1:] *= keep_chroma
+    return np.clip(lab2rgb(out), 0, 1)
+
+
 def prepare_pair(entry, root='.', max_side=800):
     """Load a blend pair onto one canvas and build its mask.
 
     Image b sets the frame; image a is aligned to it with clicked points
-    (entry['points']) or center-cropped/resized. A mask spec with
-    "space": "a" or "b" is drawn on that original photo and warped along with it,
-    so a mask placed on a face stays on the face after alignment. Otherwise the
-    mask is drawn directly on the final canvas.
-    Returns (a, b, mask)."""
+    (entry['points']; entry['fit'] = 'affine' or 'similarity' for 3 points) or
+    center-cropped/resized. A mask spec with "space": "a" or "b" is drawn on that
+    original photo and warped along with it, so a mask placed on a face stays on
+    the face after alignment. entry['mask_hole'] is a second mask drawn on b and
+    removed from the first (e.g. keep b's own lips). Returns (a, b, mask)."""
     from imutils import load, fit_to
     from hybrid import align_pair, load_points
     root = Path(root)
@@ -117,23 +133,37 @@ def prepare_pair(entry, root='.', max_side=800):
         b = b[int(y0 * H):int(y1 * H), int(x0 * W):int(x1 * W)]
     if entry.get('pre_blur_a'):                  # e.g. remove film grain from an old scan
         a = gaussian_blur(a, entry['pre_blur_a'])
+    if entry.get('color_match'):
+        a = color_match(a, b, **entry['color_match'])
     spec = dict(entry['mask'])
     space = spec.pop('space', None)
+    hole = entry.get('mask_hole')
+    extra_a, extra_b = [], []                    # extra channels warped with each image
     if space == 'a':
-        a = np.dstack([a, make_mask(spec, a.shape, root)])
-    elif space == 'b':
-        b = np.dstack([b, make_mask(spec, b.shape, root)])
+        extra_a.append(make_mask(spec, a.shape, root, image=a))
+    if space == 'b':
+        extra_b.append(make_mask(spec, b.shape, root, image=b))
+    if hole:
+        extra_b.append(make_mask(hole, b.shape, root, image=b))
+    if extra_a:
+        a = np.dstack([a] + extra_a)
+    if extra_b:
+        b = np.dstack([b] + extra_b)
     if entry.get('points'):
         a, b, _ = align_pair(a, b, *load_points(root / entry['points'], a.shape, b.shape),
-                             max_upscale=entry.get('max_upscale'))
+                             max_upscale=entry.get('max_upscale'), fit=entry.get('fit', 'affine'))
     elif a.shape[:2] != b.shape[:2]:
         a = fit_to(a, b.shape[:2])
+    ea, eb = a[..., 3:], b[..., 3:]
+    a, b = a[..., :3], b[..., :3]
     if space == 'a':
-        a, mask = a[..., :3], a[..., 3]
+        mask = ea[..., 0]
     elif space == 'b':
-        b, mask = b[..., :3], b[..., 3]
+        mask = eb[..., 0]
     else:
         mask = make_mask(spec, a.shape, root, image=b)
+    if hole:
+        mask = mask * (1 - gaussian_blur(eb[..., -1], entry.get('hole_soften', 1.5)))
     return a, b, np.clip(mask, 0, 1)
 
 

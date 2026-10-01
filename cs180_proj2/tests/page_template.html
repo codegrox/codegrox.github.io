@@ -516,7 +516,7 @@
     </div>
     <p>Most of my masks needed more than a straight line:</p>
     <ol class="method-steps">
-      <li><strong>Face swaps.</strong> The mask has to stay on the face through alignment, so it is drawn on the source photo and warped along with it, carried as a fourth image channel through the same transform. Both swaps use the hybrids' three-point affine alignment (eyes plus mouth), so the pasted mouth and beard follow the head's tilt instead of hanging at an angle. I capped the upsampling of the lower-resolution face at 1.5× and blurred the old bin Laden scan with σ = 1, since its film grain otherwise came through as blue speckle.</li>
+      <li><strong>Face swaps.</strong> The mask has to stay on the face through alignment, so it is drawn on the source photo and warped along with it, carried as a fourth image channel through the same transform. The mouth swap uses the hybrids' three-point affine alignment (eyes plus mouth). For the beard, a rotation-and-scale-only (similarity) fit to the same three points works better: with three points the affine fit matches them exactly and spends its extra freedom on shear, slanting the face, while the similarity fit needs only a 4.6° turn. The beard mask also has a hole cut around Newsom's own lips, so only the mustache and beard come from bin Laden. I capped the upsampling of the lower-resolution face at 1.5×, blurred the old bin Laden scan with σ = 1 to remove film grain, and corrected its colors before blending (below).</li>
       <li><strong>Dark City.</strong> These masks have to follow a person's outline. I traced a rough polygon around the subject, and GrabCut (OpenCV's graph-cut segmentation) refined it to the real silhouette, including the hair, the sleeves, and the gap between the arm and the coat. Only then does the mask go into the stacks.</li>
     </ol>
     <div class="breakout">
@@ -544,9 +544,9 @@
       <h3>Irregular mask · Beard transplant</h3>
       <div class="media-grid compare-4">
         <figure><div class="figure-frame"><img src="media/blend/newsom_beard/input_b.jpg" alt="Portrait of Gavin Newsom"></div><figcaption><strong>B:</strong> Newsom.</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/blend/newsom_beard/input_a.jpg" alt="Portrait of Osama bin Laden aligned on the face midline"></div><figcaption><strong>A:</strong> bin Laden, affine-aligned to Newsom’s head tilt.</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/blend/newsom_beard/mask.png" alt="Beard-shaped mask"></div><figcaption><strong>Mask:</strong> mustache, lips and beard, traced on A.</figcaption></figure>
-        <figure><div class="figure-frame"><img src="media/blend/newsom_beard/result.jpg" alt="Newsom with bin Laden's beard"></div><figcaption><strong>Result.</strong> The beard hangs from his chin; it keeps a cool cast from the old scan.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/blend/newsom_beard/input_a.jpg" alt="Portrait of Osama bin Laden aligned on the face midline"></div><figcaption><strong>A:</strong> bin Laden, rotated and scaled to Newsom’s head, colors corrected.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/blend/newsom_beard/mask.png" alt="Beard-shaped mask"></div><figcaption><strong>Mask:</strong> mustache and beard traced on A, with a hole for Newsom’s lips.</figcaption></figure>
+        <figure><div class="figure-frame"><img src="media/blend/newsom_beard/result.jpg" alt="Newsom with bin Laden's beard"></div><figcaption><strong>Result.</strong> Newsom keeps his own smile; the beard hangs from his chin.</figcaption></figure>
       </div>
       <h3>Irregular mask · Dark City: the doctor in deep space</h3>
       <div class="media-grid compare-4">
@@ -565,7 +565,7 @@
       <figure><div class="figure-frame"><img src="media/blend/doctor_space/result.jpg" alt="The doctor in deep space, full size"></div><figcaption><strong>The doctor, full size.</strong></figcaption></figure>
       <figure><div class="figure-frame"><img src="media/blend/train_space/result.jpg" alt="The night train under star trails, full size"></div><figcaption><strong>The night train, full size.</strong></figcaption></figure>
     </div>
-    <p>The beard shows the main limit of the method. Blending smooths the <em>transition</em> between two images at every scale, but it doesn't make their colors agree. The old scan's cool color balance survives inside the mask, because inside the mask the result simply <em>is</em> image A. Fixing that would require matching the colors first, for example by transferring the mean and spread of each color channel from B to A before blending.</p>
+    <p>The beard also shows the main limit of the method. Blending smooths the <em>transition</em> between two images at every scale, but it does not make their colors agree, because inside the mask the result simply <em>is</em> image A. The old scan had a strong cool cast and colored grain in the hair, so I corrected it before blending. I measured the average Lab color of matching skin patches on both faces (forehead and nose), shifted bin Laden's whole photo by the difference, and kept 35% of its chroma so the hair reads as neutral salt-and-pepper. Shifting only the averages, and not the contrast, keeps the beard dark. When I also matched the contrast, it washed out to a gray haze.</p>
 
     <h3>Laplacian stack of my favorite blend</h3>
     <p>This is the same breakdown as Burt &amp; Adelson's Figure 10, for the launch. Each row is one level from fine (top) to coarse, with the masked stars, the masked launch photo, and their sum. The last two rows are the remaining blurry level and the sum of all levels.</p>
