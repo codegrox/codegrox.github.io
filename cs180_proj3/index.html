@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CS180 Project 3: sampling, editing and illusions with a pretrained flow model, and flow matching from scratch on MNIST.">
+  <title>Project 3 — Fun with Flow Models · Codegrox</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('codegrox-theme')||'dark'}catch(e){}</script>
+  <link rel="stylesheet" href="../assets/site.css">
+  <style>
+    .project-page .prompt { font-style: italic; opacity: .85; }
+    .project-page .small-print { font-size: .92em; opacity: .85; }
+    .project-page .figure-frame img.crisp { image-rendering: pixelated; }
+    .project-page pre { overflow-x: auto; }
+  </style>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="project-page">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../">CODEGRO<span class="mark">X</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="../#projects">Projects</a>
+      <a class="optional" href="https://github.com/codegrox">GitHub</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </nav>
+  </div>
+</header>
+<main id="content" class="shell project-layout">
+  <header class="project-hero reading">
+    <div class="eyebrow">CS 180 · Project 03 · Fall 2026</div>
+    <h1 class="project-title">Fun with Flow Models</h1>
+    <p class="project-subtitle">Denoising, sampling, editing and optical illusions with a pretrained text-to-image flow model, then a UNet trained from scratch to turn noise into MNIST digits, with all CS280A bells &amp; whistles.</p>
+  </header>
+  <nav class="project-toc reading" aria-label="Project sections">
+    <a href="#part-a" data-num="A">Part A</a>
+    <a href="#a11" data-num="1.1">Noisy inputs</a>
+    <a href="#a12" data-num="1.2">Blur</a>
+    <a href="#a13" data-num="1.3">One step</a>
+    <a href="#a14" data-num="1.4">Velocity</a>
+    <a href="#a15" data-num="1.5">Euler</a>
+    <a href="#a16" data-num="1.6">From noise</a>
+    <a href="#a21" data-num="2.1">CFG</a>
+    <a href="#a31" data-num="3.1">Editing</a>
+    <a href="#a32" data-num="3.2">Text edits</a>
+    <a href="#a33" data-num="3.3">Anagrams</a>
+    <a href="#a34" data-num="3.4">Hybrids</a>
+    <a href="#b-w-a" data-num="280">Anagrams · logo</a>
+    <a href="#own-a" data-num="A+">Own ideas</a>
+    <a href="#part-b" data-num="B">Part B</a>
+    <a href="#b11" data-num="1.1">UNet</a>
+    <a href="#b121" data-num="1.2">Denoiser</a>
+    <a href="#b122" data-num="1.2.2">OOD</a>
+    <a href="#b123" data-num="1.2.3">Pure noise</a>
+    <a href="#b21" data-num="2.3">Time FM</a>
+    <a href="#b24" data-num="2.6">Class FM</a>
+    <a href="#b-w-b" data-num="280">Better time UNet</a>
+    <a href="#own-b" data-num="B+">Step counts</a>
+    <a href="#inputs" data-num="—">My images</a>
+    <a href="#learned" data-num="—">Learned</a>
+  </nav>
+  <div class="reading panel corner-ticks project-summary">
+    <div class="panel-title">Result snapshot</div>
+    <p>Part A: every required section on Constable's <em>Wivenhoe Park</em>, my pixel art and my drawings; two working hybrids (skull / waterfall, panda / bamboo); CS280A anagrams with a 90° rotation and color negation, and a course logo. Part B: the pure-noise denoiser hits the measured mean-digit floor (0.0673); class-conditioned samples are clean after one epoch; the improved time-only UNet raises confidently legible samples from 73.0% to 79.4%. Extras: inpainting with RePaint, step-count studies in both parts, 4- and 6-way anagrams, and "make it real".</p>
+  </div>
+
+  <header class="part-heading reading" id="part-a">
+    <div class="eyebrow">Part A</div>
+    <h2>Exploring the Power of Flow Models</h2>
+    <p>Everything in Part A uses one pretrained text-to-image model, PixNerd-XXL-P16-T2I, which works directly on 512×512 pixels.
+    Fixed settings throughout: seed 180, Euler step \(h = 0.02\) (50 steps from pure noise),
+    classifier-free guidance \(w = 7\), Tesla T4 in float32 (peak memory 11.4 GiB). No training:
+    every result below is a different way of <em>integrating the same learned velocity field</em>.</p>
+  </header>
+
+  <section id="a-conv" class="project-section">
+    <h2>The Flow-Matching Convention</h2>
+    <p>Time runs from noise at \(t = 0\) to data at \(t = 1\). A training input is a straight-line mix of a clean image and Gaussian noise, and the network predicts the velocity of that line:</p>
+    <div class="math">\[x_t = (1-t)\,\epsilon + t\,x_1, \qquad \frac{dx_t}{dt} = x_1 - \epsilon \approx v_\theta(x_t, t, c).\]</div>
+    <p>Each training path is straight, but the model only sees \(x_t\), not which clean image it came from, so it learns the <em>average</em> direction over every image consistent with \(x_t\). Following that averaged field traces a curved path. That one fact explains most of Section 1: why a single jump is blurry, why many small steps are sharp, and why the update looks the way it does.</p>
+    <p>My inputs: John Constable's <em>Wivenhoe Park</em> (1816) for Sections 1.1–1.5; a pixel-art Mount Fuji, a pen-and-ink fantasy tower and two of my own drawings for Section 3.1; and more of my chosen images for the extras. All are center-cropped to 512×512. <a href="#inputs">All my images</a> and <a href="#credits">credits</a> are at the end.</p>
+  </section>
+
+  <section id="a11" class="project-section">
+    <h2>1.1 Noisy Training Inputs</h2>
+    <p>One noise tensor (seed 180) is drawn once and reused at every \(t\), so only the mix changes across the row. The image is also <em>scaled down</em> by \(t\), not just noised, which is why \(t = 0.25\) is grayer as well as noisier. The notebook asserts both endpoints exactly: \(t = 0\) returns the noise and \(t = 1\) returns the image.</p>
+    <pre><code>def interpolate(image, noise, t):
+    return (1 - t) * noise + t * image</code></pre>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_original.png" alt="original"></div><figcaption><strong>Original</strong> \(x_1\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_noisy_0.25.png" alt="t=0.25"></div><figcaption>\(x_t\), \(t = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_noisy_0.50.png" alt="t=0.50"></div><figcaption>\(x_t\), \(t = 0.50\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_noisy_0.75.png" alt="t=0.75"></div><figcaption>\(x_t\), \(t = 0.75\)</figcaption></figure></div></div>
+  </section>
+
+  <section id="a12" class="project-section">
+    <h2>1.2 Classical Denoising</h2>
+    <p>Dividing by \(t\) restores the image's amplitude but scales the noise by the same factor: its standard deviation becomes \((1-t)/t\), which is <strong>3</strong> at \(t = 0.25\), wider than the image's whole \([-1, 1]\) range. I swept σ over {0.5, 1, 1.5, 2, 3, 4, 6, 8, 12, 16} and kept the σ with the lowest MSE to the known original.</p>
+    <div class="table-wrap"><table><thead><tr><th>t</th><th>noise std after ÷t</th><th>best σ</th><th>MSE</th></tr></thead><tbody><tr><td>0.25</td><td>3.00</td><td>12</td><td>0.0238</td></tr><tr><td>0.50</td><td>1.00</td><td>6</td><td>0.0153</td></tr><tr><td>0.75</td><td>0.33</td><td>2</td><td>0.0089</td></tr></tbody></table></div>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_blur_0.25.png" alt="blur t=0.25"></div><figcaption>Blurred, \(t = 0.25\), σ = 12</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_blur_0.50.png" alt="blur t=0.50"></div><figcaption>Blurred, \(t = 0.50\), σ = 6</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_blur_0.75.png" alt="blur t=0.75"></div><figcaption>Blurred, \(t = 0.75\), σ = 2</figcaption></figure></div></div>
+    <p>The best σ grows quickly as the noise grows (2 → 6 → 12). At \(t = 0.25\) the only way to beat the noise is to erase almost all structure, leaving colored blobs where the trees and sky were. A blur cannot tell noise from detail: both are high frequencies, so it removes both.</p>
+  </section>
+
+  <section id="a13" class="project-section">
+    <h2>1.3 One-Step Denoising</h2>
+    <p>One velocity evaluation extrapolates straight to the end: \(\hat x_1 = x_t + (1-t)\,v_\theta(x_t, t, c)\) with \(c\) = "a high quality photo". The prediction is a velocity, so it is added for the remaining time \(1 - t\), not subtracted like a noise estimate.</p>
+    <pre><code>def one_step_denoise(x, t, condition, predict_velocity):
+    return x + (1 - t) * predict_velocity(x, t, condition)</code></pre>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_onestep_0.25.png" alt="one step t=0.25"></div><figcaption>One step from \(t = 0.25\) · MSE 0.0171</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_onestep_0.50.png" alt="one step t=0.50"></div><figcaption>One step from \(t = 0.50\) · MSE 0.0092</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_onestep_0.75.png" alt="one step t=0.75"></div><figcaption>One step from \(t = 0.75\) · MSE 0.0044</figcaption></figure></div></div>
+    <p>Already far better than blurring (MSE 0.0092 vs 0.0153 at \(t = 0.5\)), because the model knows what images look like. From \(t = 0.25\), though, the result is a soft, painterly guess: the house, cows and fence are gone, and the trees are smooth shapes. That is the averaging from the convention above made visible. When many clean images are consistent with the input, one step lands on their average, and an average of sharp images is blurry.</p>
+  </section>
+
+  <section id="a14" class="project-section">
+    <h2>1.4 Visualizing Velocity</h2>
+    <p>I know the exact update that should be added, \(x_1 - x_t = (1-t)(x_1 - \epsilon)\), so I can compare it with what the model adds, \((1-t)\hat v_t\), and map the per-pixel error \(E_t = \sqrt{\text{mean}_{\text{RGB}}[(1-t)(\hat v_t - v_{\text{gt}})]^2}\). All six updates share one symmetric scale, ±1.78 with zero at middle gray. The three error maps share one scale from 0 to 0.345. Both limits are the 99th percentile over all three times: the true maxima (4.33 and 1.12) come from a handful of noise outliers and would flatten everything else to gray or black.</p>
+    <pre><code>@torch.inference_mode()
+def velocity_diagnostics(x_t, t, clean_image, epsilon, condition, predict_velocity):
+    v_hat = predict_velocity(x_t, t, condition)
+    predicted_update = (1 - t) * v_hat
+    ground_truth_update = (1 - t) * (clean_image - epsilon)   # == clean_image - x_t
+    error_map = ((predicted_update - ground_truth_update) ** 2).mean(dim=1).sqrt()
+    return predicted_update, ground_truth_update, error_map</code></pre>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_noisy_0.25.png" alt="noisy 0.25"></div><figcaption>\(x_t\), \(t = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_pred_0.25.png" alt="pred 0.25"></div><figcaption>Predicted \((1-t)\hat v\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_gt_0.25.png" alt="gt 0.25"></div><figcaption>Ground truth \(x_1 - x_t\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_err_0.25.png" alt="err 0.25"></div><figcaption>Error, mean 0.098</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_noisy_0.50.png" alt="noisy 0.50"></div><figcaption>\(x_t\), \(t = 0.50\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_pred_0.50.png" alt="pred 0.50"></div><figcaption>Predicted \((1-t)\hat v\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_gt_0.50.png" alt="gt 0.50"></div><figcaption>Ground truth \(x_1 - x_t\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_err_0.50.png" alt="err 0.50"></div><figcaption>Error, mean 0.071</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_noisy_0.75.png" alt="noisy 0.75"></div><figcaption>\(x_t\), \(t = 0.75\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_pred_0.75.png" alt="pred 0.75"></div><figcaption>Predicted \((1-t)\hat v\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_gt_0.75.png" alt="gt 0.75"></div><figcaption>Ground truth \(x_1 - x_t\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_err_0.75.png" alt="err 0.75"></div><figcaption>Error, mean 0.051</figcaption></figure></div></div>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/vel_colorbar.png" alt="error colorbar"></div><figcaption>Error scale, shared by all three maps.</figcaption></figure></div>
+    <div class="table-wrap"><table><thead><tr><th>t</th><th>mean |ground-truth update|</th><th>mean RMS error</th><th>error / update</th></tr></thead><tbody><tr><td>0.25</td><td>0.650</td><td>0.098</td><td>0.15</td></tr><tr><td>0.50</td><td>0.434</td><td>0.071</td><td>0.16</td></tr><tr><td>0.75</td><td>0.217</td><td>0.051</td><td>0.24</td></tr></tbody></table></div>
+    <p>The ground-truth update contains the exact noise to remove, so it is grainy. The prediction is smooth, because the model cannot know the particular noise sample and predicts its expected value. The error is therefore largest exactly where the image has fine structure the model cannot recover: the tree line, the fence and the cows light up at \(t = 0.25\), while the smooth sky stays dark. As \(t\) grows, both the update and the error shrink. The error relative to the update rises from 0.15 to 0.24, because late in the path what remains to be added is mostly fine detail, the hardest part to predict.</p>
+  </section>
+
+  <section id="a15" class="project-section">
+    <h2>1.5 Euler Sampling</h2>
+    <p>Euler integration takes a small step along the current velocity and asks again: \(x_{t+h} = x_t + h\,v_\theta(x_t, t, c)\). My sampler fixes the number of steps up front, \(\lceil (1 - t_0)/h \rceil\), and computes each time as \(t_0 + kh\) instead of accumulating \(t \mathrel{+}= h\), so float round-off can never add an extra sliver of a step; the last step is shortened to land exactly on \(t = 1\). Before using it, the notebook checks it against a constant velocity field: 50 full steps, 25 half steps, shortened final step: passed.</p>
+    <pre><code>@torch.inference_mode()
+def euler_sample(x_start, t_start, step_size, velocity):
+    x = x_start.float()
+    n = math.ceil(round((1.0 - t_start) / step_size, 9))
+    states = [(float(t_start), x.clone())]
+    for k in range(n):
+        t = t_start + k * step_size
+        h = min(step_size, 1.0 - t)
+        x = x + h * velocity(x, t)
+        t_next = 1.0 if k == n - 1 else t_start + (k + 1) * step_size
+        if (k + 1) % 5 == 0 or k == n - 1:
+            states.append((float(t_next), x.clone()))
+    return x, states</code></pre>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_0.50.png" alt="t=0.50"></div><figcaption>\(t = 0.50\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_0.60.png" alt="t=0.60"></div><figcaption>\(t = 0.60\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_0.70.png" alt="t=0.70"></div><figcaption>\(t = 0.70\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_0.80.png" alt="t=0.80"></div><figcaption>\(t = 0.80\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_0.90.png" alt="t=0.90"></div><figcaption>\(t = 0.90\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_1.00.png" alt="t=1.00"></div><figcaption>\(t = 1.00\)</figcaption></figure></div></div>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_original.png" alt="original"></div><figcaption><strong>Original</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_blur_0.50.png" alt="blur"></div><figcaption>Blur · MSE 0.0153</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_onestep_0.50.png" alt="one step"></div><figcaption>One step · MSE 0.0092</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/sec1_traj_1.00.png" alt="Euler"></div><figcaption>Euler, 25 steps · MSE 0.0106</figcaption></figure></div></div>
+    <p>Euler is the sharpest by far: real cows, a fence, cloud texture. Yet its MSE (0.0106) is slightly <em>worse</em> than the one-step result (0.0092). This is not a contradiction. Many steps let the model commit to one specific, sharp image instead of the blurry average, and wherever that image's details differ from Constable's, MSE punishes them more than it punishes blur. MSE rewards the average, while a sampler should produce a <em>plausible</em> image.</p>
+  </section>
+
+  <section id="a16" class="project-section">
+    <h2>1.6 Sampling from Pure Noise</h2>
+    <p>The same sampler from \(t = 0\): 50 steps, prompt "a high quality photo", no guidance, seeds 180–184.</p>
+    <div class="breakout"><div class="media-grid compare-5"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/conditional_0.png" alt="sample 0"></div><figcaption>Seed 180</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/conditional_1.png" alt="sample 1"></div><figcaption>Seed 181</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/conditional_2.png" alt="sample 2"></div><figcaption>Seed 182</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/conditional_3.png" alt="sample 3"></div><figcaption>Seed 183</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/conditional_4.png" alt="sample 4"></div><figcaption>Seed 184</figcaption></figure></div></div>
+    <p>All five are people, which shows what the model associates with "a high quality photo". But the faces are often broken: seed 180 has no face at all, and seed 183 is a melted figure. Without guidance the sampler follows the plain conditional velocity, which still carries a lot of the model's generic "any image" behavior, so the prompt pulls only weakly.</p>
+  </section>
+
+  <section id="a21" class="project-section">
+    <h2>2.1 Classifier-Free Guidance</h2>
+    <p>CFG evaluates the same \(x_t\) twice, with the prompt and with the empty prompt, and extrapolates past the conditional prediction: \(v = v_c + w\,(v_c - v_u)\). The difference \(v_c - v_u\) is the part of the motion that exists <em>because of</em> the prompt; scaling it by \(w = 7\) pushes samples toward images much more typical of it. The notebook checks that \(w = 0\) reproduces the plain prediction exactly. Same five noises as 1.6:</p>
+    <pre><code>def cfg_velocity(x, t, condition, w, predict_velocity, null_condition=&#x27;&#x27;):
+    v_cond = predict_velocity(x, t, condition)
+    if w == 0:
+        return v_cond
+    v_uncond = predict_velocity(x, t, null_condition)
+    return v_cond + w * (v_cond - v_uncond)</code></pre>
+    <div class="breakout"><div class="media-grid compare-5"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/cfg_0.png" alt="cfg 0"></div><figcaption>Seed 180, \(w = 7\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/cfg_1.png" alt="cfg 1"></div><figcaption>Seed 181, \(w = 7\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/cfg_2.png" alt="cfg 2"></div><figcaption>Seed 182, \(w = 7\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/cfg_3.png" alt="cfg 3"></div><figcaption>Seed 183, \(w = 7\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/cfg_4.png" alt="cfg 4"></div><figcaption>Seed 184, \(w = 7\)</figcaption></figure></div></div>
+    <p>Every sample becomes a clean, well-lit studio portrait. The cost is variety: five centered faces with the same framing, lighting and expression. The seeds still decide hair, background and pose (seed 182 keeps its hand at the cheek), so guidance changes how strongly the sampler commits, not where it starts.</p>
+  </section>
+
+  <section id="a31" class="project-section">
+    <h2>3.1 Image-to-Image Editing</h2>
+    <p>Noise a real image to \(t_0\) with the interpolation from 1.1, then run guided Euler sampling back to 1 (prompt "a high quality photo", \(w = 7\)). The starting time is the edit strength: at \(t_0 = 0.02\) only 2% of the image survives and the model mostly invents; at 0.5 half the signal remains and the model only retouches texture. Same noise (seed 180) for every edit.</p>
+    <pre><code>def edit(image, noise, t_start, condition, predict_velocity, w=7, step_size=0.02):
+    x = interpolate(image, noise, t_start)
+    velocity = lambda x, t: cfg_velocity(x, t, condition, w, predict_velocity, null_condition)
+    return euler_sample(x, t_start, step_size, velocity)[0]</code></pre>
+    <h3>Campanile</h3><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_original.png" alt="Campanile input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.02.png" alt="Campanile from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.04.png" alt="Campanile from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.06.png" alt="Campanile from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.10.png" alt="Campanile from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.14.png" alt="Campanile from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.25.png" alt="Campanile from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_t_0.50.png" alt="Campanile from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div>
+    <p>The tower's tall white column survives from the very first step: at 0.02 to 0.06 it is a white vase, a cone and a lamp post; from 0.10 on it is the Campanile with its clock face and trees. A tall, bright, centered shape is about all that 2% of the signal can carry.</p>
+    <h3>Wivenhoe Park (Constable, 1816)</h3><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_original.png" alt="Wivenhoe Park input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.02.png" alt="Wivenhoe Park from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.04.png" alt="Wivenhoe Park from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.06.png" alt="Wivenhoe Park from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.10.png" alt="Wivenhoe Park from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.14.png" alt="Wivenhoe Park from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.25.png" alt="Wivenhoe Park from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_t_0.50.png" alt="Wivenhoe Park from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div>
+    <p>At 0.02 the "high quality photo" prior wins outright (a man at a laptop). From 0.04 to 0.14 only the horizontal banding survives, and it becomes a product shot and then a train in a field. From 0.25 on the painting returns, now looking like a photograph of the park. The scene's layout is the first thing to survive and the brushwork the last.</p>
+    <h3>Mount Fuji, pixel art</h3><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/a/edit_my_image_2_original.png" alt="Pixel-art Fuji input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.02.png" alt="Pixel-art Fuji from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.04.png" alt="Pixel-art Fuji from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.06.png" alt="Pixel-art Fuji from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.10.png" alt="Pixel-art Fuji from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.14.png" alt="Pixel-art Fuji from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.25.png" alt="Pixel-art Fuji from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_t_0.50.png" alt="Pixel-art Fuji from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div>
+    <p>The bright triangle is lost at 0.02 to 0.06 (soft gray product shots), becomes a photographic snow-capped Fuji at 0.10 to 0.14, and turns back into pixels by 0.50. Between 0.10 and 0.25 the model "un-pixelates" the image, because "a high quality photo" has no room for hard square edges.</p>
+    <h3>Web image: a pen-and-ink fantasy tower</h3><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_original.png" alt="Fantasy tower input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.02.png" alt="Fantasy tower from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.04.png" alt="Fantasy tower from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.06.png" alt="Fantasy tower from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.10.png" alt="Fantasy tower from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.14.png" alt="Fantasy tower from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.25.png" alt="Fantasy tower from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_web_image_t_0.50.png" alt="Fantasy tower from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div>
+    <p>The sheet of paper survives everything: even at 0.02 there is a bright card, held in a hand. From 0.10 the tower is back, first as a 3-D paper sculpture and then as the ink drawing itself. The model reads "photo of a drawing" as the most likely photo.</p>
+    <h3>My drawing: a confused pig</h3><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_original.png" alt="Pig drawing input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.02.png" alt="Pig drawing from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.04.png" alt="Pig drawing from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.06.png" alt="Pig drawing from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.10.png" alt="Pig drawing from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.14.png" alt="Pig drawing from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.25.png" alt="Pig drawing from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_1_t_0.50.png" alt="Pig drawing from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div>
+    <h3>My drawing: a kart hitting a wall</h3><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_original.png" alt="Kart drawing input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.02.png" alt="Kart drawing from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.04.png" alt="Kart drawing from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.06.png" alt="Kart drawing from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.10.png" alt="Kart drawing from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.14.png" alt="Kart drawing from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.25.png" alt="Kart drawing from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_drawing_2_t_0.50.png" alt="Kart drawing from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div>
+    <p>Flat-color drawings show the sharpest transition. At 0.02 to 0.04 the colors survive but not the content (a red tray, a pink ball, an orange roll, red letters). At 0.06 to 0.10 the drawings come back as cleaner, slightly 3-D cartoons (the pig gets lipstick at 0.10), and from 0.14 on they are left almost untouched. My first run composited these transparent PNGs onto black, which made the model invent dark computer screens around them; the final run puts them on white, as drawn.</p>
+  </section>
+
+  <section id="a32" class="project-section">
+    <h2>3.2 Text-Guided Editing</h2>
+    <p>The same procedure with the generic prompt replaced by a description of the edit. Low starting times give the prompt room to win; high ones keep the layout and change only the surface.</p>
+<h3>Campanile</h3><p class="prompt">“a photograph of a rocket standing on a launch pad against a clear blue sky”</p><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_campanile_original.png" alt="Campanile input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.02.png" alt="Campanile from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.04.png" alt="Campanile from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.06.png" alt="Campanile from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.10.png" alt="Campanile from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.14.png" alt="Campanile from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.25.png" alt="Campanile from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_campanile_t_0.50.png" alt="Campanile from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div><p>From 0.02 to 0.06 it is a genuine rocket on a launch pad, with gantry towers to the right where the Campanile had trees. By 0.10 to 0.14 it is a hybrid: the tower has turned into a white rocket body with a blue band, still with the clock-face window. From 0.25 the Campanile wins again.</p><h3>Wivenhoe Park</h3><p class="prompt">“a high quality photograph of an English country park in winter, with a frozen lake and snow-covered trees”</p><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_1_original.png" alt="Wivenhoe Park input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.02.png" alt="Wivenhoe Park from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.04.png" alt="Wivenhoe Park from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.06.png" alt="Wivenhoe Park from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.10.png" alt="Wivenhoe Park from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.14.png" alt="Wivenhoe Park from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.25.png" alt="Wivenhoe Park from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_1_t_0.50.png" alt="Wivenhoe Park from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div><p>The cleanest edit of the three: winter arrives by 0.02 and stays through 0.14, with bare trees, snow on the banks and a frozen lake in the same composition. At 0.25 only a pale, wintry cast remains, and at 0.50 the summer painting is back.</p><h3>Pixel-art Fuji</h3><p class="prompt">“a high quality landscape photograph of Mount Fuji covered in snow at sunset, with trees in the foreground”</p><div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/edit_my_image_2_original.png" alt="Pixel-art Fuji input"></div><figcaption><strong>Input</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.02.png" alt="Pixel-art Fuji from t=0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.04.png" alt="Pixel-art Fuji from t=0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.06.png" alt="Pixel-art Fuji from t=0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.10.png" alt="Pixel-art Fuji from t=0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.14.png" alt="Pixel-art Fuji from t=0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.25.png" alt="Pixel-art Fuji from t=0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/text_edit_my_image_2_t_0.50.png" alt="Pixel-art Fuji from t=0.50"></div><figcaption>\(t_0 = 0.50\)</figcaption></figure></div></div><p>Sunset is easy because the input already has a pink sky: pink-orange skies and snow fields through 0.06, then a photographic white Fuji with dark pines from 0.10 to 0.25, and pixel art again at 0.50.</p></section>
+  <section id="a33" class="project-section">
+    <h2>3.3 Visual Anagrams</h2>
+    <p>One image, two prompts. At every Euler step the velocity is the average of the guided velocity for prompt \(a\) on the image and the guided velocity for prompt \(b\) on the image rotated 180°, rotated back. Rotation by 180° flips both axes (it is not a mirror) and is its own inverse, which the notebook checks.</p>
+    <pre><code>def visual_anagrams(noise, condition_a, condition_b, predict_velocity, w=7, step_size=0.02):
+    def velocity(x, t):
+        v_a = cfg_velocity(x, t, condition_a, w, predict_velocity, null_condition)
+        v_b = rotate180(cfg_velocity(rotate180(x), t, condition_b, w, predict_velocity, null_condition))
+        return (v_a + v_b) / 2
+    return euler_sample(noise, 0, step_size, velocity)[0]</code></pre>
+    <div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_0.png" alt="old man"></div><figcaption>“an oil painting of an old man”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_0_rotated.png" alt="campfire"></div><figcaption>Rotated 180°: “an oil painting of people around a campfire”</figcaption></figure></div></div>
+    <p>The stronger of the two. The old man's lit forehead and beard become, upside down, the firelight and the huddled figures. Both prompts want a dark background with one warm, bright center, so they can share almost every pixel.</p>
+    <div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_1.png" alt="village"></div><figcaption>“a lithograph of a snowy mountain village”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_1_rotated.png" alt="horse"></div><figcaption>Rotated 180°: “a lithograph of a horse”</figcaption></figure></div></div>
+    <p>Readable both ways but weaker: the village's mountain becomes the horse's neck and the houses become its legs. Both views stay faint, because pencil lithographs are mostly white paper and give the two prompts few dark pixels to share.</p>
+  </section>
+
+  <section id="a34" class="project-section">
+    <h2>3.4 Hybrid Images</h2>
+    <p>Factorized diffusion, the same idea as Project 2's hybrids but applied to velocities instead of finished images: \(v = f_{\text{low}}(v_a) + v_b - f_{\text{low}}(v_b)\), with \(f_{\text{low}}\) the provided Gaussian blur (kernel 265, σ = 16). The far prompt \(a\) decides the coarse layout seen from across the room; the near prompt \(b\) fills in the detail seen up close.</p>
+    <pre><code>def make_hybrids(noise, condition_a, condition_b, predict_velocity, w=7, step_size=0.02):
+    def velocity(x, t):
+        v_a = cfg_velocity(x, t, condition_a, w, predict_velocity, null_condition)
+        v_b = cfg_velocity(x, t, condition_b, w, predict_velocity, null_condition)
+        return lowpass(v_a) + (v_b - lowpass(v_b))
+    return euler_sample(noise, 0, step_size, velocity)[0]</code></pre>
+    <h3>Hybrid 1: skull / waterfall</h3><div class="breakout"><div class="media-grid compare-2"><figure data-distance><div class="figure-frame"><div class="distance-view"><img src="media/a/hybrid_skull_waterfall.png" alt="hybrid skull_waterfall"></div></div>
+<div class="distance-control"><span class="small-ui">Near</span><input type="range" min="0" max="100" value="0" aria-label="Simulated viewing distance"><span class="small-ui">Far</span></div>
+<figcaption><strong>Near</strong>: “a spectacular waterfall pouring over a rocky ledge into a river, detailed sepia etching”. Drag the slider to step back.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_skull_waterfall_lowpass.png" alt="low-pass view"></div><figcaption><strong>Far</strong> (the σ = 16 low-pass the method takes from the far prompt): “a front-facing human skull, recognizable eye sockets and jaw, fine sepia etching” · seed 921</figcaption></figure></div></div><h3>Hybrid 2: panda / bamboo</h3><div class="breakout"><div class="media-grid compare-2"><figure data-distance><div class="figure-frame"><div class="distance-view"><img src="media/a/hybrid_panda_bamboo_182.png" alt="hybrid panda_bamboo_182"></div></div>
+<div class="distance-control"><span class="small-ui">Near</span><input type="range" min="0" max="100" value="0" aria-label="Simulated viewing distance"><span class="small-ui">Far</span></div>
+<figcaption><strong>Near</strong>: “a lithograph of a dense bamboo forest”. Drag the slider to step back.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_panda_bamboo_182_lowpass.png" alt="low-pass view"></div><figcaption><strong>Far</strong> (the σ = 16 low-pass the method takes from the far prompt): “a lithograph of a giant panda&#x27;s face, front view, big black eye patches” · seed 182</figcaption></figure></div></div><h3>Bonus: owl / pine forest</h3><div class="breakout"><div class="media-grid compare-2"><figure data-distance><div class="figure-frame"><div class="distance-view"><img src="media/a/hybrid_owlface_forest_182.png" alt="hybrid owlface_forest_182"></div></div>
+<div class="distance-control"><span class="small-ui">Near</span><input type="range" min="0" max="100" value="0" aria-label="Simulated viewing distance"><span class="small-ui">Far</span></div>
+<figcaption><strong>Near</strong>: “a lithograph of a dense pine forest”. Drag the slider to step back.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_owlface_forest_182_lowpass.png" alt="low-pass view"></div><figcaption><strong>Far</strong> (the σ = 16 low-pass the method takes from the far prompt): “a lithograph of an owl face with two huge round eyes, front view” · seed 182</figcaption></figure></div></div>
+    <p>The skull reuses the course's example pair, so I wanted a second, distinct one. Finding it took 20 candidates, and the failures explain why. A σ = 16 blur at 512 px keeps only features larger than about 50 px, so the far subject has to be recognizable from a few big dark shapes on a light field. The skull's eye sockets and the panda's eye patches and ears pass that test. A cat's or a man's eyes are too small, and tall cathedrals and tree trunks put strong vertical detail everywhere, which drowns out the far subject. Some of the failures, seen from far away:</p>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_cat_forest_lowpass.png" alt="cat_forest"></div><figcaption>Far view of “a front-facing portrait of a tabby cat with pointed ears and large eyes” + “a deep old-growth forest of closely spaced tall fir trees and intricate branches”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_owl_cathedral_180_lowpass.png" alt="owl_cathedral_180"></div><figcaption>Far view of “a lithograph of an owl” + “a lithograph of a gothic cathedral”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_oldman_mountains_180_lowpass.png" alt="oldman_mountains_180"></div><figcaption>Far view of “a lithograph of the face of an old man” + “a lithograph of a snowy mountain range”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_lion_waves_180_lowpass.png" alt="lion_waves_180"></div><figcaption>Far view of “a lithograph of a lion&#x27;s face” + “a lithograph of ocean waves crashing on rocks”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_face_cliffs_180_lowpass.png" alt="face_cliffs_180"></div><figcaption>Far view of “a lithograph of an old man&#x27;s face” + “a lithograph of rocky cliffs and mountains”</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/hybrid_woman_flowers_180_lowpass.png" alt="woman_flowers_180"></div><figcaption>Far view of “a charcoal portrait of a woman&#x27;s face” + “a charcoal drawing of a meadow full of wildflowers”</figcaption></figure></div></div>
+    <p>Evaluating candidates with this low-pass view was a lesson in itself. My first previews shrank each image to 64 px and enlarged it with blocky pixels, which made the owl look like a failure when it actually reads.</p>
+  </section>
+
+  <header class="part-heading reading" id="b-w-a">
+    <div class="eyebrow">Part A · Bells &amp; Whistles (required for CS280A)</div>
+    <h2>More Visual Anagrams, and a Course Logo</h2>
+  </header>
+
+  <section id="a-bw-anagrams" class="project-section">
+    <h2>Two More Anagram Transformations</h2>
+    <p>The Visual Anagrams paper shows that the 180° trick works for any transformation that is an <em>orthogonal</em> map on pixels: it moves or flips pixels without blending them, so Gaussian noise stays Gaussian noise and both views can be denoised at once. PixNerd works on pixels directly, with no latent decoder in the way, so these apply exactly. I chose a <strong>90° rotation</strong> (inverse: a −90° turn) and the <strong>color negative</strong> \(x \mapsto -x\) in \([-1, 1]\) pixel space, which is its own inverse. The velocity rule is unchanged: \(v = \tfrac12\big(v_a(x) + T^{-1} v_b(Tx)\big)\). Each pair ran with several seeds; the best is shown.</p>
+    <pre><code>def anagram_T(noise, ca, cb, T, T_inv, w=W, step_size=H):
+    def velocity(x, t):
+        v_a = cfg_velocity(x, t, ca, w, predict_velocity, null_condition)
+        v_b = T_inv(cfg_velocity(T(x), t, cb, w, predict_velocity, null_condition))
+        return (v_a + v_b) / 2
+    return euler_sample(noise, 0, step_size, velocity)[0]</code></pre>
+    <h3>rabbit / duck</h3><div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_rot90_0_s181.png" alt="rabbit / duck"></div><figcaption>“an oil painting of a rabbit” · seed 181</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_rot90_0_s181_view.png" alt="rabbit / duck transformed"></div><figcaption>Turned 90°: “an oil painting of a duck”</figcaption></figure></div></div><h3>sailing ship / horse</h3><div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_rot90_1_s180.png" alt="sailing ship / horse"></div><figcaption>“a lithograph of a sailing ship” · seed 180</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_rot90_1_s180_view.png" alt="sailing ship / horse transformed"></div><figcaption>Turned 90°: “a lithograph of a horse”</figcaption></figure></div></div><h3>owl / lighthouse</h3><div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_negate_0_s181.png" alt="owl / lighthouse"></div><figcaption>“an ink drawing of an owl” · seed 181</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_negate_0_s181_view.png" alt="owl / lighthouse transformed"></div><figcaption>Color negative: “an ink drawing of a lighthouse”</figcaption></figure></div></div><h3>snowy village / old man</h3><div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_negate_1_s183.png" alt="snowy village / old man"></div><figcaption>“a charcoal drawing of a snowy village” · seed 183</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/anagram_negate_1_s183_view.png" alt="snowy village / old man transformed"></div><figcaption>Color negative: “a charcoal drawing of an old man”</figcaption></figure></div></div>
+    <p>The 90° rotation works best when both subjects are animals or objects in profile, which can share a silhouette at right angles: the rabbit's back becomes the duck's head, and the ship's black sails become the horse's neck. The color negative is harder, because the two views have to share <em>edges</em> while swapping light and dark. Charcoal and ink help: a snowy village is mostly white, so its negative is mostly black, which is where a dark portrait lives, and seed 183's white roofs become an old man in a hat. That pair needed five seeds; seeds 180 and 184 stayed faint.</p>
+  </section>
+
+  <section id="a-bw-logo" class="project-section">
+    <h2>A Course Logo</h2>
+    <p>Text-guided image-to-image editing (Section 3.2's procedure) starting from my own drawings: my hand sketch of red "CS180" letters filling a circle, and a cleaned-up version I drew in code, with condensed letters whose heights follow the circle, in Berkeley Blue and California Gold (<code>tools/make_logo.py</code>). Emblem prompt: “a clean minimalist emblem logo, bold gold letters CS180 filling a Berkeley blue circle with a thin gold ring, flat vector graphic”. Pin prompt: “a glossy navy blue and gold enamel pin badge of a circular CS180 logo, product photo on a white table”.</p>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_original.png" alt="my sketch"></div><figcaption><strong>My sketch</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_original.png" alt="emblem"></div><figcaption><strong>Cleaned-up emblem</strong> (drawn in code)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.10.png" alt="pin 0.10"></div><figcaption><strong>Final logo</strong>: enamel pin, \(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.08.png" alt="pin 0.08"></div><figcaption>Enamel pin, \(t_0 = 0.08\)</figcaption></figure></div></div>
+    <h3>The enamel pin across starting times</h3>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.04.png" alt="pin 0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.06.png" alt="pin 0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.08.png" alt="pin 0.08"></div><figcaption>\(t_0 = 0.08\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.10.png" alt="pin 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.14.png" alt="pin 0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_pin_t_0.25.png" alt="pin 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_t_0.04.png" alt="flat 0.04"></div><figcaption>Flat emblem, \(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_cs180_t_0.10.png" alt="flat 0.10"></div><figcaption>Flat emblem, \(t_0 = 0.10\)</figcaption></figure></div></div>
+    <h3>Starting from the hand sketch</h3>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.02.png" alt="sketch 0.02"></div><figcaption>\(t_0 = 0.02\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.04.png" alt="sketch 0.04"></div><figcaption>\(t_0 = 0.04\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.06.png" alt="sketch 0.06"></div><figcaption>\(t_0 = 0.06\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.08.png" alt="sketch 0.08"></div><figcaption>\(t_0 = 0.08\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.10.png" alt="sketch 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.14.png" alt="sketch 0.14"></div><figcaption>\(t_0 = 0.14\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_t_0.25.png" alt="sketch 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/logo_sketch_red_t_0.04.png" alt="red prompt"></div><figcaption>Red-letter prompt, \(t_0 = 0.04\)</figcaption></figure></div></div>
+    <p>The model cannot spell. At \(t_0 \le 0.06\) it redesigns the logo freely and the letters become inventions ("CBCO", "4524", scrambled glyphs). From 0.14 on the input is already a clean logo, so the edit changes almost nothing. The useful window is narrow, \(t_0 \approx 0.08\)–\(0.10\): late enough that the letter shapes are fixed, early enough that the model can still add gloss, an embossed rim and a shadow. My hand sketch never becomes a readable logo, because its thin, wobbly strokes carry too little signal at the early starts and are simply kept at the late ones. That is why I drew the clean emblem first: the model is a good finisher but a bad letterer.</p>
+  </section>
+
+  <header class="part-heading reading" id="own-a">
+    <div class="eyebrow">Part A · Own ideas (optional)</div>
+    <h2>Step Counts, Inpainting, Multi-View Anagrams, and "Make It Real"</h2>
+  </header>
+
+  <section id="a-steps" class="project-section">
+    <h2>How Few Euler Steps Are Enough?</h2>
+    <p>Same seed, prompt and guidance (\(w = 7\)) as Section 2.1, with \(h = 1/n\):</p>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/steps_5.png" alt="5 steps"></div><figcaption>5 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/steps_10.png" alt="10 steps"></div><figcaption>10 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/steps_25.png" alt="25 steps"></div><figcaption>25 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/steps_50.png" alt="50 steps"></div><figcaption>50 steps</figcaption></figure></div></div>
+    <p>With 5 or 10 steps the image is an orange-and-black blur: each step jumps a fifth or a tenth of the way along a velocity that is only valid locally, and a curved path cut into five straight pieces misses badly. At 25 steps it is a sharp, plausible face, but a <em>different</em> person from the 50-step result, because small early errors send it toward a different image. The learned flow is far from straight.</p>
+  </section>
+
+  <section id="a-inpaint" class="project-section">
+    <h2>Inpainting: Remove, Replace, Swap</h2>
+    <p>Generate only inside a mask. After every Euler step the known pixels are reset to exactly where they would be on their own straight path, \((1-t)\epsilon + t\,y\), so the masked region is generated to fit a known context.</p>
+    <pre><code>def inpaint(y, mask, cond, seed, t_start=0.0, w=W, step_size=H):
+    eps = noise(seed)
+    m = mask.to(device)
+    def velocity(x, t):
+        return cfg_velocity(x, t, cond, w, predict_velocity, null_condition)
+    x = interpolate(y, eps, t_start)
+    n = math.ceil(round((1 - t_start) / step_size, 9))
+    for k in range(n):
+        t = t_start + k * step_size
+        h = min(step_size, 1 - t)
+        t_next = 1.0 if k == n - 1 else t + h
+        x = x + h * velocity(x, t)
+        x = m * x + (1 - m) * interpolate(y, eps, t_next)      # known pixels follow their exact path
+    return x</code></pre>
+    <h3>Replace: Constable's cows become horses</h3>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_replace_cows_input.png" alt="input"></div><figcaption>Input</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_replace_cows_s181.png" alt="horses 181"></div><figcaption>“…two brown horses grazing…”, seed 181</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_replace_cows_s180.png" alt="horses 180"></div><figcaption>Seed 180</figcaption></figure></div></div>
+    <p>Seed 181 is the result I hoped for: small brown horses at the water's edge, painted in Constable's style. Seed 180 paints one giant horse, because the mask is a box and nothing tells the model the right scale.</p>
+    <h3>Swap: the cows and the house trade places</h3>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_swap_cows_house_input.png" alt="swap input"></div><figcaption>Cut-and-paste swap (input)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_swap_cows_house_s181.png" alt="t0.3"></div><figcaption>Regenerated from \(t_0 = 0.3\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_v2_swap_t0.50_s180.png" alt="t0.5"></div><figcaption>From \(t_0 = 0.5\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_v2_swap_t0.60_s180.png" alt="t0.6"></div><figcaption>From \(t_0 = 0.6\)</figcaption></figure></div></div>
+    <p>I cut out the cows and the red house, swapped them (each resized to the other's box) and regenerated both boxes plus a feathered border. From \(t_0 = 0.3\) the model <em>undoes</em> the swap: it puts a house back on the hill and animals back on the bank, because that is the more probable painting. From 0.5 or 0.6 there is too little freedom left to reverse it, so the swap stays and only its edges are blended: cows on the far hill, a red house on the near bank.</p>
+    <h3>Remove: the Campanile, four ways</h3>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_remove_campanile_input.png" alt="input"></div><figcaption>Input</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_v2_remove_campanile_s181.png" alt="plain"></div><figcaption>Plain inpainting, \(w = 7\), feathered mask</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_v3_remove_campanile_w2_s181.png" alt="low w"></div><figcaption>Neutral prompt, \(w = 2\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/inpaint_v4_repaint_w3_s181.png" alt="repaint"></div><figcaption><strong>RePaint resampling</strong>, \(w = 3\)</figcaption></figure></div></div>
+    <p>The hardest of the three, and the most instructive. Plain inpainting removes the tower but leaves a vivid cyan strip, for two reasons that add up. Guidance at \(w = 7\) pushes the new sky toward an idealized "clear blue sky", and the strip's color is decided in the first steps, when the surrounding sky is still mostly noise, and is never revisited. With low guidance and a neutral prompt the colors match, but the model fills the tall, tower-shaped hole with a tall object, a stretched face (or a brick chimney in seed 180): the mask's shape is itself a hint. The fix is RePaint-style resampling. Every 5-step stretch is run, re-noised back to where it started (exactly onto the straight path's noise level) and run again, three times, so the filled strip keeps re-adjusting to the real pixels around it. With \(w = 3\) and a "no tower" prompt, seed 181 is seamless. At \(w = 5\) the bright strip comes back, which confirms that guidance strength, not the mask, caused the color shift.</p>
+    <pre><code>def inpaint_repaint(y, mask, cond, seed, w, h=H, jump=5, resample=3):
+    eps = noise(seed)
+    m = mask.to(device)
+    g = torch.Generator().manual_seed(seed + 999)
+    n = round(1 / h)
+    x = eps.clone()
+    k = 0
+    while k &lt; n:
+        end = min(k + jump, n)
+        passes = 1 if k == 0 or end == n else resample
+        for r in range(passes):
+            for i in range(k, end):
+                t = i * h
+                x = x + h * cfg_velocity(x, t, cond, w, predict_velocity, null_condition)
+                x = m * x + (1 - m) * interpolate(y, eps, (i + 1) * h)
+            if r &lt; passes - 1:
+                t1, t2 = k * h, end * h
+                sig = math.sqrt(max((1 - t1) ** 2 - (t1 * (1 - t2) / t2) ** 2, 0.0))
+                x = (t1 / t2) * x + sig * torch.randn(x.shape, generator=g).to(device)
+                x = m * x + (1 - m) * interpolate(y, eps, t1)
+        k = end
+    return x</code></pre>
+  </section>
+
+  <section id="a-multi" class="project-section">
+    <h2>Four- and Six-Way Rotation Anagrams</h2>
+    <p>The Section 3.3 rule extended to \(N\) views, \(v = \tfrac1N \sum_k T_k^{-1} v_k(T_k x)\), each view with its own prompt. Four views use exact 90° turns. For six, a 60° turn cannot be done exactly on a square grid, so I rotate only the inscribed disc, ring by ring: each one-pixel ring's pixels are sorted by angle and shifted cyclically by one sixth, with the few leftover pixels held fixed. That is an exact permutation, so it is orthogonal, and six turns are exactly the identity, which the notebook checks.</p>
+    <pre><code>def ring_rotation(size=512, k=6):
+    yy, xx = torch.meshgrid(torch.arange(size), torch.arange(size), indexing=&#x27;ij&#x27;)
+    dx, dy = xx + 0.5 - size / 2, yy + 0.5 - size / 2
+    r, ang = torch.sqrt(dx ** 2 + dy ** 2), torch.atan2(dy, dx)
+    g = torch.arange(size * size)                     # T(x).flat[j] = x.flat[g[j]]
+    ring = r.floor().long().flatten(); angf = ang.flatten()
+    for rr in range(size // 2):
+        idx = torch.nonzero(ring == rr).flatten()
+        idx = idx[torch.argsort(angf[idx])]
+        n, L = len(idx), len(idx) % k
+        if n - L == 0: continue
+        fixed = (torch.arange(L) * n // max(L, 1) + 7 * rr) % n          # scatter the &lt;=5 fixed pixels around the ring
+        keep = torch.ones(n, dtype=torch.bool); keep[fixed] = False
+        ids = idx[keep]; m = len(ids); s = m // k
+        g[ids[(torch.arange(m) + s) % m]] = ids
+    ginv = torch.empty_like(g); ginv[g] = torch.arange(size * size)
+    return g, ginv
+
+def multiview_anagram(seed, conds, T, T_inv, w=W, step_size=H):
+    N = len(conds)
+    def velocity(x, t):
+        return sum(T_inv(cfg_velocity(T(x, k), t, c, w, predict_velocity, null_condition), k)
+                   for k, c in enumerate(conds)) / N
+    return euler_sample(noise(seed), 0, step_size, velocity)[0]</code></pre>
+    <h3>Four views: horse, ship, old man, rabbit</h3>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot4_s181_view0.png" alt="view 0"></div><figcaption>0°: horse</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot4_s181_view1.png" alt="view 1"></div><figcaption>90°: sailing ship</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot4_s181_view2.png" alt="view 2"></div><figcaption>180°: old man</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot4_s181_view3.png" alt="view 3"></div><figcaption>270°: rabbit</figcaption></figure></div></div>
+    <p>Each subject is readable in its own orientation, though as faint pencil drawings that share a lot of strokes: each prompt now gets only a quarter of the velocity's pull.</p>
+    <h3>Six views: three attempts, three different failures</h3>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6_s180_view0.png" alt="take 1 view 0"></div><figcaption>Take 1 (lithograph, \(w = 7\)), 0°: horse</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6_s180_view1.png" alt="take 1 view 1"></div><figcaption>Take 1 (lithograph, \(w = 7\)), 60°: ship</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6_s180_view2.png" alt="take 1 view 2"></div><figcaption>Take 1 (lithograph, \(w = 7\)), 120°: old man</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6_s180_view3.png" alt="take 1 view 3"></div><figcaption>Take 1 (lithograph, \(w = 7\)), 180°: rabbit</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6_s180_view4.png" alt="take 1 view 4"></div><figcaption>Take 1 (lithograph, \(w = 7\)), 240°: owl</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6_s180_view5.png" alt="take 1 view 5"></div><figcaption>Take 1 (lithograph, \(w = 7\)), 300°: castle</figcaption></figure></div></div>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6b_s180_view0.png" alt="take 2 view 0"></div><figcaption>Take 2 (bold woodcut, \(w = 10\)), 0°</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6b_s180_view2.png" alt="take 2 view 2"></div><figcaption>Take 2 (bold woodcut, \(w = 10\)), 120°</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6b_s180_view4.png" alt="take 2 view 4"></div><figcaption>Take 2 (bold woodcut, \(w = 10\)), 240°</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6c_w7_s183_view0.png" alt="take 3 view 0"></div><figcaption>Take 3 (oil painting, \(w = 7\)), 0°</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6c_w7_s183_view2.png" alt="take 3 view 2"></div><figcaption>Take 3 (oil painting, \(w = 7\)), 120°</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/rot6c_w7_s183_view4.png" alt="take 3 view 4"></div><figcaption>Take 3 (oil painting, \(w = 7\)), 240°</figcaption></figure></div></div>
+    <p>A genuine limitation of the method, not a bug. With six prompts averaged, each keeps only a sixth of its pull. Take 1's thin lithograph lines faded, and only the horse and the open-mouthed old man read. A bold woodcut style with stronger guidance (take 2) overshot into solid black blobs. An oil-painting style (take 3) found the easiest way to satisfy all six views at once: one furry animal face, half cat and half owl, that looks almost the same at every rotation. The Visual Anagrams paper also reports quality dropping as views are added; six prompts sharing one picture is too much to ask.</p>
+  </section>
+
+  <section id="a-real" class="project-section">
+    <h2>"Make It Real" on Paintings, Prints and Pixel Art</h2>
+    <p>Section 3.1's edit on six more of my chosen images, at the two starting times where the earlier sweeps changed the most.</p>
+<div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_vouet_portrait_original.png" alt="Simon Vouet, self-portrait"></div><figcaption><strong>Simon Vouet, self-portrait</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_vouet_portrait_t_0.10.png" alt="Simon Vouet, self-portrait 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_vouet_portrait_t_0.25.png" alt="Simon Vouet, self-portrait 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_saturn_1874_original.png" alt="Trouvelot, The Planet Saturn (1874)"></div><figcaption><strong>Trouvelot, The Planet Saturn (1874)</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_saturn_1874_t_0.10.png" alt="Trouvelot, The Planet Saturn (1874) 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_saturn_1874_t_0.25.png" alt="Trouvelot, The Planet Saturn (1874) 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_comet_1881_original.png" alt="Trouvelot, The Great Comet of 1881"></div><figcaption><strong>Trouvelot, The Great Comet of 1881</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_comet_1881_t_0.10.png" alt="Trouvelot, The Great Comet of 1881 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_comet_1881_t_0.25.png" alt="Trouvelot, The Great Comet of 1881 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_seascape_rain_original.png" alt="Constable, Seascape Study with Rain Cloud"></div><figcaption><strong>Constable, Seascape Study with Rain Cloud</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_seascape_rain_t_0.10.png" alt="Constable, Seascape Study with Rain Cloud 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_seascape_rain_t_0.25.png" alt="Constable, Seascape Study with Rain Cloud 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_chalk_cliffs_original.png" alt="Friedrich, Chalk Cliffs on Rügen"></div><figcaption><strong>Friedrich, Chalk Cliffs on Rügen</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_chalk_cliffs_t_0.10.png" alt="Friedrich, Chalk Cliffs on Rügen 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_chalk_cliffs_t_0.25.png" alt="Friedrich, Chalk Cliffs on Rügen 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/a/extra_pixel_statue_original.png" alt="Pixel-art statue"></div><figcaption><strong>Pixel-art statue</strong></figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_pixel_statue_t_0.10.png" alt="Pixel-art statue 0.10"></div><figcaption>\(t_0 = 0.10\)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/a/extra_pixel_statue_t_0.25.png" alt="Pixel-art statue 0.25"></div><figcaption>\(t_0 = 0.25\)</figcaption></figure></div></div><p>At \(t_0 = 0.25\) all six become photographs of what they show: Vouet a real man in a ruffled collar, the rain cloud a real storm, the pixel statue a bronze one. At 0.10 the subject is usually lost to the "photo" prior: Saturn becomes a pair of hands, the comet a building, the chalk cliffs a hand holding a phone, and Vouet a different person, with only the white collar and the pose surviving. Identity survives only above a certain starting time, and that time depends on how much of the identity lives in coarse shapes.</p></section>
+  <section id="a-cost" class="project-section">
+    <h2>Part A Compute</h2>
+    <p>Measured in the notebook on Tesla T4. One network evaluation is one forward pass of the 512×512 model, and each guided step costs two. Sections re-run after a runtime restart count only the new work.</p>
+    <div class="table-wrap"><table><thead><tr><th>Section</th><th>Wall time</th><th>Network evaluations</th><th>Per evaluation</th></tr></thead><tbody><tr><td>1.1-1.3</td><td>0.1 min</td><td>3</td><td>1.715 s</td></tr><tr><td>1.4</td><td>0.1 min</td><td>3</td><td>2.941 s</td></tr><tr><td>1.5</td><td>0.3 min</td><td>25</td><td>0.622 s</td></tr><tr><td>1.6+2.1</td><td>6.9 min</td><td>750</td><td>0.556 s</td></tr><tr><td>3.1</td><td>32.8 min</td><td>3,540</td><td>0.556 s</td></tr><tr><td>3.2</td><td>16.4 min</td><td>1,770</td><td>0.556 s</td></tr><tr><td>3.3</td><td>3.7 min</td><td>400</td><td>0.555 s</td></tr><tr><td>3.4</td><td>12.9 min</td><td>1,200</td><td>0.644 s</td></tr><tr><td>B&amp;W_anagrams</td><td>14.8 min</td><td>1,600</td><td>0.557 s</td></tr><tr><td>B&amp;W_logo</td><td>7.1 min</td><td>768</td><td>0.557 s</td></tr><tr><td>own_step_sweep</td><td>1.7 min</td><td>180</td><td>0.557 s</td></tr><tr><td>own_inpainting</td><td>5.0 min</td><td>540</td><td>0.555 s</td></tr><tr><td>own_four_way</td><td>7.4 min</td><td>800</td><td>0.555 s</td></tr><tr><td>own_six_way</td><td>5.6 min</td><td>600</td><td>0.556 s</td></tr><tr><td>own_make_it_real</td><td>9.2 min</td><td>996</td><td>0.557 s</td></tr><tr><td>3.4_fresh</td><td>17.2 min</td><td>1,600</td><td>0.644 s</td></tr><tr><td>3.4_round2</td><td>12.9 min</td><td>1,200</td><td>0.644 s</td></tr><tr><td>polish</td><td>15.4 min</td><td>1,660</td><td>0.557 s</td></tr><tr><td>polish2_inpaint</td><td>3.7 min</td><td>400</td><td>0.560 s</td></tr><tr><td>polish2_six_way</td><td>5.5 min</td><td>600</td><td>0.555 s</td></tr><tr><td>fix</td><td>30.3 min</td><td>3,726</td><td>0.487 s</td></tr></tbody></table></div>
+  </section>
+
+  <header class="part-heading reading" id="part-b">
+    <div class="eyebrow">Part B</div>
+    <h2>Flow Matching from Scratch</h2>
+    <p>A UNet built from the assignment's blocks, trained on the 60,000 MNIST training digits: first as a one-step denoiser, then as time-conditioned and class-conditioned flow-matching models. Trained on a Tesla T4 (all required experiments together: 41.8 min), seed 180, pixels in \([0, 1]\). Digit grids are shown at their native 28-pixel resolution, enlarged with pixel-exact scaling.</p>
+  </header>
+
+  <section id="b11" class="project-section">
+    <h2>1.1 The UNet</h2>
+    <p>Two downsampling blocks take 28×28 to 7×7, an average pool collapses 7×7 to a single vector (the bottleneck that sees the whole digit at once), and a 7×7 transposed convolution expands it back. Every decoder stage concatenates the encoder features of the same resolution, so stroke positions never have to squeeze through the bottleneck. One class covers all three modes: no conditioning, time, and time plus class.</p>
+    <pre><code>class UNet(nn.Module):
+    def __init__(self, D: int = 64, mode: str = &#x27;denoise&#x27;):
+        super().__init__()
+        if mode not in (&#x27;denoise&#x27;, &#x27;time&#x27;, &#x27;class&#x27;):
+            raise ValueError(mode)
+        self.D = D
+        self.mode = mode
+        self.conv0 = ConvBlock(1, D)
+        self.down1 = DownBlock(D, D)
+        self.down2 = DownBlock(D, 2 * D)
+        self.flatten = nn.Sequential(nn.AvgPool2d(7), nn.GELU())
+        self.unflatten = nn.Sequential(nn.ConvTranspose2d(2*D, 2*D, 7, 7),
+                                       nn.BatchNorm2d(2*D), nn.GELU())
+        self.up1 = UpBlock(4*D, D)
+        self.up2 = UpBlock(2*D, D)
+        self.conv_out = ConvBlock(2*D, D)
+        self.last = nn.Conv2d(D, 1, 3, 1, 1)
+        if mode != &#x27;denoise&#x27;:
+            self.fc1_t = FCBlock(1, 2*D)
+            self.fc2_t = FCBlock(1, D)
+        if mode == &#x27;class&#x27;:
+            self.fc1_c = FCBlock(10, 2*D)
+            self.fc2_c = FCBlock(10, D)
+
+    def forward(self, x: Tensor, t: Tensor | None = None, c: Tensor | None = None):
+        if x.ndim != 4 or x.shape[1:] != (1,28,28):
+            raise ValueError(f&#x27;Expected (B,1,28,28); got {tuple(x.shape)}&#x27;)
+        b = x.shape[0]
+        x0 = self.conv0(x)                 # (B,D,28,28)
+        x1 = self.down1(x0)                # (B,D,14,14)
+        x2 = self.down2(x1)                # (B,2D,7,7)
+        z = self.unflatten(self.flatten(x2))  # (B,2D,7,7)
+        if self.mode != &#x27;denoise&#x27;:
+            if t is None:
+                raise ValueError(&#x27;Time required by time/class modes&#x27;)
+            t = t.reshape(b,1).to(x.device, x.dtype)
+            emb1 = self.fc1_t(t).reshape(b, 2*self.D,1,1)
+            emb2 = self.fc2_t(t).reshape(b, self.D,1,1)
+            if self.mode == &#x27;class&#x27;:
+                if c is None:
+                    raise ValueError(&#x27;One-hot class conditioning required; zero for unconditional&#x27;)
+                c = c.reshape(b,10).to(x.device, x.dtype)
+                z = self.fc1_c(c).reshape(b,2*self.D,1,1) * z + emb1
+            else:
+                z = z * emb1
+        z = self.up1(torch.cat([z,x2],dim=1))  # (B,D,14,14)
+        if self.mode != &#x27;denoise&#x27;:
+            if self.mode == &#x27;class&#x27;:
+                z = self.fc2_c(c).reshape(b,self.D,1,1) * z + emb2
+            else:
+                z = z * emb2
+        z = self.up2(torch.cat([z,x1],dim=1))
+        z = self.conv_out(torch.cat([z,x0],dim=1))
+        return self.last(z)</code></pre>
+  </section>
+
+  <section id="b12" class="project-section">
+    <h2>1.2 The Noising Process</h2>
+    <p>\(z = x + \sigma\epsilon\) on the first ten test digits with one fixed noise draw; rows are σ = 0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0.</p>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/denoise_noise_levels_10.png" alt="noise levels"></div><figcaption>Noise levels by row.</figcaption></figure></div>
+  </section>
+
+  <section id="b121" class="project-section">
+    <h2>1.2.1 Training the Denoiser (σ = 0.5)</h2>
+    <p>\(D = 128\), batch 256, Adam at 1e-4, 5 epochs = 1,170 steps, MSE to the clean digit. A fresh \(\epsilon\) is drawn for every batch as it leaves the loader, so the network never sees the same noisy image twice. Mean training loss per epoch: 0.0203, 0.0109, 0.0093, 0.0086, 0.0082.</p>
+    <div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/denoise_denoise_epoch1.png" alt="epoch 1"></div><figcaption><strong>Epoch 1.</strong> Rows: clean, noisy (σ = 0.5), denoised.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/denoise_denoise_epoch5.png" alt="epoch 5"></div><figcaption><strong>Epoch 5.</strong></figcaption></figure></div></div>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/denoise_training_loss.png" alt="loss"></div><figcaption>Training loss, every step.</figcaption></figure></div>
+    <p>After one epoch the digits are recovered but soft, with a gray haze where the noise was; after five the strokes are crisp and the background black. The loss halves in the first epoch, and most of what follows is sharpening.</p>
+  </section>
+
+  <section id="b122" class="project-section">
+    <h2>1.2.2 Out-of-Distribution Noise Levels</h2>
+    <p>The σ = 0.5 model on the same digits and noise at every σ; rows alternate noisy input and output, σ = 0 to 1.</p>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/denoise_denoise_ood.png" alt="ood"></div><figcaption>Pairs of rows: input, then denoised, for σ = 0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0.</figcaption></figure></div>
+    <p>Below the training level (σ ≤ 0.4) it is nearly perfect: removing less noise than it expects costs nothing. Above it, it degrades gracefully: at σ = 0.6 the digits are still clean, at 0.8 strokes start to break, and at 1.0 spurious blobs appear and the 2 and 4 grow extra strokes. The network has learned "remove about this much noise", and when there is more, the leftover noise gets drawn as structure.</p>
+  </section>
+
+  <section id="b123" class="project-section">
+    <h2>1.2.3 Denoising Pure Noise</h2>
+    <p>Same network and schedule, but the input is \(\epsilon\) alone, which carries no information about which digit is the target. Mean training loss per epoch: 0.0731, 0.0675, 0.0674, 0.0674, 0.0674.</p>
+    <div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/pure_pure_epoch1.png" alt="pure 1"></div><figcaption><strong>Epoch 1.</strong> Top: noise inputs; bottom: outputs.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/pure_pure_epoch5.png" alt="pure 5"></div><figcaption><strong>Epoch 5.</strong></figcaption></figure></div></div>
+    <div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/pure_training_loss.png" alt="pure loss"></div><figcaption>Training loss.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/mnist_mean.png" alt="mean digit"></div><figcaption>The pixel-wise mean of all 60,000 training digits.</figcaption></figure></div></div>
+    <div class="panel corner-ticks reading"><div class="panel-title">Why every output is the same blur</div>
+    <p>With an MSE loss, the best possible prediction is the conditional mean \(\mathbb{E}[x \mid z]\). When \(z\) is independent of \(x\), that is just \(\mathbb{E}[x]\), the centroid of the training set: one fixed image whatever the input. The loss proves it. It flattens at 0.0674, and I measured the lowest loss any constant output can reach (the pixel variance of the training digits around their mean) at <strong>0.0673</strong>. The network has hit that floor: it ignores its input and outputs the average digit, a superimposed 0/3/8-like smudge. This is why generation needs many small steps from noise rather than one.</p></div>
+  </section>
+
+  <section id="b21" class="project-section">
+    <h2>2.1–2.3 Time-Conditioned Flow Matching</h2>
+    <p>Train on \(x_t = (1-t)x_0 + t x_1\) with random \(t\) and regress the velocity \(x_1 - x_0\). The same \(x_t\) needs very different velocities early (mostly noise) and late (almost a digit), so \(t\), already in \([0, 1]\), enters through two small fully connected blocks that scale the bottleneck and the first decoder stage channel by channel. \(D = 64\), batch 64, 10 epochs = 9,370 steps, Adam from 1e-2 with ExponentialLR (γ = 0.1<sup>1/10</sup>) stepped once per epoch. Sampling: 50 Euler steps of 1/50.</p>
+    <pre><code>@torch.no_grad()
+def flow_sample(model: UNet, n: int, device: torch.device,
+                labels: Tensor | None = None, steps: int = 100, gamma: float = 5.0,
+                seed: int = 180) -&gt; Tensor:
+    model.eval()
+    generator = torch.Generator(device=device).manual_seed(seed)
+    x = torch.randn((n,1,28,28),device=device,generator=generator)
+    if model.mode == &#x27;class&#x27;:
+        if labels is None or len(labels) != n:
+            raise ValueError(&#x27;Class sampling needs one label for each image&#x27;)
+        c = one_hot(labels.to(device))
+        c_null = torch.zeros_like(c)
+    for i in range(steps):
+        t = torch.full((n,1),i/steps,device=device)
+        if model.mode == &#x27;class&#x27;:
+            u_u = model(x,t,c_null)
+            u_c = model(x,t,c)
+            v = u_u + gamma*(u_c-u_u)
+        else:
+            v = model(x,t)
+        x = x + (1.0/steps)*v
+    return x.clamp(0,1)</code></pre>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_time_epoch1.png" alt="time 1"></div><figcaption><strong>Epoch 1</strong> · mean loss 0.1786</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_time_epoch5.png" alt="time 5"></div><figcaption><strong>Epoch 5</strong> · mean loss 0.1004</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_time_epoch10.png" alt="time 10"></div><figcaption><strong>Epoch 10</strong> · mean loss 0.0922</figcaption></figure></div></div>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/time_training_loss.png" alt="time loss"></div><figcaption>Training loss.</figcaption></figure></div>
+    <p>Epoch 1 is scribbles with digit-like strokes. By epoch 5 most samples are legible, and epoch 10 mainly cleans up their strokes. The same 40 starting noises give the same digits at epochs 5 and 10, so the model is refining a fixed mapping rather than changing its mind. Several samples still hesitate between two digits (an 8 that is half 3, a 4 that is half 9), because a time-only model has to pick a class on its own.</p>
+  </section>
+
+  <section id="b24" class="project-section">
+    <h2>2.4–2.6 Class Conditioning with Classifier-Free Guidance</h2>
+    <p>Two more blocks take a one-hot digit label and scale the same two feature maps, while \(t\) now shifts them (\(c_1 \cdot h + t_1\)). For 10% of training images the label is zeroed, so the same network also learns the unconditional velocity. Sampling uses 300 Euler steps and \(v = v_u + \gamma(v_c - v_u)\) with γ = 5, the Part B guidance convention. Each row is the digits 0–9, with the same starting noise at every epoch.</p>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_class_epoch1.png" alt="class 1"></div><figcaption><strong>Epoch 1</strong> · mean loss 0.1637</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_class_epoch5.png" alt="class 5"></div><figcaption><strong>Epoch 5</strong> · mean loss 0.0912</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_class_epoch10.png" alt="class 10"></div><figcaption><strong>Epoch 10</strong> · mean loss 0.0836</figcaption></figure></div></div>
+    <div class="breakout"><div class="media-grid compare-2"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/class_training_loss.png" alt="class loss"></div><figcaption>Training loss.</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_class_sampling.gif" alt="sampling gif"></div><figcaption>Epoch-10 sampler: noise to digits over the 300 steps.</figcaption></figure></div></div>
+    <p>Class conditioning converges much faster than time-only training: every digit is already the requested class after one epoch, and by epoch 5 they are clean. Knowing the class removes the hardest decision, so the network only has to learn how to draw. The final loss (0.0836) is also lower than the time-only model's (0.0922), because the label removes uncertainty about the target velocity.</p>
+    <h3>Removing the learning-rate scheduler</h3>
+    <p>The exponential schedule does two jobs: big steps early, while the loss falls fast, and small steps late, so the weights stop bouncing around the minimum. One constant rate cannot do both, so I compensated with a smaller constant rate: 2e-3 instead of starting at 1e-2. That keeps the early phase stable and gives up some of the late settling. Everything else, including the seed, is identical.</p>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_nosched_class_nosched_epoch1.png" alt="nosched 1"></div><figcaption><strong>No scheduler, epoch 1</strong> · mean loss 0.1405</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_nosched_class_nosched_epoch5.png" alt="nosched 5"></div><figcaption><strong>No scheduler, epoch 5</strong> · mean loss 0.0919</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/class_nosched_class_nosched_epoch10.png" alt="nosched 10"></div><figcaption><strong>No scheduler, epoch 10</strong> · mean loss 0.0861</figcaption></figure></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Mean loss, epoch</th><th>1</th><th>5</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody><tr><td>ExponentialLR from 1e-2</td><td>0.1637</td><td>0.0912</td><td>0.0858</td><td>0.0844</td><td>0.0836</td></tr><tr><td>Constant 2e-3</td><td>0.1405</td><td>0.0919</td><td>0.0879</td><td>0.0863</td><td>0.0861</td></tr></tbody></table></div>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/class_nosched_training_loss.png" alt="nosched loss"></div><figcaption>Training loss without the scheduler.</figcaption></figure></div>
+    <p>The constant rate is actually <em>ahead</em> early (epoch 1: 0.1405 vs 0.1637), because 1e-2 is too aggressive at the start. The scheduler wins only at the end (0.0836 vs 0.0861), and without decay the loss flattens over epochs 9–10 (0.0863 → 0.0861) instead of still falling. The samples are indistinguishable by eye; the gap is about 3% of the loss.</p>
+  </section>
+
+  <header class="part-heading reading" id="b-w-b">
+    <div class="eyebrow">Part B · Bells &amp; Whistles (required for CS280A)</div>
+    <h2>A Better Time-Conditioned UNet</h2>
+  </header>
+
+  <section id="b-better" class="project-section">
+    <h2>Wider, Longer, Averaged</h2>
+    <p>The same UNet code with three changes. It is <strong>wider</strong>: D = 128, 7,974,145 parameters, about 4× the baseline. It trains <strong>longer</strong>: 15 epochs with the learning rate decaying from 5e-3 to 5e-4, then 15 more decaying from 5e-4 to 5e-5, 30 in total. And it is sampled from an <strong>exponential moving average</strong> of its weights (decay 0.999). Same 50 Euler steps and the same 40 starting noises as the baseline grid; each epoch took about 110 s on the T4.</p>
+    <div class="breakout"><div class="media-grid compare-3"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_time_baseline_epoch10_grid.png" alt="baseline"></div><figcaption><strong>Baseline</strong>: D = 64, 10 epochs</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_time_plus_epoch15_grid.png" alt="15 epochs"></div><figcaption>D = 128, 15 epochs</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus30_time_plus_epoch30_grid.png" alt="30 epochs"></div><figcaption><strong>D = 128, 30 epochs</strong></figcaption></figure></div></div>
+    <p>To measure "better" instead of eyeballing it, I trained a small separate CNN classifier on real MNIST (98.6% test accuracy) and scored 1,000 fresh samples from each model on two things: how often it reads a digit with over 90% confidence (legibility), and how evenly the samples spread across the ten digits (normalized entropy, where 1 is perfectly even).</p>
+    <div class="table-wrap"><table><thead><tr><th>Model</th><th>Read with >90% confidence</th><th>Mean confidence</th><th>Digit balance</th><th>Final-epoch training loss</th></tr></thead><tbody><tr><td>Baseline (D = 64, 10 epochs)</td><td>73.0%</td><td>0.907</td><td>0.983</td><td>0.0922</td></tr><tr><td>D = 128, 15 epochs</td><td>76.6%</td><td>0.920</td><td>0.994</td><td>0.0882</td></tr><tr><td><strong>D = 128, 30 epochs</strong></td><td><strong>79.4%</strong></td><td>0.927</td><td>0.994</td><td>0.0852</td></tr></tbody></table></div>
+    <div class="reading"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/time_plus30_training_loss.png" alt="loss 30"></div><figcaption>Training loss of the improved model over all 30 epochs.</figcaption></figure></div>
+    <p>Legibility rises from 73.0% to 79.4%, about three times the sampling noise of a 1,000-sample estimate. In the grids, broken strokes join up: the baseline's broken 8 and messy 4 become a clean 3 and 4, and its stray "1." becomes a clean 1. The baseline also under-produced 0s and 6s (5% and 7% of its samples instead of 10%), while the improved model's digit balance is nearly perfect. Most of the gain came from the second 15 epochs: at epoch 15 the learning rate had already decayed while the loss was still falling, and the extra epochs kept improving it until about epoch 25, where it levels off. What remains, a few samples that hesitate between two digits, is the inherent ambiguity of a model that has to choose its own class.</p>
+  </section>
+
+  <header class="part-heading reading" id="own-b">
+    <div class="eyebrow">Part B · Own idea (optional)</div>
+    <h2>How Straight Are the Learned Flows?</h2>
+  </header>
+  <section id="b-steps" class="project-section">
+    <p>Each model sampled again with 1 to 300 Euler steps from the same noise. If the learned paths were straight, one step would suffice.</p>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_class_1_grid.png" alt="class 1"></div><figcaption>Class model, 1 step</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_class_5_grid.png" alt="class 5"></div><figcaption>Class model, 5 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_class_50_grid.png" alt="class 50"></div><figcaption>Class model, 50 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_class_300_grid.png" alt="class 300"></div><figcaption>Class model, 300 steps</figcaption></figure></div></div>
+    <div class="breakout"><div class="media-grid compare-4"><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_time_plus_2_grid.png" alt="time 2"></div><figcaption>Time-only model, 2 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_time_plus_5_grid.png" alt="time 5"></div><figcaption>Time-only model, 5 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_time_plus_10_grid.png" alt="time 10"></div><figcaption>Time-only model, 10 steps</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/time_plus_steps_time_plus_50_grid.png" alt="time 50"></div><figcaption>Time-only model, 50 steps</figcaption></figure></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Euler steps</th><th>1</th><th>2</th><th>5</th><th>10</th><th>25</th><th>50</th><th>100</th><th>300</th></tr></thead><tbody><tr><td>Class model: read as the requested digit</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td><td>100%</td></tr><tr><td>Time-only model (15 epochs): read with >90% confidence</td><td>0%</td><td>33%</td><td>63%</td><td>71%</td><td>72%</td><td>74%</td><td>76%</td><td>77%</td></tr></tbody></table></div>
+    <p>The two models behave completely differently. The class-conditioned model is 100% correct even with <em>one</em> step: a single jump from noise lands on the guided <em>average</em> of that class, a thick blurry digit (Section 1.2.3's mean-digit result, now per class), which is still perfectly recognizable. The time-only model has no class to average within, so one step gives an unreadable blob (0% confident), two steps give ghostly overlaps of several digits (32%), and quality keeps improving out to 300 steps. Its paths curve because the model decides which digit to become along the way. Knowing the class straightens the flow.</p>
+  </section>
+
+  <section id="inputs" class="project-section">
+    <h2>My Image Choices</h2>
+    <p>The 21 images I collected for this project, shown small. Eleven are used above; the rest stay here as a record of what I considered. Every used image was center-cropped, or for the drawings padded on white, to 512×512 by <code>tools/prepare_inputs.py</code>.</p>
+    <div class="breakout"><div class="media-grid compare-5"><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_00.jpg" alt="Constable, Wivenhoe Park (1816)"></div><figcaption><strong>Constable, Wivenhoe Park (1816)</strong> · 1.1–1.5, 3.1, 3.2, inpainting</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_01.jpg" alt="Mount Fuji, photo and pixel art (Pixless camera)"></div><figcaption><strong>Mount Fuji, photo and pixel art (Pixless camera)</strong> · 3.1, 3.2 (pixel half)</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_02.jpg" alt="Tiny Worlds and Fantasy Architecture (pen drawing)"></div><figcaption><strong>Tiny Worlds and Fantasy Architecture (pen drawing)</strong> · 3.1 web image</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_03.jpg" alt="My drawing: confused pig"></div><figcaption><strong>My drawing: confused pig</strong> · 3.1</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_04.jpg" alt="My drawing: kart into a wall"></div><figcaption><strong>My drawing: kart into a wall</strong> · 3.1</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_05.jpg" alt="Simon Vouet, self-portrait"></div><figcaption><strong>Simon Vouet, self-portrait</strong> · make it real</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_06.jpg" alt="Trouvelot, The Planet Saturn (1874)"></div><figcaption><strong>Trouvelot, The Planet Saturn (1874)</strong> · make it real</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_07.jpg" alt="Trouvelot, The Great Comet of 1881"></div><figcaption><strong>Trouvelot, The Great Comet of 1881</strong> · make it real</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_08.jpg" alt="Constable, Seascape Study with Rain Cloud"></div><figcaption><strong>Constable, Seascape Study with Rain Cloud</strong> · make it real</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_09.jpg" alt="Friedrich, Chalk Cliffs on Rügen"></div><figcaption><strong>Friedrich, Chalk Cliffs on Rügen</strong> · make it real</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_10.jpg" alt="Pixel-art statue (Pixless camera)"></div><figcaption><strong>Pixel-art statue (Pixless camera)</strong> · make it real</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_11.jpg" alt="Friedrich, The Cross in the Mountains"></div><figcaption><strong>Friedrich, The Cross in the Mountains</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_12.jpg" alt="Friedrich, Rocky Landscape in the Elbe Sandstone Mountains"></div><figcaption><strong>Friedrich, Rocky Landscape in the Elbe Sandstone Mountains</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_13.jpg" alt="Caffi, Blessing of Pius IX at Night"></div><figcaption><strong>Caffi, Blessing of Pius IX at Night</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_14.jpg" alt="Caffi, Solar Eclipse in Venice (1842)"></div><figcaption><strong>Caffi, Solar Eclipse in Venice (1842)</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_15.jpg" alt="Mount Saint Gothard (print)"></div><figcaption><strong>Mount Saint Gothard (print)</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_16.jpg" alt="Van Dyck, Portrait of Inigo Jones"></div><figcaption><strong>Van Dyck, Portrait of Inigo Jones</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_17.jpg" alt="Windmill tower (pen drawing)"></div><figcaption><strong>Windmill tower (pen drawing)</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_18.jpg" alt="Pixless camera sample 1"></div><figcaption><strong>Pixless camera sample 1</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_19.jpg" alt="Pixless camera sample 3"></div><figcaption><strong>Pixless camera sample 3</strong> · not used</figcaption></figure><figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/inputs/src_20.jpg" alt="Pixless camera sample 7"></div><figcaption><strong>Pixless camera sample 7</strong> · not used</figcaption></figure></div></div>
+  </section>
+
+  <section id="learned" class="project-section">
+    <h2>What I Learned</h2>
+    <p>The idea underneath both parts is that a model trained with squared error predicts an <em>average</em>. In Part B the pure-noise denoiser hits exactly the mean-digit floor, and one-step class sampling lands on the per-class mean. In Part A one-step denoising is blurry, and Euler sampling is sharper but has the worse MSE. Iterative sampling is how a specific sample comes out of a model of averages, and guidance is how that sample is pushed toward what a prompt describes. Most of the creative tools are then just different velocity combinations: averaging views for anagrams, splitting frequencies for hybrids, resetting known pixels for inpainting. The failures taught as much as the successes. Six views dilute each prompt until the model picks a rotation-symmetric compromise; a σ = 16 low-pass decides which subjects can be hybrids; and guidance strength, not the mask, caused the inpainting color seam.</p>
+  </section>
+
+  <section id="credits" class="project-section">
+    <h2>Credits</h2>
+    <p class="small-print">Paintings and prints (public domain, via Wikimedia Commons and museum collections): John Constable, <em>Wivenhoe Park, Essex</em> (1816) and <em>Seascape Study with Rain Cloud</em>; Caspar David Friedrich, <em>Chalk Cliffs on Rügen</em>, <em>The Cross in the Mountains</em> and <em>Rocky Landscape in the Elbe Sandstone Mountains</em>; Simon Vouet, self-portrait (Musée des Beaux-Arts de Lyon); Étienne Léopold Trouvelot, <em>The Planet Saturn</em> (1874) and <em>The Great Comet of 1881</em>; Ippolito Caffi, two night scenes; Anthony van Dyck, <em>Portrait of Inigo Jones</em>; <em>Mount Saint Gothard</em> (Vanderbilt Fine Arts Gallery). Pixel-art images: sample photos from the Pixless pixel-art camera project. Pen drawings: "Tiny Worlds and Fantasy Architecture" and a windmill-tower drawing found online. The Campanile photo and the PixNerd adapter are supplied by the course. The pig, kart and logo sketch are my drawings; the blue-and-gold emblem is drawn by my code. Model: PixNerd-XXL-P16-T2I (MCG-NJU), revision 9fa8836b55. Methods: Visual Anagrams and Factorized Diffusion (Geng et al.), SDEdit (Meng et al.), RePaint (Lugmayr et al.).</p>
+  </section>
+
+</main>
+<footer class="site-footer"><div class="footer-inner shell"><span>© CS 180 • 2026 • Hovhannes Antablyan. All rights reserved.</span><a href="../">All projects</a></div></footer>
+<button class="back-top" type="button" aria-label="Back to top">Top</button>
+<script>
+  document.querySelectorAll('[data-distance]').forEach((fig) => {
+    const img = fig.querySelector('.distance-view img');
+    const range = fig.querySelector('input[type="range"]');
+    if (!img || !range) return;
+    const update = () => { img.style.width = `${100 - 0.9 * Number(range.value)}%`; };
+    range.addEventListener('input', update);
+    update();
+  });
+</script>
+<script src="../assets/site.js"></script>
+</body>
+</html>
