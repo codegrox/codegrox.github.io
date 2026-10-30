@@ -1,0 +1,20 @@
+{
+ "points": 47,
+ "seeds": 8,
+ "similarity_resid_median_px": 8.676248917661992,
+ "similarity_resid_p90_px": 11.407999705326077,
+ "affine_resid_median_px": 4.4852136355157555,
+ "homography_resid_median_px": 4.056791886165288,
+ "anisotropy": 1.054225285213357,
+ "rotation_deg": -0.048117109962102896,
+ "relief_size_px": [
+  870.307167235495,
+  948.8054607508532
+ ],
+ "crop": [
+  200,
+  377,
+  1270,
+  1526
+ ]
+}

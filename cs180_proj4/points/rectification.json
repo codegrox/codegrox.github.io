@@ -1,0 +1,77 @@
+{
+ "windows": {
+  "file": "rect_windows.jpg",
+  "corners": [
+   [
+    47.99,
+    897.41
+   ],
+   [
+    630.25,
+    938.11
+   ],
+   [
+    637.78,
+    1195.77
+   ],
+   [
+    30.12,
+    1194.67
+   ]
+  ],
+  "aspect_h_over_w": 0.4926,
+  "order": "TL, TR, BR, BL",
+  "note": "outer frame corners of the 4 x 2 window block, read at 2x zoom",
+  "source": "PXL_20261028_163644745.RAW-01.MP.jpg"
+ },
+ "cabinet": {
+  "file": "rect_cabinet.jpg",
+  "corners": [
+   [
+    1123.34,
+    896.89
+   ],
+   [
+    1337.92,
+    875.28
+   ],
+   [
+    1364.41,
+    1554.82
+   ],
+   [
+    1164.63,
+    1618.72
+   ]
+  ],
+  "aspect_h_over_w": 2.8149,
+  "order": "TL, TR, BR, BL",
+  "note": "dark glass panel, detected as a quadrilateral, sub-pixel refined",
+  "source": "PXL_20261028_191653589.RAW-01.jpg"
+ },
+ "marquee": {
+  "file": "rect_marquee.jpg",
+  "corners": [
+   [
+    413.11,
+    812.66
+   ],
+   [
+    1182.6,
+    667.6
+   ],
+   [
+    1185.61,
+    1172.06
+   ],
+   [
+    359.4,
+    1181.6
+   ]
+  ],
+  "aspect_h_over_w": 0.4869,
+  "order": "TL, TR, BR, BL",
+  "note": "left face of the theatre marquee, outer frame corners read at 2x zoom",
+  "source": "PXL_20261028_185438595.RAW-01.jpg"
+ }
+}

@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CS180 Project 4A: homographies, inverse warping, rectification, blended photo mosaics and a cylindrical panorama.">
+  <title>Project 4A — Image Warping and Mosaicing · Codegrox</title>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('codegrox-theme')||'dark'}catch(e){}</script>
+  <link rel="stylesheet" href="../assets/site.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>[id^="res-"] { scroll-margin-top: 84px; }</style>
+</head>
+<body class="project-page">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../">CODEGRO<span class="mark">X</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="../#projects">Projects</a>
+      <a class="optional" href="https://github.com/codegrox">GitHub</a>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </nav>
+  </div>
+</header>
+
+
+<main id="content" class="shell project-layout">
+  <header class="project-hero reading">
+    <div class="eyebrow">CS 180 · Project 04 · Fall 2026</div>
+    <h1 class="project-title">Image Warping and Mosaicing</h1>
+    <p class="project-subtitle">Part A of [Auto]Stitching Photo Mosaics: recovering homographies from point correspondences, inverse warping with two interpolation methods, rectifying planes, blending photos into mosaics, and a 200° cylindrical panorama.</p>
+  </header>
+
+  <nav class="project-toc reading" aria-label="Project sections">
+    <a href="#shoot" data-num="A.1">Photos</a>
+    <a href="#homography" data-num="A.2">Homographies</a>
+    <a href="#warp" data-num="A.3">Warping</a>
+    <a href="#mosaic" data-num="A.4">Mosaics</a>
+    <a href="#cylinder" data-num="A.5">Panorama</a>
+    <a href="#learned" data-num="&#8212;">Learned</a>
+  </nav>
+
+  <div class="reading panel corner-ticks project-summary">
+    <div class="panel-title">Result snapshot</div>
+    <p><strong>Every homography on this page comes from my own least-squares solver, fit to 12 correspondences per pair to under 1.2 px.</strong> Rectification recovers the real proportions of a rectangle from the phone's focal length. The three mosaics use gain compensation for exposures I did not lock, plus a two-level blend that keeps detail sharp without ghosting. For the bells &amp; whistles, nine photos become a 204° cylindrical panorama, sampled directly from the original photos with camera rotations fitted to every point.</p>
+  </div>
+
+  <section id="shoot" class="project-section">
+    <h2>Part A.1: Shoot and Digitize Pictures</h2>
+    <p>All photos are from a Pixel 10 Pro on its main 24 mm-equivalent lens (no ultra-wide, which would add barrel distortion), shot at 4080×3072 and stored here at 2048 px on the long side. For every set I stood in one place and turned the phone around its lens, so that neighbouring photos differ only by a camera rotation and are related exactly by a homography. Neighbouring frames overlap by roughly 40–70%. I did not lock exposure, which shows up later as brightness differences that the blending has to absorb.</p>
+    <div class="breakout">
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_theatre.jpg" width="732" height="320" alt="Input photos: Set 1 · California Theatre, 3 photos, horizontal"></div><figcaption><strong>Set 1 · California Theatre, 3 photos, horizontal.</strong> <a href="#res-theatre">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_rooftop.jpg" width="732" height="320" alt="Input photos: Set 2 · Rooftop view, 3 photos tilted vertically"></div><figcaption><strong>Set 2 · Rooftop view, 3 photos tilted vertically.</strong> <a href="#res-rooftop">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_lawn.jpg" width="978" height="320" alt="Input photos: Set 3 · Lawn and construction crane, 4 photos"></div><figcaption><strong>Set 3 · Lawn and construction crane, 4 photos.</strong> <a href="#res-lawn">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_wide.jpg" width="2208" height="320" alt="Input photos: Wide sweep for the bells &amp; whistles, 9 photos turning about 140°"></div><figcaption><strong>Wide sweep for the bells &amp; whistles, 9 photos turning about 140°.</strong> <a href="#res-wide">See the result ↓</a></figcaption></figure>
+    </div>
+
+    <h3>More sets</h3>
+    <p>I used every remaining sequence that had real overlap and was shot from one spot. All of them are used below: six as planar mosaics and three as cylindrical panoramas. I left out only a single photo with no partner, a pair that mixes the ultra-wide and main lenses, near-duplicate frames, and three close-up sets with strong parallax: a relief wall, a pay station, and the hallway, which only supplied the fire-cabinet rectification.</p>
+    <div class="breakout">
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_street.jpg" width="732" height="320" alt="Input photos: Street, 3 photos"></div><figcaption><strong>Street, 3 photos.</strong> <a href="#res-street">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_glass.jpg" width="732" height="320" alt="Input photos: Glass building, 3 photos"></div><figcaption><strong>Glass building, 3 photos.</strong> <a href="#res-glass">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_tower.jpg" width="732" height="320" alt="Input photos: Tower, looking up, 3 photos"></div><figcaption><strong>Tower, looking up, 3 photos.</strong> <a href="#res-tower">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_yellow.jpg" width="732" height="320" alt="Input photos: Yellow building, 3 photos"></div><figcaption><strong>Yellow building, 3 photos.</strong> <a href="#res-yellow">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_cars.jpg" width="978" height="320" alt="Input photos: Trees and parked cars, 4 photos"></div><figcaption><strong>Trees and parked cars, 4 photos.</strong> <a href="#res-cars">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_theatreB.jpg" width="732" height="320" alt="Input photos: Theatre, second take, 3 photos"></div><figcaption><strong>Theatre, second take, 3 photos.</strong> <a href="#res-theatreB">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_gg_pan.jpg" width="856" height="320" alt="Input photos: Golden Gate without the tilted flag frame, 2 photos"></div><figcaption><strong>Golden Gate without the tilted flag frame, 2 photos.</strong> <a href="#res-gg_pan">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_theatre7.jpg" width="1716" height="320" alt="Input photos: Theatre street, every frame, 7 photos"></div><figcaption><strong>Theatre street, every frame, 7 photos.</strong> <a href="#res-theatre7">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_oldA.jpg" width="1224" height="320" alt="Input photos: Old building, sweep 1, 5 photos"></div><figcaption><strong>Old building, sweep 1, 5 photos.</strong> <a href="#res-oldA">See the result ↓</a></figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_oldB.jpg" width="978" height="320" alt="Input photos: Old building, sweep 2, 4 photos"></div><figcaption><strong>Old building, sweep 2, 4 photos.</strong> <a href="#res-oldB">See the result ↓</a></figcaption></figure>
+    </div>
+  </section>
+  <section id="homography" class="project-section">
+    <h2>Part A.2: Recover Homographies</h2>
+    <p>A homography maps a point \(p = (x, y, 1)\) in one photo to \(p' \sim Hp\) in the other. Fixing \(h_{33} = 1\) leaves 8 unknowns, and every correspondence \((x, y) \to (u, v)\) gives two linear equations once the perspective divide is multiplied out:</p>
+    <div class="math">\[\begin{aligned} h_{11}x + h_{12}y + h_{13} - h_{31}xu - h_{32}yu &= u \\ h_{21}x + h_{22}y + h_{23} - h_{31}xv - h_{32}yv &= v \end{aligned}\]</div>
+    <p>Four correspondences determine \(H\) exactly, but a couple of pixels of error then swing it a lot, so I use 12 per pair and solve the overdetermined \(2n \times 8\) system \(Ah = b\) by least squares. One numerical detail matters here. With raw pixel coordinates, \(A\) mixes entries around \(10^6\) (the \(xu\) terms) with 1s, and its condition number is 1.4 × 10<sup>7</sup> for the theatre pair. Following Hartley, I first move each point set's centroid to the origin and scale its mean distance to \(\sqrt 2\). That brings the condition number down to 4.9. I then solve and undo the normalization: \(H = T_2^{-1} \tilde H T_1\).</p>
+    <div class="media-grid compare-2">
+      <figure><pre><code>def build_system(im1_pts, im2_pts):
+    A, b = [], []
+    for (x, y), (u, v) in zip(np.asarray(im1_pts, float), np.asarray(im2_pts, float)):
+        A.append([x, y, 1, 0, 0, 0, -x * u, -y * u]); b.append(u)
+        A.append([0, 0, 0, x, y, 1, -x * v, -y * v]); b.append(v)
+    return np.array(A), np.array(b)</code></pre></figure>
+      <figure><pre><code>def computeH(im1_pts, im2_pts):
+    p1, p2 = np.asarray(im1_pts, float), np.asarray(im2_pts, float)
+    if len(p1) &lt; 4 or p1.shape != p2.shape:
+        raise ValueError(&#x27;need n &gt;= 4 matching (x, y) points in each image&#x27;)
+    T1, T2 = _normalizer(p1), _normalizer(p2)
+    n1 = apply(T1, p1)
+    n2 = apply(T2, p2)
+    A, b = build_system(n1, n2)
+    h = np.linalg.lstsq(A, b, rcond=None)[0]
+    Hn = np.append(h, 1).reshape(3, 3)
+    H = np.linalg.inv(T2) @ Hn @ T1                # undo the normalization
+    return H / H[2, 2]</code></pre></figure>
+    </div>
+
+    <h3>Correspondences</h3>
+    <p>Points have to sit on sharp, unambiguous features: window and sign corners, letters, roof edges. A point on a plain wall or in the sky can slide without anyone noticing. I used a small helper (<code>tests/autocorr.py</code>, not part of the graded code) to propose strong corners and match each one in the neighbouring photo. It keeps a point only if its match is clearly unique and agrees with a single homography fitted to all candidates, which throws out moving cars, and then spreads the final points over the overlap. I checked every pair by eye before using it.</p>
+    <div class="breakout">
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/theatre_12.jpg" width="1370" height="900" alt="Theatre photos 1 and 2 with 12 numbered correspondences"></div><figcaption><strong>Theatre 1 → 2.</strong> Ornament tips, marquee and sign corners, the mural, a parked car's wheel.</figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/theatre_23.jpg" width="1370" height="900" alt="Theatre photos 2 and 3 with correspondences"></div><figcaption><strong>Theatre 2 → 3.</strong></figcaption></figure>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/rooftop_12.jpg" width="1370" height="900" alt="Rooftop photos 1 and 2 with correspondences"></div><figcaption><strong>Rooftop 1 → 2.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/rooftop_23.jpg" width="1370" height="900" alt="Rooftop photos 2 and 3 with correspondences"></div><figcaption><strong>Rooftop 2 → 3.</strong></figcaption></figure>
+      </div>
+      <div class="media-grid compare-3">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/lawn_12.jpg" width="1370" height="900" alt="Lawn 1 and 2"></div><figcaption><strong>Lawn 1 → 2.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/lawn_23.jpg" width="1370" height="900" alt="Lawn 2 and 3"></div><figcaption><strong>Lawn 2 → 3.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/lawn_34.jpg" width="1370" height="900" alt="Lawn 3 and 4"></div><figcaption><strong>Lawn 3 → 4.</strong></figcaption></figure>
+      </div>
+    </div>
+
+    <h3>System of equations and recovered homographies</h3>
+    <p>For the theatre pair 1 → 2, the first two correspondences produce these four rows of \(Ah = b\). The full system has \(2 \times 12\) rows:</p>
+    <div class="math">\[\begin{bmatrix}214.5 & 359.2 & 1 & 0 & 0 & 0 & -1.551e+05 & -2.598e+05 \\ 0 & 0 & 0 & 214.5 & 359.2 & 1 & -9.201e+04 & -1.541e+05 \\ 447.1 & 404.1 & 1 & 0 & 0 & 0 & -4.188e+05 & -3.784e+05 \\ 0 & 0 & 0 & 447.1 & 404.1 & 1 & -1.955e+05 & -1.767e+05\end{bmatrix} \begin{bmatrix} h_{11} \\ \vdots \\ h_{32} \end{bmatrix} = \begin{bmatrix}723.32 \\ 428.97 \\ 936.57 \\ 437.20\end{bmatrix}\]</div>
+    <p>Recovered homographies (\(h_{33} = 1\)):</p>
+    <div class="media-grid compare-2">
+      <figure><div class="math">\[H_{1 \to 2}^{\text{theatre}} = \begin{bmatrix}0.6758 & 0.009163 & 542.6 \\ -0.2293 & 0.8826 & 141.9 \\ -0.0002041 & -5.274e-06 & 1\end{bmatrix}\]</div></figure>
+      <figure><div class="math">\[H_{2 \to 3}^{\text{theatre}} = \begin{bmatrix}0.6514 & 0.003777 & 568.5 \\ -0.2392 & 0.8741 & 126.9 \\ -0.0002204 & -5.635e-06 & 1\end{bmatrix}\]</div></figure>
+      <figure><div class="math">\[H_{1 \to 2}^{\text{rooftop}} = \begin{bmatrix}0.8215 & -0.1467 & 126.5 \\ -0.05235 & 0.5085 & 773.1 \\ -5.019e-06 & -0.0002412 & 1\end{bmatrix}\]</div></figure>
+      <figure><div class="math">\[H_{2 \to 3}^{\text{rooftop}} = \begin{bmatrix}0.8224 & -0.1507 & 145.7 \\ -0.02153 & 0.5901 & 635.9 \\ -1.784e-05 & -0.0001977 & 1\end{bmatrix}\]</div></figure>
+    </div>
+    <p>The residual after the fit is how far each point lands from its clicked partner when mapped through \(H\). Every pair fits with a median residual of 0.4–0.7 px, and no point is off by more than about 1.1 px, on 2048 px photos:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pair</th><th>Points</th><th>Median residual</th><th>Max residual</th></tr></thead>
+        <tbody>
+          <tr><td>theatre  1 → 2</td><td>12</td><td>0.70 px</td><td>1.08 px</td></tr>
+          <tr><td>theatre  2 → 3</td><td>12</td><td>0.42 px</td><td>1.14 px</td></tr>
+          <tr><td>rooftop  1 → 2</td><td>12</td><td>0.67 px</td><td>1.02 px</td></tr>
+          <tr><td>rooftop  2 → 3</td><td>12</td><td>0.51 px</td><td>1.04 px</td></tr>
+          <tr><td>lawn  1 → 2</td><td>12</td><td>0.55 px</td><td>1.01 px</td></tr>
+          <tr><td>lawn  2 → 3</td><td>12</td><td>0.45 px</td><td>0.88 px</td></tr>
+          <tr><td>lawn  3 → 4</td><td>12</td><td>0.50 px</td><td>0.92 px</td></tr>
+          <tr><td>street  1 → 2</td><td>12</td><td>0.52 px</td><td>1.09 px</td></tr>
+          <tr><td>street  2 → 3</td><td>12</td><td>0.46 px</td><td>0.83 px</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The table shows the pairs behind the three main mosaics. Across all 44 neighbouring pairs used on this page, the median residual ranges from 0.15 to 0.70 px, and the single worst point is 1.16 px off.</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/corr/oldA_23.jpg" width="1370" height="900" alt="Old building photos 2 and 3 with correspondences"></div><figcaption><strong>Old building 2 → 3</strong>, one of the round-two pairs: the balcony, window corners, the lamp post, and the building’s base.</figcaption></figure>
+  </section>
+
+  <section id="warp" class="project-section">
+    <h2>Part A.3: Warp the Images</h2>
+    <p>Both warps are <strong>inverse</strong> warps. I first push the four image corners through \(H\) to get the output's bounding box. Then, for every output pixel \(p'\), I compute where it came from, \(p = H^{-1}p'\), and sample the source there. Going backwards guarantees exactly one value per output pixel, so there are no holes. Pixel centers sit at integer coordinates, so \((0, 0)\) is the center of the first pixel. Locations that fall outside the source get alpha 0, and that alpha mask later drives the blending. Everything is vectorized over row chunks, so warping a 2048 px photo takes well under a second.</p>
+    <div class="media-grid compare-2">
+      <figure><pre><code>def _nearest(im, sx, sy):
+    h, w = im.shape[:2]
+    xi, yi = np.rint(sx).astype(np.int64), np.rint(sy).astype(np.int64)
+    valid = (xi &gt;= 0) &amp; (xi &lt; w) &amp; (yi &gt;= 0) &amp; (yi &lt; h)
+    vals = im[np.clip(yi, 0, h - 1), np.clip(xi, 0, w - 1)]
+    return vals * valid[..., None], valid.astype(np.float32)</code></pre><figcaption><strong>Nearest neighbour:</strong> round the source location to the closest pixel.</figcaption></figure>
+      <figure><pre><code>def _bilinear(im, sx, sy):
+    h, w = im.shape[:2]
+    valid = (sx &gt;= 0) &amp; (sx &lt;= w - 1) &amp; (sy &gt;= 0) &amp; (sy &lt;= h - 1)
+    x0 = np.clip(np.floor(sx).astype(np.int64), 0, w - 2)
+    y0 = np.clip(np.floor(sy).astype(np.int64), 0, h - 2)
+    fx = np.clip(sx - x0, 0, 1)[..., None].astype(np.float32)
+    fy = np.clip(sy - y0, 0, 1)[..., None].astype(np.float32)
+    top = im[y0, x0] * (1 - fx) + im[y0, x0 + 1] * fx           # blend along x ...
+    bot = im[y0 + 1, x0] * (1 - fx) + im[y0 + 1, x0 + 1] * fx
+    vals = top * (1 - fy) + bot * fy                              # ... then along y
+    return vals * valid[..., None], valid.astype(np.float32)</code></pre><figcaption><strong>Bilinear:</strong> weight the four surrounding pixels by distance, first along x, then along y.</figcaption></figure>
+    </div>
+
+    <h3>Rectification</h3>
+    <p>To test the warps before building mosaics, I rectified three rectangles photographed at an angle, plus a fourth blind test against a reference photo (below). Corners alone don't give the target shape, because I don't know how big the real rectangle is. But the phone's focal length is known (1422 px from EXIF), and with \(K\) known the homography from a unit square to the photographed quadrilateral factors as \(K^{-1}H \propto [\,r_1\; r_2\; t\,]\). The rectangle's true aspect ratio is then \(h/w = \lVert K^{-1}h_2 \rVert / \lVert K^{-1}h_1 \rVert\). This gives 0.493 for the window block, 2.815 for the cabinet glass, and 0.487 for the theatre marquee. The rectified windows come out square and evenly spaced, which independently confirms the computed ratio.</p>
+    <div class="breakout">
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/windows_input.jpg" width="1054" height="1400" alt="Building facade with the four corners of a 4 by 2 window block marked"></div><figcaption><strong>Input:</strong> outer corners of a 4 × 2 window block.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/windows_bilinear.jpg" width="739" height="436" alt="Rectified window block"></div><figcaption><strong>Rectified (bilinear).</strong> The black wedge is outside the original photo.</figcaption></figure>
+      </div>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/cabinet_input.jpg" width="1054" height="1400" alt="Fire cabinet seen at an angle with its glass corners marked"></div><figcaption><strong>Input:</strong> the cabinet's glass panel, seen from the side.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/cabinet_bilinear.jpg" width="632" height="1018" alt="Rectified fire cabinet seen straight on"></div><figcaption><strong>Rectified (bilinear):</strong> now seen straight on.</figcaption></figure>
+      </div>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/marquee_input.jpg" width="1054" height="1400" alt="Theatre marquee seen from the side with its corners marked"></div><figcaption><strong>Input:</strong> the left face of the theatre marquee, seen from below and to the side.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/marquee_bilinear.jpg" width="934" height="521" alt="Rectified theatre marquee reading California straight on"></div><figcaption><strong>Rectified (bilinear):</strong> "California" reads straight-on, the louvers are level and the hanging cables are vertical.</figcaption></figure>
+      </div>
+      <h3>Nearest neighbour vs. bilinear</h3>
+      <div class="media-grid compare-4">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/rect/windows_zoom_nearest.jpg" width="480" height="360" alt="Nearest-neighbour zoom of a window frame"></div><figcaption><strong>Nearest</strong>, 4× zoom: jagged, stair-stepped frame edges.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/rect/windows_zoom_bilinear.jpg" width="480" height="360" alt="Bilinear zoom of the same window frame"></div><figcaption><strong>Bilinear:</strong> smooth edges.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/rect/cabinet_zoom_nearest.jpg" width="440" height="560" alt="Nearest-neighbour zoom of the cabinet label"></div><figcaption><strong>Nearest:</strong> the glass edge turns into a stair-step.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/rect/cabinet_zoom_bilinear.jpg" width="440" height="560" alt="Bilinear zoom of the cabinet label"></div><figcaption><strong>Bilinear:</strong> one clean edge.</figcaption></figure>
+      </div>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/rect/marquee_zoom_nearest.jpg" width="560" height="360" alt="Nearest-neighbour zoom of the marquee lettering"></div><figcaption><strong>Nearest:</strong> the letter's outline and the cables turn into staircases.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/rect/marquee_zoom_bilinear.jpg" width="560" height="360" alt="Bilinear zoom of the marquee lettering"></div><figcaption><strong>Bilinear:</strong> smooth outline, continuous cables.</figcaption></figure>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rectification</th><th>Output</th><th>Nearest</th><th>Bilinear</th><th>Bilinear cost</th></tr></thead>
+        <tbody>
+          <tr><td>4 × 2 window block</td><td>739×436</td><td>18 ms</td><td>50 ms</td><td>2.8×</td></tr>
+          <tr><td>fire-cabinet glass</td><td>632×1018</td><td>45 ms</td><td>92 ms</td><td>2.0×</td></tr>
+          <tr><td>theatre marquee face</td><td>934×521</td><td>33 ms</td><td>81 ms</td><td>2.5×</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Trade-off.</strong> Nearest neighbour does one lookup per output pixel. Bilinear does four lookups plus three weighted sums, and measured 2.0–2.8× slower here. The quality difference shows wherever the warp stretches or rotates the image: nearest copies whole source pixels, so diagonal edges turn into stair-steps and enlarged areas look blocky. Bilinear averages neighbours, which is slightly softer but continuous. For the mosaics I use bilinear throughout: the extra cost is a fraction of a second per photo, and blocky seams would be far more visible than slight softness.</p>
+
+    <h3>Blind test: rectify, then compare with a straight-on photo</h3>
+    <p>The examples above are judged by eye. For this one I also took a straight-on reference photo, so the result can be checked with numbers. The subject is a relief sculpture on a shaded wall, photographed at a steep angle. The relief has no rectangular border, but its wall does. The building's corner edge and the doorway's left edge are vertical, and the floor line and the doorway's top edge are horizontal, all on the same plane. Three of the rectangle's corners are physical points: the building corner at the floor, and the doorway's top-left and bottom-left corners. The fourth is where the corner edge meets the doorway's top edge, extended. From these corners and the focal length, the wall rectangle's height/width is 0.584. <strong>The reference photo is not used anywhere in the rectification.</strong></p>
+    <div class="breakout">
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/relief_input.jpg" width="1054" height="1400" alt="Angled photo of the relief wall with the constructed wall rectangle marked"></div><figcaption><strong>Input:</strong> the wall rectangle, from the building corner (blue line) to the doorway, and from the floor to the doorway's top edge.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/rect/relief_blind.jpg" width="1951" height="1756" alt="Blind rectification of the relief wall"></div><figcaption><strong>Blind rectification</strong> (bilinear).</figcaption></figure>
+      </div>
+      <figure>
+        <div class="wipe" data-wipe>
+          <img loading="lazy" decoding="async" src="media/rect/relief_reference_crop.jpg" width="1070" height="1149" alt="Straight-on reference photo of the relief">
+          <div class="wipe-top"><img loading="lazy" decoding="async" src="media/rect/relief_blind_aligned_crop.jpg" width="1070" height="1149" alt="Blind rectification aligned to the reference by a similarity"></div>
+          <div class="wipe-bar"></div>
+          <input type="range" min="0" max="100" value="50" aria-label="Wipe between blind rectification and reference photo">
+        </div>
+        <figcaption><strong>Drag to compare.</strong> The blind rectification (left), placed onto the reference by shift, rotation and uniform scale only, against the real straight-on photo (right). The colour difference is lighting: shade vs. sun.</figcaption>
+      </figure>
+    </div>
+    <p>To measure the match, I placed the blind result onto the reference with a similarity seeded from 8 landmark pairs (heads, hands, feet). I then refined 47 strong points on the relief by local patch matching. A perfect rectification would leave only a similarity between the two, so the question is how much a richer transform improves the fit:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Transform from blind result to reference</th><th>Allows</th><th>Median residual</th></tr></thead>
+        <tbody>
+          <tr><td>Similarity</td><td>shift, rotation, uniform scale</td><td>8.7 px (p90 11.4 px)</td></tr>
+          <tr><td>Affine</td><td>+ shear, unequal scale</td><td>4.5 px</td></tr>
+          <tr><td>Homography</td><td>+ perspective</td><td>4.1 px</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Almost all of the remaining error is affine: a 5.4% difference in stretch between two directions, with essentially no rotation (0.05°). Allowing perspective on top barely helps (4.5 → 4.1 px), so no measurable perspective is left. In other words, the blind rectification got the plane's orientation right and is about 5% off in proportions. That is about what to expect from four hand-read corners and a focal length rounded to the nearest millimetre. The last few pixels, about 0.4% of the 870×949 px relief, most likely come from the relief's own depth, since it is sculpted, not flat, and was seen from two very different angles.</p>
+    <p>Rectification also cannot recover detail the photo never captured. At the relief, the angled photo recorded only 0.47 source pixels per output pixel horizontally (0.80 vertically). The rectified relief is therefore about 2.1× upsampled sideways: the geometry is right, but it is visibly softer than the straight-on reference.</p>
+  </section>
+  <section id="mosaic" class="project-section">
+    <h2>Part A.4: Blend the Images into a Mosaic</h2>
+    <p>I build every mosaic in one shot, in five steps:</p>
+    <ol class="method-steps">
+      <li><strong>Chain to a reference.</strong> The middle photo stays unwarped. Each neighbour homography maps photo \(k\) into photo \(k+1\), so composing them outward gives every photo's homography into the reference.</li>
+      <li><strong>Size the canvas</strong> as the union of all warped bounding boxes, then warp each photo once, at full resolution, into its own box inside that canvas.</li>
+      <li><strong>Gain compensation.</strong> I did not lock exposure, so neighbouring photos differ in brightness. On a quarter-size preview I measure each overlap's mean color and solve for one gain per photo and channel (Brown &amp; Lowe's formulation), so that overlaps agree while every gain stays near 1. Without that prior, "all gains = 0" would trivially make every overlap agree.</li>
+      <li><strong>Feathering.</strong> Each photo's weight is its distance to the edge of its own footprint (the distance transform, MATLAB's <code>bwdist</code>), so each pixel trusts the photo whose center it is closest to.</li>
+      <li><strong>Two-level blend (a 2-level Laplacian pyramid).</strong> Feathering alone averages misaligned fine detail into faint double edges (ghosting). The spec suggests a 2-level pyramid for exactly this, so I split each photo into a blurred low band (Gaussian, σ = 4 px) and a detail band (photo minus low band). The low band is feathered, which gives a smooth transition in color and exposure. The detail band is taken from whichever photo has the largest weight at that pixel, so edges stay single and sharp.</li>
+    </ol>
+    <div class="media-grid compare-2">
+      <figure><pre><code>def chain_to_reference(pair_H, ref):
+    n = len(pair_H) + 1
+    Hs = [None] * n
+    Hs[ref] = np.eye(3)
+    for k in range(ref - 1, -1, -1):                 # k -&gt; k+1 -&gt; ... -&gt; ref
+        Hs[k] = Hs[k + 1] @ pair_H[k]
+    for k in range(ref + 1, n):                      # k -&gt; k-1 -&gt; ... -&gt; ref
+        Hs[k] = Hs[k - 1] @ np.linalg.inv(pair_H[k - 1])
+    return [H / H[2, 2] for H in Hs]</code></pre></figure>
+      <figure><pre><code>def solve_gains(pairs, n, sigma_n=0.04, sigma_g=0.1):
+    gains = np.ones((n, 3))
+    for c in range(3):
+        A, b = [], []
+        for i, j, cnt, mi, mj in pairs:
+            w = np.sqrt(cnt)
+            row = np.zeros(n); row[i], row[j] = mi[c] * w / sigma_n, -mj[c] * w / sigma_n
+            A.append(row); b.append(0.0)
+            for k in (i, j):
+                row = np.zeros(n); row[k] = w / sigma_g
+                A.append(row); b.append(w / sigma_g)
+        if A:
+            gains[:, c] = np.linalg.lstsq(np.array(A), np.array(b), rcond=None)[0]
+    return gains</code></pre></figure>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mosaic</th><th>Photos</th><th>Canvas</th><th>Gains</th><th>Overlap difference (before → after gains)</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td>California Theatre</td><td>3</td><td>3264×2766</td><td>1.07 / 0.98 / 0.94</td><td>0.099 → 0.079</td><td>13.4 s</td></tr>
+          <tr><td>Rooftop (vertical)</td><td>3</td><td>2569×4673</td><td>0.87 / 1.01 / 1.08</td><td>0.126 → 0.076</td><td>16.4 s</td></tr>
+          <tr><td>Lawn + crane</td><td>4</td><td>3578×3355</td><td>1.11 / 1.02 / 0.91 / 0.88</td><td>0.128 → 0.080</td><td>14.0 s</td></tr>
+          <tr><td>Street</td><td>3</td><td>3341×3593</td><td>1.00 / 1.02 / 0.99</td><td>0.053 → 0.051</td><td>15.8 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The gains range from 0.87 to 1.11. The rooftop set needed the most correction: its mean color difference inside the overlaps drops from 0.126 to 0.076 (on a 0–1 scale). Part of the difference that remains is real content: shadows and parked cars that moved, plus fine texture.</p>
+
+    <div class="breakout">
+      <h3 id="res-theatre">Mosaic 1 · California Theatre</h3>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_theatre.jpg" width="732" height="320" alt="Input photos: the 3 theatre photos"></div><figcaption><strong>Input:</strong> the 3 theatre photos.</figcaption></figure>
+      <div class="media-grid compare-3">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/theatre/warped_1.jpg" width="1143" height="969" alt="Theatre photo 1 warped into the shared canvas"></div><figcaption><strong>Photo 1, warped</strong> into the reference's frame.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/theatre/warped_2.jpg" width="1143" height="969" alt="Theatre photo 2, the unwarped reference, placed on the canvas"></div><figcaption><strong>Photo 2</strong>, the reference: only shifted onto the canvas.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/theatre/warped_3.jpg" width="1143" height="969" alt="Theatre photo 3 warped into the shared canvas"></div><figcaption><strong>Photo 3, warped.</strong></figcaption></figure>
+      </div>
+      <figcaption>The three photos on the shared canvas, before blending: each one warped once by its chained homography. Dark areas are pixels a photo does not cover (alpha 0).</figcaption>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/theatre/web_twolevel.jpg" width="2200" height="1864" alt="California Theatre mosaic"></div><figcaption><strong>Two-level blend</strong> of 3 photos. The marquee lettering runs continuously across both seams. <a href="media/mosaic/theatre/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      <figure>
+        <div class="wipe" data-wipe>
+          <img loading="lazy" decoding="async" src="media/mosaic/theatre/seam_twolevel.jpg" width="1540" height="559" alt="Theatre pavement and mural, two-level blend">
+          <div class="wipe-top"><img loading="lazy" decoding="async" src="media/mosaic/theatre/seam_overwrite.jpg" width="1540" height="559" alt="Theatre pavement and mural, overwrite"></div>
+          <div class="wipe-bar"></div>
+          <input type="range" min="0" max="100" value="50" aria-label="Wipe between overwrite and two-level blend">
+        </div>
+        <figcaption><strong>Drag to compare.</strong> Overwrite (left), where each photo simply covers the previous one and leaves hard brightness steps in the pavement and mural, against the two-level blend (right).</figcaption>
+      </figure>
+      <h3 id="res-rooftop">Mosaic 2 · Rooftop view (vertical)</h3>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_rooftop.jpg" width="732" height="320" alt="Input photos: the 3 rooftop photos, from the roof below up to the sky"></div><figcaption><strong>Input:</strong> the 3 rooftop photos, from the roof below up to the sky.</figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/rooftop/web_twolevel.jpg" width="1209" height="2200" alt="Vertical rooftop mosaic"></div><figcaption><strong>Two-level blend</strong> of the 3 photos. <a href="media/mosaic/rooftop/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      <h3 id="res-lawn">Mosaic 3 · Lawn and construction crane</h3>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_lawn.jpg" width="978" height="320" alt="Input photos: the 4 lawn photos"></div><figcaption><strong>Input:</strong> the 4 lawn photos.</figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/lawn/web_twolevel.jpg" width="2200" height="2063" alt="Lawn and crane mosaic"></div><figcaption><strong>Two-level blend</strong> of 4 photos. <a href="media/mosaic/lawn/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      <div class="media-grid compare-3">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/mosaic/lawn/ghost_overwrite.jpg" width="440" height="440" alt="Scaffold detail, overwrite"></div><figcaption><strong>Overwrite.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/mosaic/lawn/ghost_feather.jpg" width="440" height="440" alt="Scaffold detail, feather"></div><figcaption><strong>Feather:</strong> two slightly offset copies averaged, so the bars go soft.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/mosaic/lawn/ghost_twolevel.jpg" width="440" height="440" alt="Scaffold detail, two-level"></div><figcaption><strong>Two-level:</strong> one sharp copy of every bar.</figcaption></figure>
+      </div>
+      <figcaption>The crop is chosen automatically as the window where the feathered and two-level results differ most.</figcaption>
+    </div>
+
+    <h3>More mosaics</h3>
+    <p>The same pipeline, with no per-set tuning, on six more sets:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mosaic</th><th>Photos</th><th>Canvas</th><th>Gains</th><th>Overlap difference (before → after gains)</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td>Golden Gate, no flag frame</td><td>2</td><td>2872×1943</td><td>0.99 / 1.01</td><td>0.040 → 0.038</td><td>8.4 s</td></tr>
+          <tr><td>Tower, looking up</td><td>3</td><td>3213×3736</td><td>0.97 / 0.98 / 1.05</td><td>0.120 → 0.111</td><td>17.2 s</td></tr>
+          <tr><td>Glass building</td><td>3</td><td>4022×2985</td><td>0.96 / 1.01 / 1.02</td><td>0.073 → 0.070</td><td>14.7 s</td></tr>
+          <tr><td>Trees and parked cars</td><td>4</td><td>4009×2994</td><td>1.04 / 1.00 / 0.98 / 0.95</td><td>0.087 → 0.071</td><td>18.3 s</td></tr>
+          <tr><td>Yellow building</td><td>3</td><td>3423×3508</td><td>0.98 / 0.90 / 1.07</td><td>0.107 → 0.086</td><td>17.8 s</td></tr>
+          <tr><td>Theatre, second take</td><td>3</td><td>3116×2697</td><td>1.02 / 1.00 / 0.98</td><td>0.072 → 0.067</td><td>11.0 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="breakout">
+      <div class="media-grid compare-2">
+        <figure id="res-street"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_street.jpg" width="732" height="320" alt="Input photos: Street"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/street/web_twolevel.jpg" width="2046" height="2200" alt="Street, result"></div><figcaption><strong>Street</strong>, input (top) → result. 3 photos: a hotel, the red building and the shops. <a href="media/mosaic/street/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+        <figure id="res-glass"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_glass.jpg" width="732" height="320" alt="Input photos: Glass building"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/glass/web_twolevel.jpg" width="2200" height="1633" alt="Glass building, result"></div><figcaption><strong>Glass building</strong>, input (top) → result. 3 photos. <a href="media/mosaic/glass/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+        <figure id="res-tower"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_tower.jpg" width="732" height="320" alt="Input photos: Tower"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/tower/web_twolevel.jpg" width="1892" height="2200" alt="Tower, result"></div><figcaption><strong>Tower</strong>, input (top) → result. 3 photos tilted up: strong keystone, as in the original photos. <a href="media/mosaic/tower/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+        <figure id="res-yellow"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_yellow.jpg" width="732" height="320" alt="Input photos: Yellow building"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/yellow/web_twolevel.jpg" width="2147" height="2200" alt="Yellow building, result"></div><figcaption><strong>Yellow building</strong>, input (top) → result. 3 photos, including a pair with only about 30% overlap. <a href="media/mosaic/yellow/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+        <figure id="res-cars"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_cars.jpg" width="978" height="320" alt="Input photos: Trees and parked cars"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/cars/web_twolevel.jpg" width="2200" height="1643" alt="Trees and parked cars, result"></div><figcaption><strong>Trees and parked cars</strong>, input (top) → result. 4 photos. <a href="media/mosaic/cars/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+        <figure id="res-theatreB"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_theatreB.jpg" width="732" height="320" alt="Input photos: Theatre, second take"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/theatreB/web_twolevel.jpg" width="2200" height="1904" alt="Theatre, second take, result"></div><figcaption><strong>Theatre, second take</strong>, input (top) → result. 3 photos. <a href="media/mosaic/theatreB/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+        <figure id="res-gg_pan"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_gg_pan.jpg" width="856" height="320" alt="Input photos: Golden Gate pan"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/gg_pan/web_twolevel.jpg" width="2200" height="1488" alt="Golden Gate pan, result"></div><figcaption><strong>Golden Gate pan</strong>, input (top) → result. 2 photos, without the flag frame. <a href="media/mosaic/gg_pan/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      </div>
+    </div>
+
+    <h3>When a plane is the wrong surface</h3>
+    <p>My Golden Gate set shows the limit of a planar mosaic. Its third photo is tilted about 40° up toward a flag. Projected onto the middle photo's plane, everything far from the center is stretched enormously: the flag dominates and the bridge shrinks into a corner. The homographies are correct; the plane simply cannot hold a wide field of view without stretching. Dropping the tilted frame fixes it: the 2-photo Golden Gate pan in the gallery above is clean. The cylindrical projection below fixes it properly, for any width.</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_goldengate.jpg" width="1287" height="320" alt="Input photos: Golden Gate set with the tilted flag frame"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/goldengate/web_twolevel.jpg" width="2200" height="1610" alt="Golden Gate planar mosaic, heavily stretched"></div><figcaption><strong>Golden Gate</strong>, input (top) → planar result: correct, but stretched by the projection.</figcaption></figure>
+  </section>
+
+  <section id="cylinder" class="project-section">
+    <h2>Part A.5: Bells &amp; Whistles: Cylindrical and Spherical Mosaics</h2>
+    <p>A plane cannot hold a wide sweep: at 90° from the reference, the planar projection goes to infinity. My nine-photo sweep turns 140° and covers 204° in total. On a cylinder (or sphere) around the camera, that's no problem. My pipeline, in five steps:</p>
+    <ol class="method-steps">
+      <li><strong>Rotations from homographies.</strong> For a camera that only rotates, \(H = K R K^{-1}\). Projecting \(K^{-1}HK\) onto the nearest rotation matrix (via SVD) is the textbook shortcut, but it only minimizes an algebraic error. On my photos it reproduced the points only to 4.5–24.9 px.</li>
+      <li><strong>Fit the rotations in pixels.</strong> Instead I fit all eight neighbour rotations and one shared focal length jointly to the clicked points, with robust least squares (a small bundle adjustment). Seven of the eight pairs now fit to 0.8–2.6 px (the last one to 5.7 px). The fitted focal length is 1426.3 px, 1.003× the EXIF value of 1421.9 px. That's how I picked the radius: by measurement, and it agrees with the phone.</li>
+      <li><strong>Straighten.</strong> When you turn in place, every camera's x-axis lies in the horizontal plane, so "up" is the direction most perpendicular to all of them. The middle photo was tilted 4.3° from level; rotating the cylinder's axis onto the true up direction removes the wavy horizon.</li>
+      <li><strong>Inverse-sample from the originals.</strong> For every output pixel I compute its viewing ray on the surface, rotate it into each camera, project with \(K\), and sample that original photo bilinearly. No photo is warped twice, so the panorama keeps the sources' full resolution.</li>
+      <li><strong>Blend</strong> with the same gains and two-level blend as the planar mosaics.</li>
+    </ol>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pair</th><th>Turn</th><th>SVD rotation fit</th><th>Pixel-space joint fit</th></tr></thead>
+        <tbody>
+          <tr><td>1 → 2</td><td>21.6°</td><td>19.2 px</td><td>2.2 px</td></tr>
+          <tr><td>2 → 3</td><td>17.7°</td><td>11.0 px</td><td>5.7 px</td></tr>
+          <tr><td>3 → 4</td><td>18.1°</td><td>8.5 px</td><td>1.8 px</td></tr>
+          <tr><td>4 → 5</td><td>15.0°</td><td>4.6 px</td><td>1.0 px</td></tr>
+          <tr><td>5 → 6</td><td>17.7°</td><td>4.5 px</td><td>1.8 px</td></tr>
+          <tr><td>6 → 7</td><td>14.2°</td><td>24.9 px</td><td>2.6 px</td></tr>
+          <tr><td>7 → 8</td><td>19.1°</td><td>10.0 px</td><td>2.3 px</td></tr>
+          <tr><td>8 → 9</td><td>17.1°</td><td>9.1 px</td><td>0.8 px</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="breakout">
+      <figure id="res-wide"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_wide.jpg" width="2208" height="320" alt="Input photos: the 9-photo sweep"></div><figcaption><strong>Input:</strong> the 9 photos of the sweep.</figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/wide/web_cylinder_final.jpg" width="2600" height="862" alt="Cylindrical panorama of the campus, about 200 degrees"></div><figcaption><strong>Cylindrical panorama</strong> (204°, radius 1336 px), cropped to the largest rectangle with no empty pixels. <a href="media/wide/cylinder_final.jpg">Full resolution</a>.</figcaption></figure>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/wide/web_sphere_final.jpg" width="2600" height="760" alt="Spherical panorama"></div><figcaption><strong>Spherical version.</strong> The same rays, but with latitude instead of height on the vertical axis. A cylinder's height grows like tan(latitude), so the sphere stretches the top and bottom less.</figcaption></figure>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/wide/web_cylinder_unlevelled.jpg" width="2600" height="1436" alt="Cylinder before straightening"></div><figcaption><strong>Before straightening:</strong> the horizon waves because the reference camera was tilted.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/wide/web_cylinder_twolevel.jpg" width="2600" height="1379" alt="Cylinder after straightening"></div><figcaption><strong>After straightening</strong> (uncropped).</figcaption></figure>
+      </div>
+      <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/wide/web_planar_middle7.jpg" width="2600" height="1973" alt="Planar mosaic of the middle seven photos, heavily stretched"></div><figcaption><strong>Planar attempt, only the middle 7 photos:</strong> already a stretched bow-tie. All 9 cannot be drawn on a plane at all, because the outer frames reach past 90° from the reference.</figcaption></figure>
+    </div>
+    <h3>More panoramas</h3>
+    <p>Three more sweeps through the same panorama code, unchanged. The gap between the two rotation fits is even larger here: the SVD shortcut was off by up to 51 px, while the pixel-space fit stays within 4.4 px. The fitted focal lengths land within about 3% of EXIF.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Panorama</th><th>Photos</th><th>Field of view</th><th>Focal (fit / EXIF)</th><th>SVD rotation fit</th><th>Pixel-space fit</th><th>Tilt removed</th><th>Final</th></tr></thead>
+        <tbody>
+          <tr><td>Theatre street, all 7 frames</td><td>7</td><td>128°</td><td>1.008×</td><td>5.7–15.6 px</td><td>1.0–2.3 px</td><td>2.4°</td><td>3112×1804</td></tr>
+          <tr><td>Old building, sweep 1</td><td>5</td><td>155°</td><td>0.968×</td><td>13.2–50.9 px</td><td>1.5–4.4 px</td><td>9.3°</td><td>3416×1764</td></tr>
+          <tr><td>Old building, sweep 2</td><td>4</td><td>117°</td><td>0.968×</td><td>9.0–22.5 px</td><td>1.4–3.5 px</td><td>1.2°</td><td>2716×1780</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="breakout">
+      <figure id="res-theatre7"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_theatre7.jpg" width="1716" height="320" alt="Input photos: Theatre street, all 7 frames"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/pano/theatre7/web_final.jpg" width="2600" height="1507" alt="Theatre street, all 7 frames, result"></div><figcaption><strong>Theatre street, all 7 frames</strong>, input (top) → result. The frames go back and forth, but chaining the neighbour rotations handles any order. <a href="media/pano/theatre7/final.jpg">Full resolution</a>.</figcaption></figure>
+      <figure id="res-oldA"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_oldA.jpg" width="1224" height="320" alt="Input photos: Old building, sweep 1"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/pano/oldA/web_final.jpg" width="2600" height="1343" alt="Old building, sweep 1, result"></div><figcaption><strong>Old building, sweep 1</strong>, input (top) → result. 155° from 5 photos. <a href="media/pano/oldA/final.jpg">Full resolution</a>.</figcaption></figure>
+      <figure id="res-oldB"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/sources/strip_oldB.jpg" width="978" height="320" alt="Input photos: Old building, sweep 2"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/pano/oldB/web_final.jpg" width="2600" height="1704" alt="Old building, sweep 2, result"></div><figcaption><strong>Old building, sweep 2</strong>, input (top) → result. The walking student appears once and stays sharp: the two-level blend takes his detail from a single photo instead of averaging a ghost. <a href="media/pano/oldB/final.jpg">Full resolution</a>.</figcaption></figure>
+    </div>
+
+    <div class="media-grid compare-2">
+      <figure><pre><code>def sample_surface(im, R, K, u0, v0, W, H, f, kind, box, chunk=256):
+    x0, y0, x1, y1 = box
+    out = np.zeros((y1 - y0 + 1, x1 - x0 + 1, 3), np.float32)
+    alpha = np.zeros(out.shape[:2], np.float32)
+    M = K @ R.T                                      # reference ray -&gt; camera k pixel
+    us = np.arange(x0, x1 + 1) + u0
+    for r in range(0, out.shape[0], chunk):
+        vs = np.arange(y0 + r, min(y0 + r + chunk, y1 + 1)) + v0
+        U, V = np.meshgrid(us, vs)
+        d = _rays(U, V, f, kind)
+        p = d @ M.T
+        front = p[..., 2] &gt; 1e-6
+        z = np.where(front, p[..., 2], 1.0)
+        vals, a = _bilinear(im, p[..., 0] / z, p[..., 1] / z)
+        a = a * front
+        out[r:r + len(vs)] = vals * a[..., None]
+        alpha[r:r + len(vs)] = a
+    return out, alpha</code></pre></figure>
+      <figure><pre><code>def straighten(Rs):
+    X = np.array([R[:, 0] for R in Rs])
+    w, V = np.linalg.eigh(X.T @ X)
+    up = V[:, 0] * np.sign(V[1, 0] or 1.0)          # keep image-down convention (+y)
+    z = np.array([0.0, 0.0, 1.0]); z = z - z.dot(up) * up; z /= np.linalg.norm(z)
+    G = np.stack([np.cross(up, z), up, z])          # rows: new x, y, z in old coords
+    tilt = float(np.degrees(np.arccos(np.clip(abs(up[1]), -1, 1))))
+    return [G @ R for R in Rs], tilt</code></pre></figure>
+    </div>
+  </section>
+
+  <section id="learned" class="project-section">
+    <h2>What I Learned</h2>
+    <p>The most important lesson was that <strong>the error you minimize matters as much as the model</strong>. Every step here has a cheap algebraic version and a geometric one. Solving \(Ah = b\) on raw pixels works, but normalizing first changes the condition number by orders of magnitude. Rounding \(K^{-1}HK\) to a rotation is one line of code, but it was off by up to 24.9 px, while fitting the same rotations to the actual points brought them to about 1–2 px. Both versions "work"; only one is accurate.</p>
+    <p>The second lesson was that bugs in blending are geometric, too. My first feathered mosaic had a sharp rectangular seam, because the unwarped reference photo fills its whole box and the distance transform never reached zero at its edge. Padding the mask by one pixel fixed it. That was a one-line fix, and I only found it because I looked at a zoomed crop rather than the full mosaic.</p>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="footer-inner shell"><span>© CS 180 • 2026 • Hovhannes Antablyan. All rights reserved.</span><a href="../">All projects</a></div></footer>
+<button class="back-top" type="button" aria-label="Back to top">Top</button>
+<script src="../assets/site.js"></script>
+</body>
+</html>
