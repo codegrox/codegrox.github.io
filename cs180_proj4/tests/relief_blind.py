@@ -15,7 +15,7 @@ from imutils import load, save
 from homography import computeH, apply
 from warp import warpImageBilinear, _bilinear
 
-RAW = Path(sys.argv[1] if len(sys.argv) > 1 else '/home/claude/p4/raw/Camera')
+RAW = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / 'originals')
 SRC, REF = 'PXL_20261028_184314071.RAW-01.MP.jpg', 'PXL_20261028_184328876.RAW-01.jpg'
 LINES = {  # full-resolution (3072 x 4080) points, read at 2x zoom
     'corner_edge': [[984, 859], [920, 3683]], 'doorway_top': [[2147, 2122], [2450, 2184]],

@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
-RAW = Path(sys.argv[1] if len(sys.argv) > 1 else '/home/claude/p4/raw/Camera')
-SCORES = Path(sys.argv[2] if len(sys.argv) > 2 else '/home/claude/p4/corr/extra_scores.json')
+RAW = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT / 'originals')
+SCORES = Path(sys.argv[2] if len(sys.argv) > 2 else ROOT / 'originals' / 'extra_scores.json')
 SIDE = 2048
 
 
