@@ -8,7 +8,9 @@
   <script>try{document.documentElement.dataset.theme=localStorage.getItem('codegrox-theme')||'dark'}catch(e){}</script>
   <link rel="stylesheet" href="../assets/site.css">
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<style>[id^="res-"] { scroll-margin-top: 84px; }</style>
+<style>[id^="res-"] { scroll-margin-top: 84px; }
+.project-toc .toc-part { flex-basis: 100%; color: var(--accent); font: 600 .61rem/1 var(--sans); letter-spacing: .17em; text-transform: uppercase; }
+@media (min-width: 1260px) { .project-page .project-toc .toc-part { display: block; margin: .95rem 0 .3rem; } .project-page .project-toc .toc-part:first-of-type { margin-top: .25rem; } }</style>
 </head>
 <body class="project-page">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -27,23 +29,37 @@
 <main id="content" class="shell project-layout">
   <header class="project-hero reading">
     <div class="eyebrow">CS 180 · Project 04 · Fall 2026</div>
-    <h1 class="project-title">Image Warping and Mosaicing</h1>
-    <p class="project-subtitle">Part A of [Auto]Stitching Photo Mosaics: recovering homographies from point correspondences, inverse warping with two interpolation methods, rectifying planes, blending photos into mosaics, and a 200° cylindrical panorama.</p>
+    <h1 class="project-title">[Auto]Stitching Photo Mosaics</h1>
+    <p class="project-subtitle">Part A: homographies from hand-placed points, inverse warping, rectification, blended mosaics and a 200° cylindrical panorama. Part B: the same mosaics with no hand-placed points, from corners, descriptors, matching and RANSAC.</p>
   </header>
 
   <nav class="project-toc reading" aria-label="Project sections">
+    <span class="toc-part">Part A</span>
     <a href="#shoot" data-num="A.1">Photos</a>
     <a href="#homography" data-num="A.2">Homographies</a>
     <a href="#warp" data-num="A.3">Warping</a>
     <a href="#mosaic" data-num="A.4">Mosaics</a>
     <a href="#cylinder" data-num="A.5">Panorama</a>
-    <a href="#learned" data-num="&#8212;">Learned</a>
+    <a href="#learned-a" data-num="&#8212;">Learned</a>
+    <span class="toc-part">Part B</span>
+    <a href="#b1" data-num="B.1">Corners</a>
+    <a href="#b2" data-num="B.2">Descriptors</a>
+    <a href="#b3" data-num="B.3">Matching</a>
+    <a href="#b4" data-num="B.4">RANSAC</a>
+    <a href="#b5" data-num="B.5">Recognition</a>
+    <a href="#learned-b" data-num="&#8212;">Learned</a>
   </nav>
 
   <div class="reading panel corner-ticks project-summary">
     <div class="panel-title">Result snapshot</div>
-    <p><strong>Every homography on this page comes from my own least-squares solver, fit to 12 correspondences per pair to under 1.2 px.</strong> Rectification recovers the real proportions of a rectangle from the phone's focal length. The three mosaics use gain compensation for exposures I did not lock, plus a two-level blend that keeps detail sharp without ghosting. For the bells &amp; whistles, nine photos become a 204° cylindrical panorama, sampled directly from the original photos with camera rotations fitted to every point.</p>
+    <p><strong>Every homography on this page comes from my own least-squares solver, fit to 12 correspondences per pair to under 1.2 px.</strong> Rectification recovers the real proportions of a rectangle from the phone's focal length. The three mosaics use gain compensation for exposures I did not lock, plus a two-level blend that keeps detail sharp without ghosting. For the bells &amp; whistles, nine photos become a 204° cylindrical panorama, sampled directly from the original photos with camera rotations fitted to every point. <strong>In Part B the hand-placed points are replaced by automatic matching:</strong> the automatic homographies reproduce the Part A points to 0.5–1.4 px, and the mosaics are indistinguishable from the manual ones.</p>
   </div>
+
+  <header class="part-heading reading" id="part-a">
+    <div class="eyebrow">Part A</div>
+    <h2>Image Warping and Mosaicing</h2>
+    <p>Homographies from hand-placed points, inverse warping, rectification, blended mosaics and cylindrical panoramas.</p>
+  </header>
 
   <section id="shoot" class="project-section">
     <h2>Part A.1: Shoot and Digitize Pictures</h2>
@@ -432,10 +448,232 @@
     </div>
   </section>
 
-  <section id="learned" class="project-section">
-    <h2>What I Learned</h2>
+
+  <section id="learned-a" class="project-section">
+    <h2>What I Learned (Part A)</h2>
     <p>The most important lesson was that <strong>the error you minimize matters as much as the model</strong>. Every step here has a cheap algebraic version and a geometric one. Solving \(Ah = b\) on raw pixels works, but normalizing first changes the condition number by orders of magnitude. Rounding \(K^{-1}HK\) to a rotation is one line of code, but it was off by up to 24.9 px, while fitting the same rotations to the actual points brought them to about 1–2 px. Both versions "work"; only one is accurate.</p>
     <p>The second lesson was that bugs in blending are geometric, too. My first feathered mosaic had a sharp rectangular seam, because the unwarped reference photo fills its whole box and the distance transform never reached zero at its edge. Padding the mask by one pixel fixed it. That was a one-line fix, and I only found it because I looked at a zoomed crop rather than the full mosaic.</p>
+  </section>
+
+  <header class="part-heading reading" id="part-b">
+    <div class="eyebrow">Part B</div>
+    <h2>Feature Matching for Autostitching</h2>
+    <p>The same mosaics with no hand-placed points: corners, descriptors, matching and RANSAC, then panorama recognition from an unordered pile.</p>
+  </header>
+
+  <section id="b1" class="project-section">
+    <p>Part B replaces the hand-placed points with automatic ones, following Brown et al., "Multi-Image Matching using Multi-Scale Oriented Patches" (MOPS), with the course's simplifications: single scale, no rotation invariance, no wavelet indexing. Everything after corner detection is written from scratch, and the mosaics reuse the Part A code unchanged.</p>
+    <h2>B.1: Harris Corner Detection</h2>
+    <p>Corners are detected on the grayscale photo at half resolution (1024 px on the long side), the same way as the course's <code>harris.py</code>: the Harris response from scikit-image's <code>corner_harris</code> (eps method, σ = 1), its local maxima, and a 20 px border discarded. I keep the 5000 strongest maxima. They crowd into the most textured areas, which is bad for a homography: points in one region constrain it only there.</p>
+    <p>Adaptive Non-Maximal Suppression fixes the distribution. Each corner's radius is its distance to the nearest corner that is sufficiently stronger (\(f_i &lt; 0.9 f_j\)). Keeping the 500 corners with the largest radii leaves strong corners that are also far apart.</p>
+    <div class="breakout">
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/corners_harris.jpg" width="677" height="900" alt="Harris corners overlaid on a theatre photo"></div><figcaption><strong>Harris</strong>, 5000 strongest maxima.</figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/corners_anms.jpg" width="677" height="900" alt="ANMS corners overlaid on the same photo"></div><figcaption><strong>ANMS</strong>, 500 corners.</figcaption></figure>
+      </div>
+    </div>
+    <figure><pre><code>def anms(xy, strength, n=500, c_robust=0.9, chunk=1024):
+    order = np.argsort(-strength)
+    xy, f = xy[order], strength[order]
+    r2 = np.full(len(f), np.inf)
+    for s in range(0, len(f), chunk):
+        e = min(s + chunk, len(f))
+        d2 = ((xy[s:e, None, :] - xy[None, :, :]) ** 2).sum(-1)
+        stronger = f[s:e, None] &lt; c_robust * f[None, :]
+        r2[s:e] = np.where(stronger, d2, np.inf).min(1)
+    keep = np.argsort(-r2)[:n]
+    return xy[keep], np.sqrt(r2[keep])</code></pre></figure>
+  </section>
+
+  <section id="b2" class="project-section">
+    <h2>B.2: Feature Descriptor Extraction</h2>
+    <p>Each descriptor is an 8×8 grid of samples spaced 5 px apart, so it covers a 40×40 window. The image is blurred first (Gaussian, σ = 2), so the 5× subsampling does not alias, and the grid is read with bilinear sampling. Each descriptor is then bias/gain-normalized to zero mean and unit standard deviation, which makes matching insensitive to the exposure differences between my photos.</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" class="crisp" src="media/b/descriptors.png" width="1190" height="318" alt="Eight 40 by 40 feature windows above their normalized 8 by 8 descriptors"></div><figcaption><strong>Top:</strong> 40×40 windows. <strong>Bottom:</strong> their normalized 8×8 descriptors.</figcaption></figure>
+    <figure><pre><code>def descriptors(g, xy, window=40, size=8, sigma=2.0):
+    b = gaussian_filter(g.astype(np.float32), sigma)[..., None]
+    step = window / size
+    off = (np.arange(size) - (size - 1) / 2) * step            # -17.5 ... 17.5
+    ox, oy = np.meshgrid(off, off)
+    sx = xy[:, 0, None, None] + ox[None]; sy = xy[:, 1, None, None] + oy[None]
+    p, _ = _bilinear(b, sx, sy)
+    p = p[..., 0].reshape(len(xy), -1)
+    p = (p - p.mean(1, keepdims=True)) / (p.std(1, keepdims=True) + 1e-8)
+    return p.astype(np.float32)</code></pre></figure>
+  </section>
+
+  <section id="b3" class="project-section">
+    <h2>B.3: Feature Matching</h2>
+    <p>Every descriptor in one photo is compared with every descriptor in the other (Euclidean distance between the 64-vectors). Following Lowe, a feature keeps its nearest neighbour only if that neighbour is clearly closer than the second nearest: \(e_{1\text{-NN}} / e_{2\text{-NN}}\) below a threshold.</p>
+    <p>The spec points to the paper's Figure 6b for the threshold. I measured it on my own photos instead, since the Part A homographies are ground truth. For the 9 pairs behind the main mosaics, I labeled each of the 4500 nearest-neighbour matches as correct (within 5 px of where the manual homography maps the point) or wrong:</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/ratio_hist.png" width="1200" height="540" alt="Histogram of 1-NN to 2-NN ratios for correct and wrong matches"></div><figcaption>Correct matches cluster at low ratios; wrong ones spread toward 1.</figcaption></figure>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ratio</th><th>Correct kept</th><th>Wrong kept</th><th>Precision</th><th>Recall</th></tr></thead>
+        <tbody>
+          <tr><td>&lt; 0.40</td><td>440</td><td>20</td><td>0.96</td><td>0.31</td></tr>
+          <tr><td>&lt; 0.50</td><td>698</td><td>39</td><td>0.95</td><td>0.50</td></tr>
+          <tr><td>&lt; 0.60</td><td>920</td><td>80</td><td>0.92</td><td>0.65</td></tr>
+          <tr class="is-chosen"><td>&lt; 0.65</td><td>1044</td><td>115</td><td>0.90</td><td>0.74</td></tr>
+          <tr><td>&lt; 0.70</td><td>1141</td><td>155</td><td>0.88</td><td>0.81</td></tr>
+          <tr><td>&lt; 0.80</td><td>1265</td><td>307</td><td>0.80</td><td>0.90</td></tr>
+          <tr><td>&lt; 0.90</td><td>1345</td><td>743</td><td>0.64</td><td>0.95</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>I use 0.65: 0.90 of the kept matches are correct and 0.74 of all correct matches survive. Beyond it, the wrong matches grow quickly (115 → 155 → 307), and RANSAC absorbs a 10% outlier rate easily.</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/matches_theatre_12.jpg" width="1070" height="700" alt="Ratio-test matches between two theatre photos"></div><figcaption><strong>Theatre 1 → 2:</strong> all ratio-test matches.</figcaption></figure>
+    <figure><pre><code>def match(d1, d2, ratio=0.65):
+    D = (d1 ** 2).sum(1)[:, None] + (d2 ** 2).sum(1)[None, :] - 2 * d1 @ d2.T
+    D = np.sqrt(np.maximum(D, 0))
+    nn = np.argsort(D, 1)[:, :2]
+    e1 = D[np.arange(len(d1)), nn[:, 0]]; e2 = D[np.arange(len(d1)), nn[:, 1]]
+    r = e1 / (e2 + 1e-12)
+    keep = r &lt; ratio
+    return np.c_[np.nonzero(keep)[0], nn[keep, 0]], r[keep], r, nn[:, 0]</code></pre></figure>
+  </section>
+
+  <section id="b4" class="project-section">
+    <h2>B.4: RANSAC for Robust Homography</h2>
+    <p>4-point RANSAC, from scratch: pick 4 random matches, fit the exact homography with <code>computeH</code> from Part A, and count the matches it maps within 4 px. After 3000 rounds, I keep the largest inlier set and refit the homography to all of its inliers by least squares. Then the Part A mosaic pipeline runs unchanged.</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/b/ransac_theatre_12.jpg" width="1070" height="700" alt="RANSAC inliers and outliers between two theatre photos"></div><figcaption><strong>Green:</strong> RANSAC inliers. <strong>Red:</strong> rejected matches.</figcaption></figure>
+    <figure><pre><code>def ransac(p1, p2, iters=3000, eps=2.0, seed=0):
+    rng = np.random.default_rng(seed)
+    n = len(p1); best = np.zeros(n, bool)
+    if n &lt; 4:
+        return None, best
+    for _ in range(iters):
+        s = rng.choice(n, 4, replace=False)
+        try:
+            H = computeH(p1[s], p2[s])
+        except (np.linalg.LinAlgError, ValueError):
+            continue
+        if not np.all(np.isfinite(H)):
+            continue
+        with np.errstate(divide=&#x27;ignore&#x27;, invalid=&#x27;ignore&#x27;):   # degenerate samples
+            inl = np.linalg.norm(apply(H, p1) - p2, axis=1) &lt; eps
+        if inl.sum() &gt; best.sum():
+            best = inl
+    H = computeH(p1[best], p2[best]) if best.sum() &gt;= 4 else None
+    if H is not None:                                       # one refit pass on the refined inliers
+        best = np.linalg.norm(apply(H, p1) - p2, axis=1) &lt; eps
+        H = computeH(p1[best], p2[best])
+    return H, best</code></pre></figure>
+    <p>The hand-placed Part A points make a direct check possible: map them through the automatic homography and measure how far they land from their partners. Every pair lands within 0.5–1.4 px median and 2.15 px at worst, as close as the manual fits themselves.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pair</th><th>Ratio-test matches</th><th>RANSAC inliers</th><th>Manual points, median</th><th>Manual points, max</th></tr></thead>
+        <tbody>
+          <tr><td>theatre  1 → 2</td><td>99</td><td>87 (88%)</td><td>0.94 px</td><td>1.90 px</td></tr>
+          <tr><td>theatre  2 → 3</td><td>120</td><td>95 (79%)</td><td>0.96 px</td><td>1.91 px</td></tr>
+          <tr><td>rooftop  1 → 2</td><td>120</td><td>109 (91%)</td><td>1.31 px</td><td>2.15 px</td></tr>
+          <tr><td>rooftop  2 → 3</td><td>149</td><td>133 (89%)</td><td>0.49 px</td><td>1.06 px</td></tr>
+          <tr><td>lawn  1 → 2</td><td>124</td><td>113 (91%)</td><td>1.43 px</td><td>2.00 px</td></tr>
+          <tr><td>lawn  2 → 3</td><td>125</td><td>118 (94%)</td><td>0.98 px</td><td>1.80 px</td></tr>
+          <tr><td>lawn  3 → 4</td><td>184</td><td>170 (92%)</td><td>0.79 px</td><td>1.60 px</td></tr>
+          <tr><td>street  1 → 2</td><td>168</td><td>154 (92%)</td><td>1.06 px</td><td>1.58 px</td></tr>
+          <tr><td>street  2 → 3</td><td>70</td><td>58 (83%)</td><td>0.57 px</td><td>1.05 px</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Manual vs. automatic</h3>
+    <p>Mean colour difference inside the overlaps (after gain compensation; lower means better alignment). The two are within a few percent of each other, and the automatic one is better on two of the four:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mosaic</th><th>Manual</th><th>Automatic</th></tr></thead>
+        <tbody>
+          <tr><td>California Theatre</td><td>0.0792</td><td>0.0786</td></tr>
+          <tr><td>Rooftop (vertical)</td><td>0.0764</td><td>0.0774</td></tr>
+          <tr><td>Lawn + crane</td><td>0.0800</td><td>0.0815</td></tr>
+          <tr><td>Street</td><td>0.0515</td><td>0.0480</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="breakout">
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/theatre/web_twolevel.jpg" width="2200" height="1864" alt="Theatre, manual mosaic"></div><figcaption><strong>Theatre, manual.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/auto/theatre/web_twolevel.jpg" width="2200" height="1865" alt="Theatre, automatic mosaic"></div><figcaption><strong>Theatre, automatic.</strong> <a href="media/auto/theatre/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      </div>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/rooftop/web_twolevel.jpg" width="1209" height="2200" alt="Rooftop, manual mosaic"></div><figcaption><strong>Rooftop, manual.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/auto/rooftop/web_twolevel.jpg" width="1205" height="2200" alt="Rooftop, automatic mosaic"></div><figcaption><strong>Rooftop, automatic.</strong> <a href="media/auto/rooftop/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      </div>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/lawn/web_twolevel.jpg" width="2200" height="2063" alt="Lawn, manual mosaic"></div><figcaption><strong>Lawn, manual.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/auto/lawn/web_twolevel.jpg" width="2200" height="2078" alt="Lawn, automatic mosaic"></div><figcaption><strong>Lawn, automatic.</strong> <a href="media/auto/lawn/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      </div>
+      <div class="media-grid compare-2">
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/mosaic/street/web_twolevel.jpg" width="2046" height="2200" alt="Street, manual mosaic"></div><figcaption><strong>Street, manual.</strong></figcaption></figure>
+        <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/auto/street/web_twolevel.jpg" width="2041" height="2200" alt="Street, automatic mosaic"></div><figcaption><strong>Street, automatic.</strong> <a href="media/auto/street/twolevel.jpg">Full resolution</a>.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="b5" class="project-section">
+    <h2>B.5: Bells &amp; Whistles: Panorama Recognition</h2>
+    <p>Here the program gets every photo I took for this project in one pile, in random order, and has to find the panoramas itself, following Brown &amp; Lowe's "Recognising Panoramas". The 64 stored files hold 57 distinct photos (some sets share frames), shuffled so the order carries no information. The set names are used only to score the result.</p>
+    <figure><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pool.jpg" width="1381" height="616" alt="All photos of the project, shuffled"></div><figcaption>The input: 57 photos, shuffled.</figcaption></figure>
+    <ol class="method-steps">
+      <li><strong>Features:</strong> Harris + ANMS + descriptors (B.1–B.2) for every photo, 46 s in total.</li>
+      <li><strong>All pairs:</strong> ratio-test matching and RANSAC for all 1596 pairs. RANSAC solves all 1000 hypotheses of a pair at once (one batched 8×8 solve), so this takes 6 s.</li>
+      <li><strong>Accepting a pair:</strong> Brown &amp; Lowe's test, inliers &gt; 8 + 0.3 × matches, plus a camera-model check. Photos taken from one spot are related by \(H = K_j R K_i^{-1}\), so \(K_j^{-1} H K_i\) must be close to a rotation. Of the 99 pairs that passed the inlier test, the camera model rejected one: a coincidental 15-inlier match between two unrelated photos whose homography was degenerate (singular-value ratio 4.4 × 10<sup>16</sup>). Every real pair scored at most 1.12.</li>
+      <li><strong>Panoramas:</strong> connected groups of accepted pairs.</li>
+      <li><strong>Stitching each one:</strong> the best-connected photo becomes the reference, and homographies along a maximum spanning tree give a first guess. Then all camera rotations and one focal length are refined together over every accepted pair in the group, a small bundle adjustment (median residual 1.2–6.2 px), and the panorama is rendered on a cylinder as in A.5.</li>
+    </ol>
+    <figure><pre><code>def pairwise(F, Ks, ratio=0.65, alpha=8, beta=0.3, min_inliers=15, max_rot_dev=1.5):
+    edges, log = {}, []
+    for i in range(len(F)):
+        for j in range(i + 1, len(F)):
+            pairs, _, _, _ = match(F[i][&#x27;desc&#x27;], F[j][&#x27;desc&#x27;], ratio)
+            if len(pairs) &lt; min_inliers:
+                log.append((i, j, len(pairs), 0, False, float(&#x27;inf&#x27;))); continue
+            p1, p2 = F[i][&#x27;xy&#x27;][pairs[:, 0]], F[j][&#x27;xy&#x27;][pairs[:, 1]]
+            H, inl = ransac_batch(p1, p2)
+            ni = int(inl.sum()); ok = H is not None and ni &gt;= min_inliers and ni &gt; alpha + beta * len(pairs)
+            dev = float(&#x27;inf&#x27;)
+            if H is not None:
+                sv = np.linalg.svd(np.linalg.inv(Ks[j]) @ H @ Ks[i], compute_uv=False); dev = float(sv[0] / sv[2])
+            log.append((i, j, len(pairs), ni, ok, dev))
+            ok = ok and dev &lt; max_rot_dev
+            if ok:
+                edges[(i, j)] = (H, p1[inl], p2[inl])
+    return edges, log</code></pre></figure>
+    <p><strong>Result: 11 panoramas and 4 single photos.</strong> Judged by physical scene, every recognized panorama is correct (pairwise precision 1.00, recall 0.986). Judged by my set names, precision is 0.72. That's only because the program merged sets I had shot separately of the same place: three takes of the theatre street and two sweeps of the old building. It is right to merge them. The single miss is one tower photo that overlaps its neighbour by only ~28%, too little for 15 consistent inliers. The other singles are the fire cabinet and the two relief photos, whose viewpoint change is too large for axis-aligned descriptors (and which do not form a panorama anyway).</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Photos</th><th>Sets inside</th><th>Bundle residual</th><th>Field of view</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>10</td><td>Theatre, Theatre street, Theatre, 2nd take</td><td>2.5 px</td><td>131°</td></tr>
+          <tr><td>2</td><td>9</td><td>Wide sweep</td><td>2.6 px</td><td>202°</td></tr>
+          <tr><td>3</td><td>9</td><td>Old building 1, Old building 2</td><td>3.4 px</td><td>151°</td></tr>
+          <tr><td>4</td><td>4</td><td>Lawn</td><td>3.7 px</td><td>103°</td></tr>
+          <tr><td>5</td><td>4</td><td>Trees and cars</td><td>2.6 px</td><td>119°</td></tr>
+          <tr><td>6</td><td>3</td><td>Yellow building</td><td>3.3 px</td><td>99°</td></tr>
+          <tr><td>7</td><td>3</td><td>Glass building</td><td>3.1 px</td><td>124°</td></tr>
+          <tr><td>8</td><td>3</td><td>Golden Gate pan, Golden Gate</td><td>6.2 px</td><td>118°</td></tr>
+          <tr><td>9</td><td>3</td><td>Street</td><td>1.5 px</td><td>95°</td></tr>
+          <tr><td>10</td><td>3</td><td>Rooftop</td><td>3.1 px</td><td>83°</td></tr>
+          <tr><td>11</td><td>2</td><td>Tower</td><td>1.2 px</td><td>79°</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="breakout">
+      <figure id="rg-1"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_1.jpg" width="1086" height="140" alt="Photos recognized as panorama 1"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_1.jpg" width="2600" height="1468" alt="Recognized panorama 1, stitched automatically"></div><figcaption><strong>Panorama 1</strong>: 10 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-2"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_2.jpg" width="977" height="140" alt="Photos recognized as panorama 2"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_2.jpg" width="2600" height="864" alt="Recognized panorama 2, stitched automatically"></div><figcaption><strong>Panorama 2</strong>: 9 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-3"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_3.jpg" width="977" height="140" alt="Photos recognized as panorama 3"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_3.jpg" width="2600" height="1266" alt="Recognized panorama 3, stitched automatically"></div><figcaption><strong>Panorama 3</strong>: 9 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-4"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_4.jpg" width="432" height="140" alt="Photos recognized as panorama 4"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_4.jpg" width="2576" height="1700" alt="Recognized panorama 4, stitched automatically"></div><figcaption><strong>Panorama 4</strong>: 4 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-5"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_5.jpg" width="432" height="140" alt="Photos recognized as panorama 5"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_5.jpg" width="2600" height="1822" alt="Recognized panorama 5, stitched automatically"></div><figcaption><strong>Panorama 5</strong>: 4 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-6"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_6.jpg" width="323" height="140" alt="Photos recognized as panorama 6"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_6.jpg" width="2344" height="1840" alt="Recognized panorama 6, stitched automatically"></div><figcaption><strong>Panorama 6</strong>: 3 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-7"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_7.jpg" width="323" height="140" alt="Photos recognized as panorama 7"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_7.jpg" width="2600" height="1402" alt="Recognized panorama 7, stitched automatically"></div><figcaption><strong>Panorama 7</strong>: 3 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-8"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_8.jpg" width="563" height="140" alt="Photos recognized as panorama 8"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_8.jpg" width="2600" height="1219" alt="Recognized panorama 8, stitched automatically"></div><figcaption><strong>Panorama 8</strong>: 3 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-9"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_9.jpg" width="323" height="140" alt="Photos recognized as panorama 9"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_9.jpg" width="2200" height="1812" alt="Recognized panorama 9, stitched automatically"></div><figcaption><strong>Panorama 9</strong>: 3 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-10"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_10.jpg" width="323" height="140" alt="Photos recognized as panorama 10"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_10.jpg" width="918" height="2600" alt="Recognized panorama 10, stitched automatically"></div><figcaption><strong>Panorama 10</strong>: 3 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+      <figure id="rg-11"><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/members_11.jpg" width="214" height="140" alt="Photos recognized as panorama 11"></div><div class="figure-frame"><img loading="lazy" decoding="async" src="media/recog/pano_11.jpg" width="1864" height="1764" alt="Recognized panorama 11, stitched automatically"></div><figcaption><strong>Panorama 11</strong>: 2 photos found in the pile (top) → stitched automatically.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="learned-b" class="project-section">
+    <h2>What I Learned (Part B)</h2>
+    <p>Part B's lesson was that the hand-placed points were never the hard part. Automatic matching reproduced them to about a pixel, and the only real failure (a coincidental match between two unrelated photos) was caught by asking whether the result is physically possible for a camera that only rotates.</p>
   </section>
 </main>
 

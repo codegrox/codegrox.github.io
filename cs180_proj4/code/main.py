@@ -6,6 +6,7 @@
     python code/main.py wide            # A.5 cylindrical / spherical mosaic (main sweep)
     python code/main.py pano            # A.5 more panoramas (theatre7, oldA, oldB)
     python code/main.py figures         # web copies and comparison figures for the page
+    python code/main.py ratio auto figures_b recognize   # Part B (B.3 threshold study, B.4 mosaics, figures, B.5)
 
 Figures go to media/, measured numbers to tests/run/*.json.
 """
@@ -17,7 +18,11 @@ STAGES = {'rectify': ['stage_rectify.py'],
                       'gg_pan', 'tower', 'glass', 'cars', 'yellow', 'theatreB'],
           'pano': ['stage_pano.py', 'theatre7', 'oldA', 'oldB'],
           'wide': ['stage_wide.py'],
-          'figures': ['stage_figures.py']}
+          'figures': ['stage_figures.py'],
+          'ratio': ['stage_ratio.py'],
+          'auto': ['stage_auto.py', 'theatre', 'rooftop', 'lawn', 'street'],
+          'figures_b': ['stage_figures_b.py'],
+          'recognize': ['stage_recognize.py']}
 for name in (sys.argv[1:] or list(STAGES)):
     script, *args = STAGES[name]
     print(f'== {name}')

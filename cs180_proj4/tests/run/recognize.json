@@ -1,0 +1,282 @@
+{
+ "n_files": 64,
+ "n_unique": 57,
+ "n_pairs": 1596,
+ "n_accepted": 98,
+ "t_features": 45.767860897000105,
+ "t_pairwise": 6.154307874999972,
+ "n_inlier_test": 99,
+ "n_geo_rejected": 1,
+ "rot_dev_kept_max": 1.1201547216256416,
+ "geo_rejected": [
+  {
+   "a": "rect_cabinet.jpg",
+   "b": "rect_windows.jpg",
+   "inliers": 15,
+   "rot_dev": 4.415985411817279e+16
+  }
+ ],
+ "pair_precision": 0.7172413793103448,
+ "pair_recall": 0.9811320754716981,
+ "panoramas": [
+  {
+   "members": [
+    "theatre7_2.jpg",
+    "rect_marquee.jpg",
+    "theatre7_6.jpg",
+    "theatreB_3.jpg",
+    "theatre7_3.jpg",
+    "theatre7_7.jpg",
+    "theatre7_4.jpg",
+    "theatre7_5.jpg",
+    "theatre7_1.jpg",
+    "theatreB_1.jpg"
+   ],
+   "labels": [
+    "rect_marquee",
+    "theatre",
+    "theatre7",
+    "theatreB"
+   ],
+   "reference": "theatre7_2.jpg",
+   "n": 10,
+   "straightened_deg": 1.3914161132063865,
+   "bundle_resid_median_px": 2.5196894455622383,
+   "focal_ratio": 1.006493059751432,
+   "span_deg": 131.45540971363027,
+   "yaw_range_deg": 73.02711325592597,
+   "pitch_range_deg": 2.6436078727201866,
+   "cropped": true
+  },
+  {
+   "members": [
+    "wide_7.jpg",
+    "wide_4.jpg",
+    "wide_1.jpg",
+    "wide_2.jpg",
+    "wide_3.jpg",
+    "wide_6.jpg",
+    "wide_8.jpg",
+    "wide_9.jpg",
+    "wide_5.jpg"
+   ],
+   "labels": [
+    "wide"
+   ],
+   "reference": "wide_4.jpg",
+   "n": 9,
+   "straightened_deg": 2.8902240545632334,
+   "bundle_resid_median_px": 2.6324437872292,
+   "focal_ratio": 1.0139484831647947,
+   "span_deg": 201.63352427734682,
+   "yaw_range_deg": 136.56167826190648,
+   "pitch_range_deg": 14.204513383311316,
+   "cropped": true
+  },
+  {
+   "members": [
+    "oldA_3.jpg",
+    "oldB_2.jpg",
+    "oldB_1.jpg",
+    "oldB_4.jpg",
+    "oldA_1.jpg",
+    "oldA_4.jpg",
+    "oldA_5.jpg",
+    "oldA_2.jpg",
+    "oldB_3.jpg"
+   ],
+   "labels": [
+    "oldA",
+    "oldB"
+   ],
+   "reference": "oldB_2.jpg",
+   "n": 9,
+   "straightened_deg": 4.590816570912615,
+   "bundle_resid_median_px": 3.3541774663789976,
+   "focal_ratio": 0.9950916300987062,
+   "span_deg": 150.57759455333087,
+   "yaw_range_deg": 86.20312042786225,
+   "pitch_range_deg": 11.02603881007274,
+   "cropped": true
+  },
+  {
+   "members": [
+    "lawn_3.jpg",
+    "lawn_1.jpg",
+    "lawn_4.jpg",
+    "lawn_2.jpg"
+   ],
+   "labels": [
+    "lawn"
+   ],
+   "reference": "lawn_3.jpg",
+   "n": 4,
+   "straightened_deg": 0.7591990212952302,
+   "bundle_resid_median_px": 3.652456465233467,
+   "focal_ratio": 1.048858678797786,
+   "span_deg": 103.01526272979326,
+   "yaw_range_deg": 46.48704366295605,
+   "pitch_range_deg": 3.918537595812265,
+   "cropped": true
+  },
+  {
+   "members": [
+    "cars_1.jpg",
+    "cars_4.jpg",
+    "cars_2.jpg",
+    "cars_3.jpg"
+   ],
+   "labels": [
+    "cars"
+   ],
+   "reference": "cars_3.jpg",
+   "n": 4,
+   "straightened_deg": 9.50184142185184,
+   "bundle_resid_median_px": 2.605296261193179,
+   "focal_ratio": 1.0106228056874533,
+   "span_deg": 119.0044904564424,
+   "yaw_range_deg": 54.231356861862864,
+   "pitch_range_deg": 2.8052989239885036,
+   "cropped": true
+  },
+  {
+   "members": [
+    "yellow_2.jpg",
+    "yellow_1.jpg",
+    "yellow_3.jpg"
+   ],
+   "labels": [
+    "yellow"
+   ],
+   "reference": "yellow_3.jpg",
+   "n": 3,
+   "straightened_deg": 7.132680515300616,
+   "bundle_resid_median_px": 3.304072582133697,
+   "focal_ratio": 1.024774520127737,
+   "span_deg": 99.30303262850803,
+   "yaw_range_deg": 39.60430166542233,
+   "pitch_range_deg": 1.0918535346116012,
+   "cropped": true
+  },
+  {
+   "members": [
+    "glass_1.jpg",
+    "glass_3.jpg",
+    "glass_2.jpg"
+   ],
+   "labels": [
+    "glass"
+   ],
+   "reference": "glass_2.jpg",
+   "n": 3,
+   "straightened_deg": 3.0084709664166316,
+   "bundle_resid_median_px": 3.106657910144643,
+   "focal_ratio": 1.0360159236639928,
+   "span_deg": 123.86014825766081,
+   "yaw_range_deg": 66.35921345884776,
+   "pitch_range_deg": 4.574788155106852,
+   "cropped": true
+  },
+  {
+   "members": [
+    "gg_pan_1.jpg",
+    "goldengate_3.jpg",
+    "gg_pan_2.jpg"
+   ],
+   "labels": [
+    "gg_pan",
+    "goldengate"
+   ],
+   "reference": "gg_pan_1.jpg",
+   "n": 3,
+   "straightened_deg": 9.451875787230287,
+   "bundle_resid_median_px": 6.212114502284442,
+   "focal_ratio": 1.0468969983090568,
+   "span_deg": 118.46307213652426,
+   "yaw_range_deg": 38.62474037401568,
+   "pitch_range_deg": 8.096441615052447,
+   "cropped": true
+  },
+  {
+   "members": [
+    "street_2.jpg",
+    "street_3.jpg",
+    "street_1.jpg"
+   ],
+   "labels": [
+    "street"
+   ],
+   "reference": "street_1.jpg",
+   "n": 3,
+   "straightened_deg": 3.8868102685086807,
+   "bundle_resid_median_px": 1.4854310254861363,
+   "focal_ratio": 0.9849269993590335,
+   "span_deg": 94.74926426748625,
+   "yaw_range_deg": 34.704934279944084,
+   "pitch_range_deg": 0.259328636240536,
+   "cropped": true
+  },
+  {
+   "members": [
+    "rooftop_1.jpg",
+    "rooftop_3.jpg",
+    "rooftop_2.jpg"
+   ],
+   "labels": [
+    "rooftop"
+   ],
+   "reference": "rooftop_2.jpg",
+   "n": 3,
+   "bundle_resid_median_px": 3.0612923741228033,
+   "focal_ratio": 1.0131122608559493,
+   "span_deg": 83.23519896144835,
+   "yaw_range_deg": 2.964964793081514,
+   "pitch_range_deg": 44.53581481779053,
+   "cropped": true
+  },
+  {
+   "members": [
+    "tower_2.jpg",
+    "tower_1.jpg"
+   ],
+   "labels": [
+    "tower"
+   ],
+   "reference": "tower_2.jpg",
+   "n": 2,
+   "bundle_resid_median_px": 1.1751878427727962,
+   "focal_ratio": 0.988983471116244,
+   "span_deg": 78.50479490402388,
+   "yaw_range_deg": 20.072619047673523,
+   "pitch_range_deg": 0.42952224882805534,
+   "cropped": true
+  }
+ ],
+ "singles": [
+  {
+   "file": "relief_angled.jpg",
+   "labels": [
+    "relief_angled"
+   ]
+  },
+  {
+   "file": "relief_reference.jpg",
+   "labels": [
+    "relief_reference"
+   ]
+  },
+  {
+   "file": "rect_cabinet.jpg",
+   "labels": [
+    "rect_cabinet"
+   ]
+  },
+  {
+   "file": "rect_windows.jpg",
+   "labels": [
+    "rect_windows",
+    "tower"
+   ]
+  }
+ ]
+}

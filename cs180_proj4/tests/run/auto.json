@@ -1,0 +1,161 @@
+{
+ "theatre": {
+  "files": [
+   "theatre_1.jpg",
+   "theatre_2.jpg",
+   "theatre_3.jpg"
+  ],
+  "pairs": [
+   {
+    "pair": "theatre_12",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 99,
+    "inliers": 87,
+    "manual_pts_resid_median": 0.944258415442357,
+    "manual_pts_resid_max": 1.9013547431913447,
+    "corner_gap_px": 8.756047497942506
+   },
+   {
+    "pair": "theatre_23",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 120,
+    "inliers": 95,
+    "manual_pts_resid_median": 0.9647509347215814,
+    "manual_pts_resid_max": 1.9064612634674751,
+    "corner_gap_px": 6.446393789016732
+   }
+  ],
+  "features_s": 2.407767038000003,
+  "mosaic_s": 5.572212610000008,
+  "canvas": [
+   3271,
+   2773
+  ],
+  "overlap_diff_auto": 0.0786036370079287,
+  "overlap_diff_manual": 0.07920822431841198
+ },
+ "rooftop": {
+  "files": [
+   "rooftop_1.jpg",
+   "rooftop_2.jpg",
+   "rooftop_3.jpg"
+  ],
+  "pairs": [
+   {
+    "pair": "rooftop_12",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 120,
+    "inliers": 109,
+    "manual_pts_resid_median": 1.3107618270232124,
+    "manual_pts_resid_max": 2.1512132085212055,
+    "corner_gap_px": 30.63639319444162
+   },
+   {
+    "pair": "rooftop_23",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 149,
+    "inliers": 133,
+    "manual_pts_resid_median": 0.4899571544977287,
+    "manual_pts_resid_max": 1.0648351517510277,
+    "corner_gap_px": 1.8832980183311123
+   }
+  ],
+  "features_s": 2.2435453570000163,
+  "mosaic_s": 7.116426066999992,
+  "canvas": [
+   2562,
+   4679
+  ],
+  "overlap_diff_auto": 0.07742823009190991,
+  "overlap_diff_manual": 0.0764382658050691
+ },
+ "lawn": {
+  "files": [
+   "lawn_1.jpg",
+   "lawn_2.jpg",
+   "lawn_3.jpg",
+   "lawn_4.jpg"
+  ],
+  "pairs": [
+   {
+    "pair": "lawn_12",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 124,
+    "inliers": 113,
+    "manual_pts_resid_median": 1.4312536246306333,
+    "manual_pts_resid_max": 2.002729086146044,
+    "corner_gap_px": 18.99638763202244
+   },
+   {
+    "pair": "lawn_23",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 125,
+    "inliers": 118,
+    "manual_pts_resid_median": 0.9811376941119343,
+    "manual_pts_resid_max": 1.7965798821255814,
+    "corner_gap_px": 13.4008582810865
+   },
+   {
+    "pair": "lawn_34",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 184,
+    "inliers": 170,
+    "manual_pts_resid_median": 0.7941081227897636,
+    "manual_pts_resid_max": 1.6034383088155901,
+    "corner_gap_px": 18.824141915263226
+   }
+  ],
+  "features_s": 3.084157105999992,
+  "mosaic_s": 7.070190504999999,
+  "canvas": [
+   3565,
+   3367
+  ],
+  "overlap_diff_auto": 0.08146951781607738,
+  "overlap_diff_manual": 0.07995024586520662
+ },
+ "street": {
+  "files": [
+   "street_1.jpg",
+   "street_2.jpg",
+   "street_3.jpg"
+  ],
+  "pairs": [
+   {
+    "pair": "street_12",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 168,
+    "inliers": 154,
+    "manual_pts_resid_median": 1.0602876297370187,
+    "manual_pts_resid_max": 1.5848364930732963,
+    "corner_gap_px": 15.187450012890311
+   },
+   {
+    "pair": "street_23",
+    "harris": 5000,
+    "anms": 500,
+    "matches": 70,
+    "inliers": 58,
+    "manual_pts_resid_median": 0.5712021733236579,
+    "manual_pts_resid_max": 1.0541310826243449,
+    "corner_gap_px": 55.000756632960375
+   }
+  ],
+  "features_s": 2.1926387640000087,
+  "mosaic_s": 7.220373036000012,
+  "canvas": [
+   3337,
+   3597
+  ],
+  "overlap_diff_auto": 0.04802886912097137,
+  "overlap_diff_manual": 0.0514551599096964
+ }
+}

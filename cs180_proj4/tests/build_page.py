@@ -132,6 +132,54 @@ def build():
     V['code_fit'] = snippet('code/cylinder.py', 'fit_rotations')
     V['code_sample'] = snippet('code/cylinder.py', 'sample_surface')
     V['code_straighten'] = snippet('code/cylinder.py', 'straighten')
+    # Part B ----------------------------------------------------------------
+    A, Rt = J('auto.json'), J('ratio.json')
+    tab = {round(r['t'], 2): r for r in Rt['table']}
+    V['b_ratio_rows'] = '\n          '.join(
+        f"<tr{' class=\"is-chosen\"' if t == 0.65 else ''}><td>&lt; {t:.2f}</td><td>{tab[t]['correct']}</td><td>{tab[t]['wrong']}</td>"
+        f"<td>{tab[t]['precision']:.2f}</td><td>{tab[t]['recall']:.2f}</td></tr>" for t in (0.4, 0.5, 0.6, 0.65, 0.7, 0.8, 0.9))
+    V.update(b_n_lab=Rt['n_correct'] + Rt['n_wrong'], b_n_ok=Rt['n_correct'], b_prec=f"{tab[0.65]['precision']:.2f}", b_rec=f"{tab[0.65]['recall']:.2f}",
+             b_wrong65=tab[0.65]['wrong'], b_wrong70=tab[0.7]['wrong'], b_wrong80=tab[0.8]['wrong'], b_tol=f"{Rt['tol_px']:.0f}")
+    pairs = [q for n in ('theatre', 'rooftop', 'lawn', 'street') for q in A[n]['pairs']]
+    V['b_pair_rows'] = '\n          '.join(
+        f"<tr><td>{q['pair'].replace('_', ' ', 1)[:-2]} {q['pair'][-2]} → {q['pair'][-1]}</td><td>{q['matches']}</td>"
+        f"<td>{q['inliers']} ({100 * q['inliers'] / q['matches']:.0f}%)</td><td>{q['manual_pts_resid_median']:.2f} px</td><td>{q['manual_pts_resid_max']:.2f} px</td></tr>" for q in pairs)
+    V['b_set_rows'] = '\n          '.join(
+        f"<tr><td>{lab[n]}</td><td>{A[n]['overlap_diff_manual']:.4f}</td><td>{A[n]['overlap_diff_auto']:.4f}</td></tr>" for n in ('theatre', 'rooftop', 'lawn', 'street'))
+    V.update(b_inl_lo=min(q['inliers'] for q in pairs), b_inl_hi=max(q['inliers'] for q in pairs),
+             b_res_lo=f"{min(q['manual_pts_resid_median'] for q in pairs):.1f}", b_res_hi=f"{max(q['manual_pts_resid_median'] for q in pairs):.1f}",
+             b_res_max=f"{max(q['manual_pts_resid_max'] for q in pairs):.2f}", b_feat_s=f"{A['theatre']['features_s'] / 3:.1f}")
+    for fn in ('anms', 'descriptors', 'match', 'ransac'):
+        V[f'code_b_{fn}'] = snippet('code/features.py', fn)
+    # B.5 panorama recognition -------------------------------------------------
+    import re as _re
+    G = J('recognize.json')
+    scene = {'theatre7': 'theatre', 'theatreB': 'theatre', 'rect_marquee': 'theatre', 'oldB': 'oldA', 'gg_pan': 'goldengate', 'rect_windows': 'tower'}
+    nice = {'theatre': 'Theatre', 'theatre7': 'Theatre street', 'theatreB': 'Theatre, 2nd take', 'rect_marquee': 'marquee photo', 'wide': 'Wide sweep',
+            'oldA': 'Old building 1', 'oldB': 'Old building 2', 'lawn': 'Lawn', 'cars': 'Trees and cars', 'yellow': 'Yellow building', 'glass': 'Glass building',
+            'gg_pan': 'Golden Gate pan', 'goldengate': 'Golden Gate', 'street': 'Street', 'rooftop': 'Rooftop', 'tower': 'Tower'}
+    groups = [[_re.sub(r'_\d+$', '', Path(m).stem) for m in q['members']] for q in G['panoramas']] + [[_re.sub(r'_\d+$', '', Path(q['file']).stem)] for q in G['singles']]
+    lab = [(gi, scene.get(l, l)) for gi, g in enumerate(groups) for l in g]
+    tp = fp = fn = 0
+    for a_ in range(len(lab)):
+        for b_ in range(a_ + 1, len(lab)):
+            pred, true = lab[a_][0] == lab[b_][0], lab[a_][1] == lab[b_][1]
+            tp += pred and true; fp += pred and not true; fn += (not pred) and true
+    V.update(rg_files=G['n_files'], rg_unique=G['n_unique'], rg_pairs=G['n_pairs'], rg_accepted=G['n_accepted'], rg_inl=G['n_inlier_test'],
+             rg_t_feat=f"{G['t_features']:.0f}", rg_t_pair=f"{G['t_pairwise']:.0f}", rg_n_pano=len(G['panoramas']), rg_n_single=len(G['singles']),
+             rg_dev_max=f"{G['rot_dev_kept_max']:.2f}", rg_geo_dev=sci(G['geo_rejected'][0]['rot_dev']) if G['geo_rejected'] else '-',
+             rg_geo_inl=G['geo_rejected'][0]['inliers'] if G['geo_rejected'] else 0,
+             rg_scene_prec=f"{tp / max(tp + fp, 1):.2f}", rg_scene_rec=f"{tp / max(tp + fn, 1):.3f}", rg_set_prec=f"{G['pair_precision']:.2f}",
+             rg_res_lo=f"{min(q['bundle_resid_median_px'] for q in G['panoramas']):.1f}", rg_res_hi=f"{max(q['bundle_resid_median_px'] for q in G['panoramas']):.1f}")
+    V['rg_rows'] = '\n          '.join(
+        f"<tr><td>{k + 1}</td><td>{q['n']}</td><td>{', '.join(nice.get(l, l) for l in q['labels'] if l != 'rect_marquee')}</td>"
+        f"<td>{q['bundle_resid_median_px']:.1f} px</td><td>{q['span_deg']:.0f}°</td></tr>" for k, q in enumerate(G['panoramas']))
+    V['rg_gallery'] = '\n'.join(
+        f'      <figure id="rg-{k + 1}"><div class="figure-frame"><img src="media/recog/members_{k + 1}.jpg" alt="Photos recognized as panorama {k + 1}"></div>'
+        f'<div class="figure-frame"><img src="media/recog/pano_{k + 1}.jpg" alt="Recognized panorama {k + 1}, stitched automatically"></div>'
+        f'<figcaption><strong>Panorama {k + 1}</strong>: {q["n"]} photos found in the pile (top) → stitched automatically.</figcaption></figure>'
+        for k, q in enumerate(G['panoramas']))
+    V['code_rg_pairwise'] = snippet('code/recognize.py', 'pairwise')
     # fill ------------------------------------------------------------------
     tpl = (ROOT / 'tests/page_template.html').read_text()
     missing = sorted(set(re.findall(r'\{\{(\w+)\}\}', tpl)) - set(V))

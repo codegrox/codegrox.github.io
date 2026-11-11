@@ -1,4 +1,4 @@
-# CS180 Project 4A - Image Warping and Mosaicing
+# CS180 Project 4 - [Auto]Stitching Photo Mosaics
 
 ## Files
 
@@ -8,6 +8,8 @@
 - `code/blend.py` - A.4 gain compensation, feathering (distance transform), two-level blend
 - `code/mosaic.py` - A.4 planar mosaics (chain to the middle photo, one-shot canvas)
 - `code/cylinder.py` - A.5 cylindrical / spherical mosaics (rotations fitted in pixels, straightening, inverse sampling)
+- `code/features.py` - B.1-B.4: Harris + ANMS, 8x8 descriptors, ratio matching, 4-point RANSAC
+- `code/recognize.py` - B.5: panorama recognition (batched RANSAC, camera-model check, spanning tree, bundle adjustment)
 - `code/stage_*.py`, `code/main.py` - the pipeline (`stage_pano.py`: any sweep as a cylindrical panorama); `code/imutils.py` - I/O
 - `data/` - the photos used (Pixel 10 Pro, 2048 px long side, EXIF kept)
 - `points/correspondences.json` - 12 point pairs per neighbouring photo pair (x, y in data/ pixels)
@@ -31,6 +33,7 @@ python code/main.py mosaics       # A.4 (theatre, rooftop, lawn, street, goldeng
 python code/main.py wide          # A.5 main sweep
 python code/main.py pano          # A.5 theatre7, oldA, oldB
 python code/main.py figures       # web copies and comparison figures
+python code/main.py ratio auto figures_b recognize   # Part B
 python tests/build_page.py        # rebuild index.html from tests/run/*.json
 python tests/test_core.py         # computeH / warp checks
 ```
