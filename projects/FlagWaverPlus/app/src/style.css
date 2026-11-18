@@ -193,3 +193,12 @@ label.disabled { opacity: 0.4; pointer-events: none; }
 .seg-btn { flex: 1; border: 0; border-radius: 0; padding: 7px 0; font-size: 12px; font-weight: 600; background: transparent; }
 .seg-btn + .seg-btn { border-left: 1px solid rgba(255,255,255,0.1); }
 .seg-btn.active { background: var(--accent); color: #fff; }
+
+/* scenery */
+.scenery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.scenery-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 8px 10px; text-align: left; font-size: 12.5px; line-height: 1.2; }
+.scenery-btn.active { border-color: var(--accent); background: rgba(255, 90, 60, 0.12); }
+.scenery-btn.loading { opacity: 0.6; animation: pulse 1s infinite; }
+.scenery-kind { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.credit a { color: var(--accent2); }
+@keyframes pulse { 50% { opacity: 0.3; } }

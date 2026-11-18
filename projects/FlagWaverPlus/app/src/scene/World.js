@@ -19,6 +19,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TIME_STEP } from '../flagwaver';
 import { PRESETS } from './presets';
 import SkyDome from './SkyDome';
+import Scenery from './Scenery';
 
 /**
  * Owns renderer / scene / camera / lights / ground and the fixed-timestep loop.
@@ -67,6 +68,9 @@ export default class World {
 
         this.sky = new SkyDome(280);
         this.scene.add(this.sky.mesh);
+        this.defaultFog = this.scene.fog;
+        this.groundWanted = true;
+        this.scenery = null; // created after construction (needs renderer)
 
         this.updateCallbacks = [];
         // Pixels on the left of the viewport covered by UI; frame() keeps content clear of it.
@@ -76,6 +80,7 @@ export default class World {
         this.paused = false;
         this.timeScale = 1;
 
+        this.scenery = new Scenery(this);
         this.applyPreset('day');
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -97,9 +102,14 @@ export default class World {
         this.render();
     }
 
-    applyPreset(id) {
+    /**
+     * @param {string} id preset key
+     * @param {{lightsOnly?: boolean}} [opts] lightsOnly skips sky/ground/background (used while a scenery is active)
+     */
+    applyPreset(id, opts = {}) {
         const preset = PRESETS[id] || PRESETS.day;
         this.presetId = id;
+        const lightsOnly = opts.lightsOnly || (this.scenery && this.scenery.active);
 
         for (const l of this.lights) this.scene.remove(l);
         this.lights = [];
@@ -116,15 +126,18 @@ export default class World {
         this.lights.push(sun, sun.target);
         this.sun = sun;
 
-        this.scene.fog.color.setHex(preset.fog);
-        this.sky.setColors(...preset.sky);
-        this.ground.material.color.setHex(preset.ground);
-        this.container.style.background = preset.css;
+        this.defaultFog.color.setHex(preset.fog);
+        if (!lightsOnly) {
+            this.sky.setColors(...preset.sky);
+            this.ground.material.color.setHex(preset.ground);
+            this.container.style.background = preset.css;
+        }
         this.fitShadowToBounds(this._lastBounds);
     }
 
     setGroundVisible(v) {
-        this.ground.visible = v;
+        this.groundWanted = v;
+        if (!(this.scenery && this.scenery.kind === 'photo')) this.ground.visible = v;
     }
 
     /**
@@ -161,8 +174,8 @@ export default class World {
         }
 
         // Fog: start just beyond the flags
-        this.scene.fog.near = Math.max(30, radius * 3);
-        this.scene.fog.far = this.scene.fog.near + 200;
+        this.defaultFog.near = Math.max(30, radius * 3);
+        this.defaultFog.far = this.defaultFog.near + 200;
     }
 
     /** Move the camera so that bounds fits the view. */
@@ -243,10 +256,15 @@ export default class World {
         out.width = gl.width;
         out.height = gl.height;
         const ctx = out.getContext('2d');
-        const stops = (PRESETS[this.presetId] || PRESETS.day).stops;
-        const grad = ctx.createLinearGradient(0, 0, 0, out.height);
-        stops.forEach((c, i) => grad.addColorStop(stops.length === 1 ? 0 : i / (stops.length - 1), c));
-        ctx.fillStyle = grad;
+        const bg = this.container.style.background;
+        if (bg && bg.startsWith('#')) {
+            ctx.fillStyle = bg;
+        } else {
+            const stops = (PRESETS[this.presetId] || PRESETS.day).stops;
+            const grad = ctx.createLinearGradient(0, 0, 0, out.height);
+            stops.forEach((c, i) => grad.addColorStop(stops.length === 1 ? 0 : i / (stops.length - 1), c));
+            ctx.fillStyle = grad;
+        }
         ctx.fillRect(0, 0, out.width, out.height);
         ctx.drawImage(gl, 0, 0);
         return out.toDataURL('image/png');

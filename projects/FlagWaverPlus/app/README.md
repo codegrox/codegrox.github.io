@@ -16,8 +16,19 @@ a travelling gust, and microphone-driven wind.
 - **Wind** – natural (FlagWaver's wandering direction + varying speed), gusty (fixed direction, turbulent), steady.
 - **Travelling gust** – a pulse of wind sweeps along the line so flags ripple one after another.
 - **Lung power** – blow into your microphone; loudness becomes extra wind (nothing is recorded or sent).
+- **Scenery** – put the flags in front of a place: photo backdrops (US Capitol, Palais Bourbon, UN HQ) and 360°
+  summit panoramas (Mount St Helens, Mount Kosciuszko), or your own photo / panorama (upload or URL). Images are
+  hotlinked from Wikimedia Commons only when picked (0.3–0.9 MB each), one GPU texture at a time, credits shown in
+  the panel. Photo mode clamps the orbit and swaps the ground for a transparent shadow catcher; panorama mode wraps
+  a wide strip on a cylinder (or a 2:1 image on a sphere) and samples sky/ground colours from its edges.
 - **Sky & light presets** – day, sunset, overcast, night, studio, green screen. Soft shadows on a ground plane.
-- **Share** – scene (flags, layout, wind) encoded in the URL. Uploaded images stay local.
+- **Remembers your scene** – autosaves to localStorage every 1.5 s (and on tab close); uploaded flag images and
+  backdrops are downscaled and kept in IndexedDB, so everything is back when you reopen the page. "Reset" in the
+  Share tab returns to the default flags.
+- **Scene file** – "Save scene file" writes one `.json` with the full state plus every uploaded image inlined;
+  "Load scene file" restores it anywhere. Typical size: tens of KB plus ~100–300 KB per uploaded image.
+- **Share link** – flags, layout, wind, sky and backdrop preset encoded in the URL. Uploaded images can't fit in a
+  link; use a scene file for those.
 - **Screenshot** – PNG export of the current frame.
 - Space pauses, Tab hides the panel. Drag to orbit, scroll to zoom, right-drag to pan.
 
@@ -46,11 +57,15 @@ src/scene/SkyDome.js    gradient sky sphere that follows the camera
 src/scene/FlagManager.js  flag entries, loading, per-flag rebuild, layouts, wind + gust, simulation step
 src/scene/layouts.js    row / arc / circle / grid / vee / scatter placement
 src/scene/presets.js    sky colors, fog, ground color and lights per preset
+src/scene/sceneries.js  backdrop presets (Wikimedia URLs, credits, horizon/fov hints)
+src/scene/Scenery.js    photo plane / panorama cylinder-sphere, shadow catcher, colour sampling, orbit limits
 src/wind/micWind.js     getUserMedia + AnalyserNode -> smoothed loudness
 src/ui/panel.js         the whole side panel (tabs: Flags, Wind, Scene, Share)
 src/data/countries.js   ISO codes -> names, flagcdn URL helper, search
 src/data/simpleFlags.js procedural offline flags
 src/state/urlState.js   scene <-> URL hash
+src/state/persist.js    autosave (localStorage), scene-file export/import
+src/state/imageStore.js IndexedDB store for uploaded images (downscaled data URLs)
 src/flagwaver/          vendored FlagWaver core (physics, Flag, flagpoles, wind, helpers) – MIT
 ```
 
@@ -68,4 +83,8 @@ Images are loaded once per entry and the flag mesh is rebuilt only when a per-fl
 - Cloth/flag/flagpole simulation: [FlagWaver](https://github.com/krikienoid/flagwaver) by krikienoid,
   MIT License (copy in `src/flagwaver/LICENSE`). Based on prior work by flagtest.nz and Joshua Koo.
 - Country flag images: [flagcdn.com](https://flagcdn.com) (loaded at runtime, not redistributed here).
+- Scenery photos: Wikimedia Commons, loaded at runtime, not redistributed — US Capitol (Architect of the Capitol,
+  public domain), Pont de la Concorde / Palais Bourbon (Jebulon, CC0), UN Members Flags (Aotearoa, CC BY-SA 3.0),
+  Mount St Helens Summit Pano (Gregg M. Erickson, CC BY 3.0), Mount Kosciuszko Summit 360 panorama (Toby Hudson,
+  CC BY-SA 3.0). To self-host, download a file into `../scenery/` and change its `url` in `src/scene/sceneries.js`.
 - Everything else in this folder: MIT, see `LICENSE`.

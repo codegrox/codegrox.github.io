@@ -18,6 +18,7 @@ import {
 import { LAYOUTS } from './layouts';
 import { flagUrl, countryName } from '../data/countries';
 import { renderSimpleFlag, SIMPLE_FLAGS } from '../data/simpleFlags';
+import { getStoredDataUrl } from '../state/imageStore';
 
 let nextId = 1;
 
@@ -44,6 +45,11 @@ export function loadSource(source) {
             case 'upload':
                 loadImage(source.value, resolve, () => reject(new Error('Image could not be loaded.')));
                 break;
+            case 'stored':
+                getStoredDataUrl(source.value)
+                    .then((dataUrl) => loadImage(dataUrl, resolve, () => reject(new Error('Stored image could not be decoded.'))))
+                    .catch(reject);
+                break;
             default:
                 reject(new Error(`Unknown source type ${source.type}`));
         }
@@ -54,7 +60,8 @@ export function sourceLabel(source) {
     switch (source.type) {
         case 'simple': return SIMPLE_FLAGS[source.value]?.name || source.value;
         case 'country': return countryName(source.value);
-        case 'upload': return source.name || 'Uploaded image';
+        case 'upload':
+        case 'stored': return source.name || 'Uploaded image';
         case 'url': return source.value.replace(/^https?:\/\//, '').slice(0, 32);
         default: return 'Flag';
     }
@@ -400,7 +407,11 @@ export default class FlagManager {
 
     // ---- serialization --------------------------------------------------------
 
-    toJSON() {
+    /**
+     * @param {{forShare?: boolean}} [opts] forShare drops stored/uploaded images (too big for a URL)
+     */
+    toJSON(opts = {}) {
+        const shareable = (t) => t === 'simple' || t === 'country' || t === 'url';
         return {
             layout: this.layoutId,
             height: DEFAULT_FLAG_SETTINGS.height,
@@ -408,7 +419,7 @@ export default class FlagManager {
             wind: { speed: this.windSpeed, angle: this.windAngle, mode: this.windMode },
             gust: { ...this.gust },
             flags: this.entries
-                .filter(e => e.source.type === 'simple' || e.source.type === 'country' || e.source.type === 'url')
+                .filter(e => shareable(e.source.type) || (!opts.forShare && e.source.type === 'stored'))
                 .map(e => ({ source: e.source, settings: e.settings }))
         };
     }

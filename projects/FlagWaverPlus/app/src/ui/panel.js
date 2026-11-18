@@ -3,8 +3,11 @@ import { COUNTRY_CODES, countryName, searchCountries } from '../data/countries';
 import { SIMPLE_FLAGS, SIMPLE_FLAG_IDS, renderSimpleFlag } from '../data/simpleFlags';
 import { LAYOUTS, LAYOUT_IDS } from '../scene/layouts';
 import { PRESETS, PRESET_IDS } from '../scene/presets';
+import { SCENERIES, SCENERY_IDS } from '../scene/sceneries';
 import { DEFAULT_FLAG_SETTINGS, sourceLabel } from '../scene/FlagManager';
 import { writeHash } from '../state/urlState';
+import { storeImageFile, getStoredDataUrl } from '../state/imageStore';
+import { exportSceneFile, importSceneFile, clearScene, suspendSaving } from '../state/persist';
 
 const h = (tag, attrs = {}, ...children) => {
     const el = document.createElement(tag);
@@ -104,11 +107,18 @@ export default function createPanel(root, { manager, world, mic, toast }) {
     }
 
     const fileInput = h('input', { type: 'file', accept: 'image/*', multiple: '', class: 'hidden' });
-    fileInput.addEventListener('change', () => {
-        for (const f of fileInput.files) {
-            manager.addFlag({ type: 'upload', value: URL.createObjectURL(f), name: f.name.replace(/\.[^.]+$/, '') });
-        }
+    fileInput.addEventListener('change', async () => {
+        const files = [...fileInput.files];
         fileInput.value = '';
+        for (const f of files) {
+            try {
+                const { key, name } = await storeImageFile(f, 1024);
+                manager.addFlag({ type: 'stored', value: key, name });
+            } catch {
+                // IndexedDB unavailable (private mode etc.): fall back to a session-only blob URL
+                manager.addFlag({ type: 'upload', value: URL.createObjectURL(f), name: f.name.replace(/\.[^.]+$/, '') });
+            }
+        }
         afterAdd();
     });
 
@@ -138,7 +148,7 @@ export default function createPanel(root, { manager, world, mic, toast }) {
 
     function persistHistory() {
         try {
-            const keep = [...history.values()].map(x => x.source).filter(s => s.type === 'country' || s.type === 'simple' || s.type === 'url').slice(-60);
+            const keep = [...history.values()].map(x => x.source).filter(s => s.type === 'country' || s.type === 'simple' || s.type === 'url' || s.type === 'stored').slice(-60);
             localStorage.setItem(HISTORY_KEY, JSON.stringify(keep));
         } catch { /* ignore */ }
     }
@@ -150,12 +160,16 @@ export default function createPanel(root, { manager, world, mic, toast }) {
         const ctx = c.getContext('2d');
         let img = image;
         if (src.type === 'simple') img = renderSimpleFlag(src.value, 40);
-        if (img) {
-            const iw = img.width, ih = img.height;
-            const s = Math.min(w / iw, hh / ih);
-            ctx.drawImage(img, (w - iw * s) / 2, (hh - ih * s) / 2, iw * s, ih * s);
-        } else {
-            ctx.fillStyle = '#666'; ctx.fillRect(0, 0, w, hh);
+        const draw = (im) => {
+            const iw = im.width, ih = im.height;
+            const sc = Math.min(w / iw, hh / ih);
+            ctx.clearRect(0, 0, w, hh);
+            ctx.drawImage(im, (w - iw * sc) / 2, (hh - ih * sc) / 2, iw * sc, ih * sc);
+        };
+        ctx.fillStyle = '#666'; ctx.fillRect(0, 0, w, hh);
+        if (img) draw(img);
+        else if (src.type === 'stored') {
+            getStoredDataUrl(src.value).then((u) => { const im = new Image(); im.onload = () => draw(im); im.src = u; }).catch(() => {});
         }
         return c;
     }
@@ -177,7 +191,10 @@ export default function createPanel(root, { manager, world, mic, toast }) {
     function rememberSource(entry) {
         const key = sourceKey(entry.source);
         const existing = history.get(key);
-        if (existing) { if (entry.image && !existing.image) existing.image = entry.image; return; }
+        if (existing) {
+            if (entry.image && !existing.image) { existing.image = entry.image; renderHistory(); }
+            return;
+        }
         history.set(key, { source: { ...entry.source }, image: entry.image });
         persistHistory();
         renderHistory();
@@ -484,7 +501,91 @@ export default function createPanel(root, { manager, world, mic, toast }) {
         document.body.appendChild(a); a.click(); a.remove();
     } }, '📷 Screenshot');
 
+    // ---- Scenery (photo / panorama backdrops) ----
+    const sceneryGrid = h('div', { class: 'scenery-grid' });
+    const sceneryCredit = h('p', { class: 'muted small credit' });
+    const sceneryHeight = h('input', { type: 'range', min: -6, max: 6, step: 0.25, value: 0 });
+    const sceneryScale = h('input', { type: 'range', min: 0.5, max: 2.5, step: 0.05, value: 1 });
+    const sceneryAdjust = h('div', { class: 'hidden' },
+        h('label', {}, 'Backdrop height ', sceneryHeight),
+        h('label', { class: 'photo-only' }, 'Backdrop size ', sceneryScale));
+    sceneryHeight.addEventListener('input', () => world.scenery.setHeight(+sceneryHeight.value));
+    sceneryScale.addEventListener('input', () => world.scenery.setScale(+sceneryScale.value));
+
+    let activeSceneryId = null;
+    let activeSceneryUrl = null;    // for share links of custom URLs
+    let activeSceneryStored = null; // IndexedDB key of an uploaded backdrop
+    function markScenery(id) {
+        activeSceneryId = id;
+        sceneryGrid.querySelectorAll('.scenery-btn').forEach(b => b.classList.toggle('active', b.dataset.id === (id || 'none')));
+        const a = world.scenery.active;
+        sceneryAdjust.classList.toggle('hidden', !a);
+        sceneryAdjust.querySelector('.photo-only').classList.toggle('hidden', !a || a.def.kind !== 'photo');
+        sceneryCredit.innerHTML = '';
+        if (a && a.def.credit) {
+            sceneryCredit.append('Photo: ', a.def.page ? h('a', { href: a.def.page, target: '_blank', rel: 'noopener' }, a.def.credit) : a.def.credit, ` · ${a.def.license} · via Wikimedia Commons`);
+        } else if (a) {
+            sceneryCredit.textContent = 'Custom backdrop (not included in share links unless it is a URL).';
+        }
+        presetRow.querySelectorAll('.preset-btn').forEach(x => x.classList.toggle('active', x.dataset.id === world.presetId));
+    }
+
+    async function applyScenery(id, def, url = null, storedKey = null) {
+        if (!id) { world.scenery.clear(); activeSceneryUrl = null; activeSceneryStored = null; markScenery(null); return; }
+        sceneryGrid.querySelectorAll('.scenery-btn').forEach(b => b.classList.toggle('loading', b.dataset.id === id));
+        try {
+            await world.scenery.load(id, def);
+            activeSceneryUrl = url;
+            activeSceneryStored = storedKey;
+            sceneryHeight.value = 0; sceneryScale.value = 1;
+            world.scenery.setHeight(0); world.scenery.setScale(1);
+            markScenery(id);
+            if (fitOnChange) setTimeout(() => world.frame(manager.bounds), 50);
+        } catch (e) {
+            toast(e.message, 'error', 5000);
+            markScenery(null);
+        } finally {
+            sceneryGrid.querySelectorAll('.scenery-btn').forEach(b => b.classList.remove('loading'));
+        }
+    }
+
+    sceneryGrid.appendChild(h('button', { class: 'scenery-btn active', 'data-id': 'none', onClick: () => applyScenery(null) },
+        h('span', { class: 'scenery-kind' }, 'sky'), 'None (gradient)'));
+    for (const id of SCENERY_IDS) {
+        const d = SCENERIES[id];
+        sceneryGrid.appendChild(h('button', { class: 'scenery-btn', 'data-id': id, title: `${d.label} — ${d.credit}, ${d.license}`, onClick: () => applyScenery(id, d) },
+            h('span', { class: 'scenery-kind' }, d.kind === 'pano' ? '360°' : 'photo'), d.label));
+    }
+    const sceneryFile = h('input', { type: 'file', accept: 'image/*', class: 'hidden' });
+    sceneryFile.addEventListener('change', async () => {
+        const f = sceneryFile.files[0];
+        sceneryFile.value = '';
+        if (!f) return;
+        try {
+            const { key, dataUrl } = await storeImageFile(f, 4096);
+            applyScenery('custom', { kind: 'auto', url: dataUrl, label: f.name }, null, key);
+        } catch {
+            applyScenery('custom', { kind: 'auto', url: URL.createObjectURL(f), label: f.name });
+        }
+    });
+    const sceneryUrl = h('input', { type: 'url', placeholder: 'https://… photo or 360° panorama URL (CORS)', class: 'search' });
+    sceneryUrl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && sceneryUrl.value.trim()) {
+            const u = sceneryUrl.value.trim();
+            applyScenery('custom', { kind: 'auto', url: u, label: u }, u);
+        }
+    });
+
     scenePage.append(
+        h('div', { class: 'block' },
+            h('h2', {}, 'Scenery'),
+            h('p', { class: 'muted small' }, 'Puts the flags in front of a place. Images load only when picked (under 1 MB each) and are swapped out, never stacked. A wide strip is treated as a 360° panorama, anything else as a photo backdrop.'),
+            sceneryGrid,
+            h('div', { class: 'tool-row' }, h('button', { onClick: () => sceneryFile.click() }, 'Upload photo / panorama'), sceneryFile),
+            sceneryUrl,
+            sceneryAdjust,
+            sceneryCredit
+        ),
         h('div', { class: 'block' }, h('h2', {}, 'Sky & light'), presetRow, h('label', { class: 'row' }, groundToggle, ' Show ground')),
         h('div', { class: 'block' },
             h('h2', {}, 'Time'),
@@ -498,13 +599,36 @@ export default function createPanel(root, { manager, world, mic, toast }) {
     // ---------------------------------------------------------------- SHARE
     const linkOut = h('input', { type: 'text', readonly: '', class: 'search' });
     const shareBtn = h('button', { class: 'btn-primary', onClick: async () => {
-        const url = writeHash(manager.toJSON());
+        const url = writeHash(getState({ forShare: true }));
         linkOut.value = url;
         try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch { toast('Link ready — copy it from the box'); }
-        const skipped = manager.entries.filter(e => e.source.type === 'upload').length;
-        if (skipped) toast(`${skipped} uploaded flag(s) can't be shared by link`, 'warn', 4500);
+        const skipped = manager.entries.filter(e => e.source.type === 'upload' || e.source.type === 'stored').length;
+        if (skipped) toast(`${skipped} uploaded flag(s) can't go in a link — use a scene file for those`, 'warn', 4500);
     } }, '🔗 Copy share link');
+    const sceneFileInput = h('input', { type: 'file', accept: 'application/json,.json', class: 'hidden' });
+    sceneFileInput.addEventListener('change', async () => {
+        const f = sceneFileInput.files[0];
+        sceneFileInput.value = '';
+        if (!f) return;
+        try {
+            const st = await importSceneFile(f);
+            await loadStateFromFile(st);
+            toast('Scene loaded');
+        } catch (e) {
+            toast(e.message || 'Could not read scene file', 'error', 5000);
+        }
+    });
     pages.share.append(
+        h('div', { class: 'block' },
+            h('h2', {}, 'Scene file'),
+            h('p', { class: 'muted small' }, 'Everything — flags (uploaded images included), arrangement, wind, sky and backdrop — in one .json you can keep or send. The scene also autosaves in this browser and comes back when you reopen the page.'),
+            h('div', { class: 'tool-row' },
+                h('button', { class: 'btn-primary', onClick: () => exportSceneFile(getState()).catch(() => toast('Export failed', 'error')) }, '⬇ Save scene file'),
+                h('button', { onClick: () => sceneFileInput.click() }, '⬆ Load scene file'),
+                sceneFileInput,
+                h('span', { class: 'spacer' }),
+                h('button', { class: 'danger', title: 'Forget the autosaved scene and start from the default flags', onClick: () => { suspendSaving(); clearScene(); window.history.replaceState(null, '', location.pathname); location.reload(); } }, 'Reset'))
+        ),
         h('div', { class: 'block' },
             h('h2', {}, 'Share this scene'),
             h('p', { class: 'muted small' }, 'Encodes countries, offline flags, image URLs, layout and wind into the URL. Uploaded images stay on your machine.'),
@@ -517,6 +641,47 @@ export default function createPanel(root, { manager, world, mic, toast }) {
         )
     );
 
+    function getState(opts = {}) {
+        const st = manager.toJSON(opts);
+        st.preset = world.presetId;
+        st.ground = groundToggle.checked;
+        if (activeSceneryId && activeSceneryId !== 'custom') st.scenery = activeSceneryId;
+        else if (activeSceneryId === 'custom' && activeSceneryUrl) st.sceneryUrl = activeSceneryUrl;
+        else if (activeSceneryId === 'custom' && activeSceneryStored && !opts.forShare) st.sceneryStored = activeSceneryStored;
+        if (world.scenery.active) { st.sceneryHeight = world.scenery.height; st.sceneryScale = world.scenery.scale; }
+        return st;
+    }
+
+    async function applyState(st) {
+        if (st.preset && PRESETS[st.preset]) {
+            world.applyPreset(st.preset);
+            presetRow.querySelectorAll('.preset-btn').forEach(x => x.classList.toggle('active', x.dataset.id === st.preset));
+        }
+        if (st.ground === false) { groundToggle.checked = false; world.setGroundVisible(false); }
+        if (st.scenery && SCENERIES[st.scenery]) await applyScenery(st.scenery, SCENERIES[st.scenery]);
+        else if (st.sceneryUrl) await applyScenery('custom', { kind: 'auto', url: st.sceneryUrl, label: st.sceneryUrl }, st.sceneryUrl);
+        else if (st.sceneryStored) {
+            try {
+                const u = await getStoredDataUrl(st.sceneryStored);
+                await applyScenery('custom', { kind: 'auto', url: u, label: 'Uploaded backdrop' }, null, st.sceneryStored);
+            } catch { /* image gone; keep gradient sky */ }
+        }
+        if (world.scenery.active) {
+            if (typeof st.sceneryHeight === 'number') { world.scenery.setHeight(st.sceneryHeight); sceneryHeight.value = st.sceneryHeight; }
+            if (typeof st.sceneryScale === 'number') { world.scenery.setScale(st.sceneryScale); sceneryScale.value = st.sceneryScale; }
+        }
+        // sync UI widgets that mirror manager state
+        layoutSelect.value = manager.layoutId;
+        spacing.value = manager.spacing;
+        renderSizes();
+    }
+
+    function loadStateFromFile(st) {
+        manager.fromJSON(st);
+        select(null);
+        return applyState(st).then(() => { if (fitOnChange) setTimeout(() => world.frame(manager.bounds), 100); });
+    }
+
     // ---------------------------------------------------------------- keys
     window.addEventListener('keydown', (e) => {
         if (e.target.matches('input, textarea, select')) return;
@@ -525,5 +690,5 @@ export default function createPanel(root, { manager, world, mic, toast }) {
         if (e.code === 'Escape') select(null);
     });
 
-    return { showTab, select, renderList };
+    return { showTab, select, renderList, getState, applyState, loadStateFromFile };
 }
