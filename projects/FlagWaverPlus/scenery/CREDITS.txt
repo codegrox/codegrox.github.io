@@ -2,11 +2,7 @@
 
 capitol.jpg     United States Capitol west front edit2.jpg   Architect of the Capitol   Public domain
                 https://commons.wikimedia.org/wiki/File:United_States_Capitol_west_front_edit2.jpg
-bourbon.jpg     Pont de la Concorde Palais Bourbon Paris.jpg Jebulon                    CC0 1.0
-                https://commons.wikimedia.org/wiki/File:Pont_de_la_Concorde_Palais_Bourbon_Paris.jpg
-unhq.jpg        UN Members Flags.JPG                         Aotearoa                   CC BY-SA 3.0
-                https://commons.wikimedia.org/wiki/File:UN_Members_Flags.JPG
+taj.jpg         Taj Mahal, Agra, India edit3.jpg             Yann (edit: Jbarta)        CC BY-SA 3.0
+                https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India_edit3.jpg
 sthelens.jpg    Mount St Helens Summit Pano.jpg              Gregg M. Erickson          CC BY 3.0
                 https://commons.wikimedia.org/wiki/File:Mount_St_Helens_Summit_Pano.jpg
-kosciuszko.jpg  Mount Kosciuszko Summit 360 panorama.jpg     Toby Hudson                CC BY-SA 3.0
-                https://commons.wikimedia.org/wiki/File:Mount_Kosciuszko_Summit_360_panorama.jpg

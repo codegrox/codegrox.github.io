@@ -16,11 +16,14 @@ a travelling gust, and microphone-driven wind.
 - **Wind** – natural (FlagWaver's wandering direction + varying speed), gusty (fixed direction, turbulent), steady.
 - **Travelling gust** – a pulse of wind sweeps along the line so flags ripple one after another.
 - **Lung power** – blow into your microphone; loudness becomes extra wind (nothing is recorded or sent).
-- **Scenery** – put the flags in front of a place: photo backdrops (US Capitol, Palais Bourbon, UN HQ) and 360°
-  summit panoramas (Mount St Helens, Mount Kosciuszko), or your own photo / panorama (upload or URL). Images are
-  self-hosted in `../scenery/` and fetched only when picked (0.3–0.9 MB each), one GPU texture at a time, credits
-  shown in the panel. Photo mode clamps the orbit and swaps the ground for a transparent shadow catcher; panorama mode wraps
-  a wide strip on a cylinder (or a 2:1 image on a sphere) and samples sky/ground colours from its edges.
+- **Scenery** – one picture behind the flags, FlagWaver-style: photo backdrops (US Capitol, Taj Mahal) and
+  a 360° summit panorama (Mount St Helens), or your own photo / panorama (upload or
+  URL). A photo is spread on a plane ~300 m out with its horizon at eye level and the orbit is limited to the
+  picture's span (auto-widened when a long row of flags needs more room); a wide strip wraps a full cylinder.
+  The sky gradient and fog take their colours from the image so the ground dissolves into it.
+- **Ground** – procedural, tileable surfaces generated on a canvas (grass, striped lawn, pavers, cobblestone,
+  concrete, sand, snow, gravel, plain) with bump relief and shadows; a low-frequency sample of the same tile
+  breaks up visible repetition. Scenery presets suggest a matching surface.
 - **Sky & light presets** – day, sunset, overcast, night, studio, green screen. Soft shadows on a ground plane.
 - **Remembers your scene** – autosaves to localStorage every 1.5 s (and on tab close); uploaded flag images and
   backdrops are downscaled and kept in IndexedDB, so everything is back when you reopen the page. "Reset" in the
@@ -58,7 +61,8 @@ src/scene/FlagManager.js  flag entries, loading, per-flag rebuild, layouts, wind
 src/scene/layouts.js    row / arc / circle / grid / vee / scatter placement
 src/scene/presets.js    sky colors, fog, ground color and lights per preset
 src/scene/sceneries.js  backdrop presets (Wikimedia URLs, credits, horizon/fov hints)
-src/scene/Scenery.js    photo plane / panorama cylinder-sphere, shadow catcher, colour sampling, orbit limits
+src/scene/Scenery.js    photo plane / panorama cylinder-sphere, colour sampling, orbit limits
+src/scene/groundTextures.js procedural tileable ground textures
 src/wind/micWind.js     getUserMedia + AnalyserNode -> smoothed loudness
 src/ui/panel.js         the whole side panel (tabs: Flags, Wind, Scene, Share)
 src/data/countries.js   ISO codes -> names, flagcdn URL helper, search
@@ -86,8 +90,7 @@ Images are loaded once per entry and the flag mesh is rebuilt only when a per-fl
   [Joshua Koo](https://github.com/zz85).
 - Rendering: [three.js](https://threejs.org) (MIT).
 - Country flag images: [flagcdn.com](https://flagcdn.com) (loaded at runtime, not redistributed here).
-- Scenery photos (in `../scenery/`, downloaded with `tools/fetch-scenery.ps1`), from Wikimedia Commons — US Capitol (Architect of the Capitol,
-  public domain), Pont de la Concorde / Palais Bourbon (Jebulon, CC0), UN Members Flags (Aotearoa, CC BY-SA 3.0),
-  Mount St Helens Summit Pano (Gregg M. Erickson, CC BY 3.0), Mount Kosciuszko Summit 360 panorama (Toby Hudson,
-  CC BY-SA 3.0).
+- Scenery photos (in `../scenery/`, downloaded with `tools/fetch-scenery.ps1`), from Wikimedia Commons —
+  US Capitol west front (Architect of the Capitol, public domain), Taj Mahal, Agra (Yann, edit Jbarta,
+  CC BY-SA 3.0), Mount St Helens Summit Pano (Gregg M. Erickson, CC BY 3.0).
 - Everything else in this folder: MIT, see `LICENSE`.

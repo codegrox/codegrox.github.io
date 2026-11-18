@@ -17,6 +17,7 @@ const world = new World(stage);
 world.obstructionLeft = () =>
     (window.innerWidth > 720 && !panelRoot.classList.contains('collapsed')) ? panelRoot.offsetWidth + 24 : 0;
 const manager = new FlagManager(world);
+world.setGround('grass');
 const mic = new MicWind();
 
 // Mic loudness feeds extra wind speed every step.

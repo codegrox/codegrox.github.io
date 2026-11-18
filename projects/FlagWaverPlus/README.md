@@ -16,9 +16,8 @@ and screenshots.
 - [three.js](https://threejs.org) (MIT) for rendering; [Vite](https://vitejs.dev) for the build.
 - Country flag images: [flagcdn.com](https://flagcdn.com), loaded at runtime.
 - Scenery photos in `scenery/`, from Wikimedia Commons: US Capitol west front (Architect of the Capitol,
-  public domain); Pont de la Concorde / Palais Bourbon (Jebulon, CC0); UN Members Flags (Aotearoa, CC BY-SA 3.0);
-  Mount St Helens Summit Pano (Gregg M. Erickson, CC BY 3.0); Mount Kosciuszko Summit 360 panorama (Toby Hudson,
-  CC BY-SA 3.0).
+  public domain); Taj Mahal, Agra (Yann, edit Jbarta, CC BY-SA 3.0); Mount St Helens Summit Pano (Gregg M.
+  Erickson, CC BY 3.0).
 - Everything else (multi-flag manager, layouts, gust, mic wind, scenery system, persistence, UI): MIT, see `app/LICENSE`.
 
 ## Layout
