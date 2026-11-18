@@ -8,6 +8,9 @@ Main files:
 - `assets/site.js` - theme toggle and a few page interactions
 - `cs180_proj0/` - CS180 Project 0
 - `cs180_proj1/` - CS180 Project 1
+- `cs180_proj1/` - CS180 Project 2
+- `cs180_proj1/` - CS180 Project 3
+- `cs180_proj1/` - CS180 Project 4
 - `project-template/` - basic page to copy for a future project
 - `projects/FlagWaverPlus/` - multi-flag 3D flag waver (built app at the folder root, Vite source in `app/`)
 
