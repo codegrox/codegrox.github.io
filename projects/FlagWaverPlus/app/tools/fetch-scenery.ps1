@@ -9,11 +9,11 @@ $ua = 'FlagWaverPlus/1.0 (https://codegrox.github.io/projects/FlagWaverPlus/; sc
 $files = @(
   @{ id='capitol';    file='United_States_Capitol_west_front_edit2.jpg';      width=2048 },
   @{ id='taj';        file='Taj_Mahal,_Agra,_India_edit3.jpg';                width=2048 },
-  @{ id='sthelens';   file='Mount_St_Helens_Summit_Pano.jpg';                 width=4096 }
+  @{ id='yosemite';   file='Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg'; width=3000 }
 )
 
 # Backdrops that were dropped from the presets
-foreach ($old in @('bourbon.jpg','unhq.jpg','kosciuszko.jpg')) {
+foreach ($old in @('bourbon.jpg','unhq.jpg','kosciuszko.jpg','sthelens.jpg')) {
   $p = Join-Path $dest $old
   if (Test-Path $p) { Remove-Item $p; Write-Host "Removed obsolete $old" }
 }
@@ -47,7 +47,7 @@ capitol.jpg     United States Capitol west front edit2.jpg   Architect of the Ca
                 https://commons.wikimedia.org/wiki/File:United_States_Capitol_west_front_edit2.jpg
 taj.jpg         Taj Mahal, Agra, India edit3.jpg             Yann (edit: Jbarta)        CC BY-SA 3.0
                 https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India_edit3.jpg
-sthelens.jpg    Mount St Helens Summit Pano.jpg              Gregg M. Erickson          CC BY 3.0
-                https://commons.wikimedia.org/wiki/File:Mount_St_Helens_Summit_Pano.jpg
+yosemite.jpg    Tunnel View, Yosemite Valley, Yosemite NP - Diliff.jpg   Diliff       CC BY-SA 3.0
+                https://commons.wikimedia.org/wiki/File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg
 "@ | Set-Content -Path (Join-Path $dest 'CREDITS.txt') -Encoding UTF8
 Write-Host "Done. Files are in $((Resolve-Path $dest).Path)"

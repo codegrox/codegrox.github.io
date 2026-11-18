@@ -35,14 +35,14 @@ export const SCENERIES = {
         credit: 'Yann (edit: Jbarta)', license: 'CC BY-SA 3.0',
         horizon: 0.38, hfov: 60, light: 'day', ground: 'pavers'
     },
-    sthelens: {
-        label: 'Mount St Helens summit',
-        kind: 'pano',
-        url: `./scenery/sthelens.jpg`,
-        fallback: [`${WM}/b/b5/Mount_St_Helens_Summit_Pano.jpg/4096px-Mount_St_Helens_Summit_Pano.jpg`, FP('Mount_St_Helens_Summit_Pano.jpg', 4096)],
-        page: `${WP}Mount_St_Helens_Summit_Pano.jpg`,
-        credit: 'Gregg M. Erickson', license: 'CC BY 3.0',
-        horizon: 0.55, light: 'day', ground: 'gravel'
+    yosemite: {
+        label: 'Yosemite Valley',
+        kind: 'photo',
+        url: `./scenery/yosemite.jpg`,
+        fallback: [`${WM}/1/13/Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg/3000px-Tunnel_View%2C_Yosemite_Valley%2C_Yosemite_NP_-_Diliff.jpg`, FP('Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg', 3000)],
+        page: `${WP}Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg`,
+        credit: 'Diliff', license: 'CC BY-SA 3.0',
+        horizon: 0.45, hfov: 75, light: 'day', ground: 'gravel'
     }
 };
 
