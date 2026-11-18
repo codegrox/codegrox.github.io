@@ -36,9 +36,14 @@ if (initial) {
     manager.fromJSON(initial);
     panel.applyState(initial);
 } else {
-    for (const id of ['armenia', 'ukraine', 'japan', 'italy', 'sweden']) {
-        manager.addFlag({ type: 'simple', value: id });
-    }
+    // Japan, Armenia and France are drawn offline; US and Hong Kong come from flagcdn.com.
+    for (const src of [
+        { type: 'simple', value: 'japan' },
+        { type: 'simple', value: 'armenia' },
+        { type: 'country', value: 'us' },
+        { type: 'simple', value: 'france' },
+        { type: 'country', value: 'hk' }
+    ]) manager.addFlag(src);
 }
 setTimeout(() => world.frame(manager.bounds, false), 60);
 
