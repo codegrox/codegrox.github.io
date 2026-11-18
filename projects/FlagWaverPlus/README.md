@@ -15,7 +15,7 @@ and screenshots.
   [Joshua Koo](https://github.com/zz85) (three.js cloth simulation).
 - [three.js](https://threejs.org) (MIT) for rendering; [Vite](https://vitejs.dev) for the build.
 - Country flag images: [flagcdn.com](https://flagcdn.com), loaded at runtime.
-- Scenery photos in `scenery/`, from Wikimedia Commons: US Capitol west front (Architect of the Capitol,
+- Scenery photos in `scenery/`, from Wikimedia Commons: the classic FlagWaver sky "Sky over Washington Monument" (Andypham3000, public domain); US Capitol west front (Architect of the Capitol,
   public domain); Taj Mahal, Agra (Yann, edit Jbarta, CC BY-SA 3.0); Yosemite Valley from Tunnel View (Diliff,
   CC BY-SA 3.0).
 - Everything else (multi-flag manager, layouts, gust, mic wind, scenery system, persistence, UI): MIT, see `app/LICENSE`.

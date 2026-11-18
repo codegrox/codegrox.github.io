@@ -539,13 +539,14 @@ export default function createPanel(root, { manager, world, mic, toast }) {
     }
 
     async function applyScenery(id, def, url = null, storedKey = null) {
-        if (!id) { world.scenery.clear(); activeSceneryUrl = null; activeSceneryStored = null; markScenery(null); return; }
+        if (!id) { world.scenery.clear(); activeSceneryUrl = null; activeSceneryStored = null; groundToggle.checked = world.ground.visible; markScenery(null); return; }
         sceneryGrid.querySelectorAll('.scenery-btn').forEach(b => b.classList.toggle('loading', b.dataset.id === id));
         try {
             await world.scenery.load(id, def);
             activeSceneryUrl = url;
             activeSceneryStored = storedKey;
             sceneryHeight.value = 0; sceneryScale.value = 1; sceneryYaw.value = 0;
+            groundToggle.checked = world.ground.visible;
             markScenery(id);
             if (fitOnChange) setTimeout(() => world.frame(manager.bounds), 50);
         } catch (e) {
@@ -648,7 +649,7 @@ export default function createPanel(root, { manager, world, mic, toast }) {
         h('div', { class: 'block about' },
             h('h2', {}, 'Credits'),
             h('p', {}, 'Cloth and flagpole simulation from ', h('a', { href: 'https://github.com/krikienoid/flagwaver', target: '_blank', rel: 'noopener' }, 'FlagWaver'), ' by ', h('a', { href: 'https://github.com/krikienoid', target: '_blank', rel: 'noopener' }, 'krikienoid'), ' (MIT), itself based on earlier work by ', h('a', { href: 'http://flagtest.nz/', target: '_blank', rel: 'noopener' }, 'flagtest.nz'), ' and ', h('a', { href: 'https://github.com/zz85', target: '_blank', rel: 'noopener' }, 'Joshua Koo'), '. Rendering by ', h('a', { href: 'https://threejs.org', target: '_blank', rel: 'noopener' }, 'three.js'), '.'),
-            h('p', {}, 'Country flags from ', h('a', { href: 'https://flagcdn.com', target: '_blank', rel: 'noopener' }, 'flagcdn.com'), '. Scenery photos from Wikimedia Commons: Architect of the Capitol (public domain), Yann / Jbarta (CC BY-SA 3.0), Diliff (CC BY-SA 3.0) — each is linked in the Scene tab when active.'),
+            h('p', {}, 'Country flags from ', h('a', { href: 'https://flagcdn.com', target: '_blank', rel: 'noopener' }, 'flagcdn.com'), '. Scenery photos from Wikimedia Commons: the classic FlagWaver sky by Andypham3000 (public domain), Architect of the Capitol (public domain), Yann / Jbarta (CC BY-SA 3.0), Diliff (CC BY-SA 3.0) — each is linked in the Scene tab when active.'),
             h('p', {}, 'Multi-flag scenes, layouts, gust, mic wind, scenery, persistence and UI: this project. ', h('a', { href: 'https://github.com/codegrox/codegrox.github.io/tree/main/projects/FlagWaverPlus', target: '_blank', rel: 'noopener' }, 'Source'), ' · ', h('a', { href: '../../' }, '← codegrox.github.io'))
         )
     );
@@ -670,7 +671,6 @@ export default function createPanel(root, { manager, world, mic, toast }) {
             world.applyPreset(st.preset);
             presetRow.querySelectorAll('.preset-btn').forEach(x => x.classList.toggle('active', x.dataset.id === st.preset));
         }
-        if (st.ground === false) { groundToggle.checked = false; world.setGroundVisible(false); }
         if (st.scenery && SCENERIES[st.scenery]) await applyScenery(st.scenery, SCENERIES[st.scenery]);
         else if (st.sceneryUrl) await applyScenery('custom', { kind: 'auto', url: st.sceneryUrl, label: st.sceneryUrl }, st.sceneryUrl);
         else if (st.sceneryStored) {
@@ -681,6 +681,7 @@ export default function createPanel(root, { manager, world, mic, toast }) {
         }
         // after the scenery (which may suggest a ground) so the user's saved choice wins
         if (st.groundType && GROUNDS[st.groundType]) world.setGround(st.groundType);
+        if (typeof st.ground === 'boolean') { groundToggle.checked = st.ground; world.setGroundVisible(st.ground); }
         if (world.scenery.active) {
             if (typeof st.sceneryHeight === 'number') { world.scenery.setHeight(st.sceneryHeight); sceneryHeight.value = st.sceneryHeight; }
             if (typeof st.sceneryScale === 'number') { world.scenery.setScale(st.sceneryScale); sceneryScale.value = st.sceneryScale; }

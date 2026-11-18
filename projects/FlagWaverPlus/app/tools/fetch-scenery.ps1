@@ -43,6 +43,8 @@ if ($failed.Count -gt 0) {
 @"
 Scenery images, downloaded from Wikimedia Commons with fetch-scenery.ps1. Not original work of this project.
 
+ogflagwaver.jpg Sky over Washington Monument.JPG (FlagWaver's classic background)  Andypham3000  Public domain
+                https://commons.wikimedia.org/wiki/File:Sky_over_Washington_Monument.JPG  (copied from the FlagWaver repo, not downloaded by this script)
 capitol.jpg     United States Capitol west front edit2.jpg   Architect of the Capitol   Public domain
                 https://commons.wikimedia.org/wiki/File:United_States_Capitol_west_front_edit2.jpg
 taj.jpg         Taj Mahal, Agra, India edit3.jpg             Yann (edit: Jbarta)        CC BY-SA 3.0

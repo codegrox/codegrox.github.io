@@ -7,6 +7,7 @@
 //   hfov           — photo only: horizontal degrees the photo spans (lens field of view).
 //   light          — lighting preset from presets.js to pair with it.
 //   ground         — ground texture from groundTextures.js to switch to.
+//   groundVisible  — false hides the ground (flags float in the sky, like the original FlagWaver).
 //
 // Images are self-hosted in ../../scenery/ (run app/tools/fetch-scenery.ps1 once to download them);
 // `fallback` lists Wikimedia URLs tried in order if the local file is missing.
@@ -17,6 +18,14 @@ const WP = 'https://commons.wikimedia.org/wiki/File:';
 const FP = (file, width) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=${width}`;
 
 export const SCENERIES = {
+    og: {
+        label: 'OG FlagWaver',
+        kind: 'photo',
+        url: `./scenery/ogflagwaver.jpg`,
+        page: 'https://commons.wikimedia.org/wiki/File:Sky_over_Washington_Monument.JPG',
+        credit: 'Andypham3000 — the classic FlagWaver background', license: 'Public domain',
+        horizon: 0.5, hfov: 60, light: 'overcast', groundVisible: false
+    },
     capitol: {
         label: 'US Capitol',
         kind: 'photo',

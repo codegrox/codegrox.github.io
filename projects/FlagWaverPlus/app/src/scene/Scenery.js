@@ -93,7 +93,7 @@ export default class Scenery {
         c.minAzimuthAngle = -Infinity; c.maxAzimuthAngle = Infinity;
         c.minPolarAngle = 0; c.maxPolarAngle = Math.PI * 0.52;
         c.minDistance = 2; c.maxDistance = 160;
-        if (restorePreset) w.applyPreset(w.presetId);
+        if (restorePreset) { w.setGroundVisible(true); w.applyPreset(w.presetId); }
     }
 
     setHeight(h) { this.height = h; this._layout(); }
@@ -101,16 +101,23 @@ export default class Scenery {
     setYaw(deg) { this.yaw = deg; this._layout(); }
 
     /** Called by World.frame after the camera moved: widen the photo if needed, re-derive orbit limits. */
-    frame() {
+    frame(desiredDistance) {
         if (this.kind !== 'photo') return;
         const w = this.world;
         const cam = w.camera;
-        const d = w.controls.getDistance();
+        const d = desiredDistance || w.controls.getDistance();
         const camHalfH = Math.atan(Math.tan((cam.fov * Math.PI) / 360) * cam.aspect);
         const neededHalfW = (R + d) * Math.tan(camHalfH + AZ_MARGIN + 0.02);
         const neededHfov = (2 * Math.atan(neededHalfW / R) * 180) / Math.PI;
         this.active.autoWiden = Math.max(1, neededHfov / (this.active.def.hfov * this.scale));
         this._layout();
+        // the controls may have clamped the camera closer meanwhile; put it back where framing wanted it
+        if (desiredDistance) {
+            const c = w.controls;
+            const dir = cam.position.clone().sub(c.target).normalize();
+            cam.position.copy(c.target).addScaledVector(dir, Math.min(desiredDistance, c.maxDistance));
+            c.update();
+        }
     }
     onResize() { if (this.kind === 'photo') this.frame(); }
 
@@ -171,13 +178,14 @@ export default class Scenery {
         w.sky.mesh.visible = true;
         w.setFogColor(colors.groundFar.clone().lerp(colors.skyHorizon, 0.2));
         w.container.style.background = `#${colors.top.getHexString()}`;
-        if (def.ground) w.setGround(def.ground, true);
+        if (def.ground) { w.setGround(def.ground, true); w.setGroundVisible(true); }
+        if (def.groundVisible === false) w.setGroundVisible(false);
     }
 
     _layout() {
         if (!this.active || !this.active.mesh) return;
         const { def, mesh, aspect } = this.active;
-        const horizon = Math.min(0.95, Math.max(0.05, def.horizon + this.height * 0.02));
+        const horizon = Math.min(0.95, Math.max(0.0, def.horizon + this.height * 0.02));
         const eye = EYE;
 
         if (def.kind === 'photo') {

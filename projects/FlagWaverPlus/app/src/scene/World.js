@@ -258,7 +258,7 @@ export default class World {
         const f = this.computeFrame(bounds);
         if (!f) return;
         const { pos, target } = f;
-        const done = () => { if (this.scenery) this.scenery.frame(); };
+        const done = () => { if (this.scenery) this.scenery.frame(pos.distanceTo(target)); };
 
         if (!animate) {
             this.camera.position.copy(pos);

@@ -16,7 +16,7 @@ a travelling gust, and microphone-driven wind.
 - **Wind** – natural (FlagWaver's wandering direction + varying speed), gusty (fixed direction, turbulent), steady.
 - **Travelling gust** – a pulse of wind sweeps along the line so flags ripple one after another.
 - **Lung power** – blow into your microphone; loudness becomes extra wind (nothing is recorded or sent).
-- **Scenery** – one picture behind the flags, FlagWaver-style: photo backdrops (US Capitol, Taj Mahal, Yosemite Valley), or your own photo / panorama (upload or
+- **Scenery** – one picture behind the flags, FlagWaver-style: photo backdrops (the original FlagWaver sky, US Capitol, Taj Mahal, Yosemite Valley), or your own photo / panorama (upload or
   URL). A photo is spread on a plane ~300 m out with its horizon at eye level and the orbit is limited to the
   picture's span (auto-widened when a long row of flags needs more room); a wide strip wraps a full cylinder.
   The sky gradient and fog take their colours from the image so the ground dissolves into it.
@@ -90,6 +90,6 @@ Images are loaded once per entry and the flag mesh is rebuilt only when a per-fl
 - Rendering: [three.js](https://threejs.org) (MIT).
 - Country flag images: [flagcdn.com](https://flagcdn.com) (loaded at runtime, not redistributed here).
 - Scenery photos (in `../scenery/`, downloaded with `tools/fetch-scenery.ps1`), from Wikimedia Commons —
-  US Capitol west front (Architect of the Capitol, public domain), Taj Mahal, Agra (Yann, edit Jbarta,
+  the classic FlagWaver sky "Sky over Washington Monument" (Andypham3000, public domain); US Capitol west front (Architect of the Capitol, public domain), Taj Mahal, Agra (Yann, edit Jbarta,
   CC BY-SA 3.0), Yosemite Valley from Tunnel View (Diliff, CC BY-SA 3.0).
 - Everything else in this folder: MIT, see `LICENSE`.
