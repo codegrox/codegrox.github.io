@@ -1,0 +1,19 @@
+{
+  "name": "flagwaverplus",
+  "version": "1.0.0",
+  "description": "Wave many flags at once — multi-flag 3D cloth simulation built on the FlagWaver core.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "0.149.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
