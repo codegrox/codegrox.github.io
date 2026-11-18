@@ -1,8 +1,0 @@
-﻿Scenery images, downloaded from Wikimedia Commons with fetch-scenery.ps1. Not original work of this project.
-
-capitol.jpg     United States Capitol west front edit2.jpg   Architect of the Capitol   Public domain
-                https://commons.wikimedia.org/wiki/File:United_States_Capitol_west_front_edit2.jpg
-taj.jpg         Taj Mahal, Agra, India edit3.jpg             Yann (edit: Jbarta)        CC BY-SA 3.0
-                https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India_edit3.jpg
-yosemite.jpg    Tunnel View, Yosemite Valley, Yosemite NP - Diliff.jpg   Diliff       CC BY-SA 3.0
-                https://commons.wikimedia.org/wiki/File:Tunnel_View,_Yosemite_Valley,_Yosemite_NP_-_Diliff.jpg
