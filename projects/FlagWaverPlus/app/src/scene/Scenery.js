@@ -62,27 +62,30 @@ export default class Scenery {
     load(id, def) {
         this.clear(false);
         const token = ++this._token;
-        return new Promise((resolve, reject) => {
-            this.loader.load(def.url, (texture) => {
-                if (token !== this._token) { texture.dispose(); return; }
-                texture.encoding = sRGBEncoding;
-                texture.anisotropy = Math.min(4, this.world.renderer.capabilities.getMaxAnisotropy());
-                const img = texture.image;
-                const aspect = img.width / img.height;
-                let kind = def.kind;
-                if (kind === 'auto') kind = aspect >= 3 ? 'pano' : 'photo';
-                const resolved = { ...def, kind };
-                if (resolved.horizon === undefined) resolved.horizon = kind === 'photo' ? 0.4 : 0.5;
-                if (resolved.fov === undefined) resolved.fov = 32;
-
-                this.active = { id, def: resolved, texture, mesh: null, image: img, aspect };
-                this._buildMesh();
-                this._applyEnvironment();
-                resolve();
-            }, undefined, () => {
-                if (token !== this._token) return;
-                reject(new Error('Backdrop image could not be loaded (offline, blocked, or no CORS).'));
+        const urls = [def.url].concat(def.fallback ? [].concat(def.fallback) : []);
+        const tryLoad = (i) => new Promise((resolve, reject) => {
+            this.loader.load(urls[i], resolve, undefined, () => {
+                if (token !== this._token) { reject(new Error('superseded')); return; }
+                console.warn('[scenery] could not load', urls[i]);
+                if (i + 1 < urls.length) tryLoad(i + 1).then(resolve, reject);
+                else reject(new Error('Backdrop image could not be loaded (offline, blocked, or no CORS).'));
             });
+        });
+        return tryLoad(0).then((texture) => {
+            if (token !== this._token) { texture.dispose(); return; }
+            texture.encoding = sRGBEncoding;
+            texture.anisotropy = Math.min(4, this.world.renderer.capabilities.getMaxAnisotropy());
+            const img = texture.image;
+            const aspect = img.width / img.height;
+            let kind = def.kind;
+            if (kind === 'auto') kind = aspect >= 3 ? 'pano' : 'photo';
+            const resolved = { ...def, kind };
+            if (resolved.horizon === undefined) resolved.horizon = kind === 'photo' ? 0.4 : 0.5;
+            if (resolved.fov === undefined) resolved.fov = 32;
+
+            this.active = { id, def: resolved, texture, mesh: null, image: img, aspect };
+            this._buildMesh();
+            this._applyEnvironment();
         });
     }
 

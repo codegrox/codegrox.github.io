@@ -1,6 +1,7 @@
 # Vendored FlagWaver core
 
 Source: https://github.com/krikienoid/flagwaver (v3.0.0, MIT License — see LICENSE in this folder).
+Written by krikienoid; based on previous work by flagtest.nz (http://flagtest.nz/) and Joshua Koo (https://github.com/zz85).
 
 Kept as-is: `physics/`, `subjects/`, `interactions/`, `helpers/`, `utils/`, `webgl/`, `constants.js`.
 

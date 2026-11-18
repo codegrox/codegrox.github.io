@@ -18,8 +18,8 @@ a travelling gust, and microphone-driven wind.
 - **Lung power** – blow into your microphone; loudness becomes extra wind (nothing is recorded or sent).
 - **Scenery** – put the flags in front of a place: photo backdrops (US Capitol, Palais Bourbon, UN HQ) and 360°
   summit panoramas (Mount St Helens, Mount Kosciuszko), or your own photo / panorama (upload or URL). Images are
-  hotlinked from Wikimedia Commons only when picked (0.3–0.9 MB each), one GPU texture at a time, credits shown in
-  the panel. Photo mode clamps the orbit and swaps the ground for a transparent shadow catcher; panorama mode wraps
+  self-hosted in `../scenery/` and fetched only when picked (0.3–0.9 MB each), one GPU texture at a time, credits
+  shown in the panel. Photo mode clamps the orbit and swaps the ground for a transparent shadow catcher; panorama mode wraps
   a wide strip on a cylinder (or a 2:1 image on a sphere) and samples sky/ground colours from its edges.
 - **Sky & light presets** – day, sunset, overcast, night, studio, green screen. Soft shadows on a ground plane.
 - **Remembers your scene** – autosaves to localStorage every 1.5 s (and on tab close); uploaded flag images and
@@ -80,11 +80,14 @@ Images are loaded once per entry and the flag mesh is rebuilt only when a per-fl
 
 ## Credits & licenses
 
-- Cloth/flag/flagpole simulation: [FlagWaver](https://github.com/krikienoid/flagwaver) by krikienoid,
-  MIT License (copy in `src/flagwaver/LICENSE`). Based on prior work by flagtest.nz and Joshua Koo.
+- Cloth/flag/flagpole simulation: [FlagWaver](https://github.com/krikienoid/flagwaver) by
+  [krikienoid](https://github.com/krikienoid), MIT License (copy in `src/flagwaver/LICENSE`, changes listed in
+  `src/flagwaver/NOTICE.md`). FlagWaver is based on prior work by [flagtest.nz](http://flagtest.nz/) and
+  [Joshua Koo](https://github.com/zz85).
+- Rendering: [three.js](https://threejs.org) (MIT).
 - Country flag images: [flagcdn.com](https://flagcdn.com) (loaded at runtime, not redistributed here).
-- Scenery photos: Wikimedia Commons, loaded at runtime, not redistributed — US Capitol (Architect of the Capitol,
+- Scenery photos (in `../scenery/`, downloaded with `tools/fetch-scenery.ps1`), from Wikimedia Commons — US Capitol (Architect of the Capitol,
   public domain), Pont de la Concorde / Palais Bourbon (Jebulon, CC0), UN Members Flags (Aotearoa, CC BY-SA 3.0),
   Mount St Helens Summit Pano (Gregg M. Erickson, CC BY 3.0), Mount Kosciuszko Summit 360 panorama (Toby Hudson,
-  CC BY-SA 3.0). To self-host, download a file into `../scenery/` and change its `url` in `src/scene/sceneries.js`.
+  CC BY-SA 3.0).
 - Everything else in this folder: MIT, see `LICENSE`.

@@ -635,52 +635,12 @@ export default function createPanel(root, { manager, world, mic, toast }) {
             shareBtn, linkOut
         ),
         h('div', { class: 'block about' },
-            h('h2', {}, 'About'),
-            h('p', {}, 'Cloth simulation from ', h('a', { href: 'https://github.com/krikienoid/flagwaver', target: '_blank', rel: 'noopener' }, 'FlagWaver'), ' by krikienoid (MIT). Country images from ', h('a', { href: 'https://flagcdn.com', target: '_blank', rel: 'noopener' }, 'flagcdn.com'), '.'),
-            h('p', {}, h('a', { href: '../../' }, '← codegrox.github.io'), ' · ', h('a', { href: 'https://github.com/codegrox/codegrox.github.io/tree/main/projects/FlagWaverPlus', target: '_blank', rel: 'noopener' }, 'source'))
+            h('h2', {}, 'Credits'),
+            h('p', {}, 'Cloth and flagpole simulation from ', h('a', { href: 'https://github.com/krikienoid/flagwaver', target: '_blank', rel: 'noopener' }, 'FlagWaver'), ' by ', h('a', { href: 'https://github.com/krikienoid', target: '_blank', rel: 'noopener' }, 'krikienoid'), ' (MIT), itself based on earlier work by ', h('a', { href: 'http://flagtest.nz/', target: '_blank', rel: 'noopener' }, 'flagtest.nz'), ' and ', h('a', { href: 'https://github.com/zz85', target: '_blank', rel: 'noopener' }, 'Joshua Koo'), '. Rendering by ', h('a', { href: 'https://threejs.org', target: '_blank', rel: 'noopener' }, 'three.js'), '.'),
+            h('p', {}, 'Country flags from ', h('a', { href: 'https://flagcdn.com', target: '_blank', rel: 'noopener' }, 'flagcdn.com'), '. Scenery photos from Wikimedia Commons: Architect of the Capitol (public domain), Jebulon (CC0), Aotearoa (CC BY-SA 3.0), Gregg M. Erickson (CC BY 3.0), Toby Hudson (CC BY-SA 3.0) — each is linked in the Scene tab when active.'),
+            h('p', {}, 'Multi-flag scenes, layouts, gust, mic wind, scenery, persistence and UI: this project. ', h('a', { href: 'https://github.com/codegrox/codegrox.github.io/tree/main/projects/FlagWaverPlus', target: '_blank', rel: 'noopener' }, 'Source'), ' · ', h('a', { href: '../../' }, '← codegrox.github.io'))
         )
     );
-
-    function getState(opts = {}) {
-        const st = manager.toJSON(opts);
-        st.preset = world.presetId;
-        st.ground = groundToggle.checked;
-        if (activeSceneryId && activeSceneryId !== 'custom') st.scenery = activeSceneryId;
-        else if (activeSceneryId === 'custom' && activeSceneryUrl) st.sceneryUrl = activeSceneryUrl;
-        else if (activeSceneryId === 'custom' && activeSceneryStored && !opts.forShare) st.sceneryStored = activeSceneryStored;
-        if (world.scenery.active) { st.sceneryHeight = world.scenery.height; st.sceneryScale = world.scenery.scale; }
-        return st;
-    }
-
-    async function applyState(st) {
-        if (st.preset && PRESETS[st.preset]) {
-            world.applyPreset(st.preset);
-            presetRow.querySelectorAll('.preset-btn').forEach(x => x.classList.toggle('active', x.dataset.id === st.preset));
-        }
-        if (st.ground === false) { groundToggle.checked = false; world.setGroundVisible(false); }
-        if (st.scenery && SCENERIES[st.scenery]) await applyScenery(st.scenery, SCENERIES[st.scenery]);
-        else if (st.sceneryUrl) await applyScenery('custom', { kind: 'auto', url: st.sceneryUrl, label: st.sceneryUrl }, st.sceneryUrl);
-        else if (st.sceneryStored) {
-            try {
-                const u = await getStoredDataUrl(st.sceneryStored);
-                await applyScenery('custom', { kind: 'auto', url: u, label: 'Uploaded backdrop' }, null, st.sceneryStored);
-            } catch { /* image gone; keep gradient sky */ }
-        }
-        if (world.scenery.active) {
-            if (typeof st.sceneryHeight === 'number') { world.scenery.setHeight(st.sceneryHeight); sceneryHeight.value = st.sceneryHeight; }
-            if (typeof st.sceneryScale === 'number') { world.scenery.setScale(st.sceneryScale); sceneryScale.value = st.sceneryScale; }
-        }
-        // sync UI widgets that mirror manager state
-        layoutSelect.value = manager.layoutId;
-        spacing.value = manager.spacing;
-        renderSizes();
-    }
-
-    function loadStateFromFile(st) {
-        manager.fromJSON(st);
-        select(null);
-        return applyState(st).then(() => { if (fitOnChange) setTimeout(() => world.frame(manager.bounds), 100); });
-    }
 
     // ---------------------------------------------------------------- keys
     window.addEventListener('keydown', (e) => {
