@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlagWaverPlus — wave many flags</title>
+  <meta name="description" content="Hoist as many flags as you like in one 3D scene. Country flags or your own images. Blow into your mic to make wind. Built on the FlagWaver cloth simulation." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='2' width='3' height='28' fill='%23ccc'/%3E%3Cpath d='M7 4 L28 7 L26 15 L7 13Z' fill='%23e33'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <div id="stage"></div>
+  <aside id="panel"></aside>
+  <button id="panel-reveal" title="Show panel (Tab)">☰</button>
+  <div id="toasts"></div>
+  <script type="module" src="/src/main.js"></script>
+  <script>
+    document.getElementById('panel-reveal').addEventListener('click', function () {
+      document.getElementById('panel').classList.remove('collapsed');
+    });
+  </script>
+</body>
+</html>
